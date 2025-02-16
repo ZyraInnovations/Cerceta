@@ -4388,6 +4388,67 @@ app.post('/login_app', async (req, res) => {
 
 
 
+app.get('/crear_domicilios', async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Obtener edificios
+            res.render('Aplicacione_residentes/domicilios/crear.hbs', { 
+                name: req.session.name, 
+                edificios, 
+                layout: 'layouts/nav_admin.hbs' 
+            });
+        } catch (error) {
+            console.error('Error obteniendo edificios:', error);
+            res.status(500).send('Error en el servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
+    try {
+        const { edificio_id } = req.params;
+        const [apartamentos] = await pool.query('SELECT id, numero FROM apartamentos WHERE edificio_id = ?', [edificio_id]);
+
+        res.json(apartamentos);
+    } catch (error) {
+        console.error('Error obteniendo apartamentos:', error);
+        res.status(500).json({ error: 'Error al obtener los apartamentos' });
+    }
+});
+
+
+
+
+
+
+app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
+    try {
+        const { edificio, apartamento, observaciones } = req.body;
+        const foto = req.file ? req.file.buffer : null; // Foto en binario
+
+        if (!edificio || !apartamento || !observaciones || !foto) {
+            return res.status(400).send('Todos los campos son obligatorios');
+        }
+
+        // Guardar en la base de datos
+        await pool.query(
+            'INSERT INTO domicilios (edificio_id, apartamento_id, observaciones, foto) VALUES (?, ?, ?, ?)',
+            [edificio, apartamento, observaciones, foto]
+        );
+
+        res.send('Domicilio registrado con éxito');
+    } catch (error) {
+        console.error('Error al guardar domicilio:', error);
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });

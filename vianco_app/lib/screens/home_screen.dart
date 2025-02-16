@@ -7,8 +7,6 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({required this.userId});
 
 final List<Map<String, dynamic>> rooms = [
-  {"name": "Edificio", "devices": 11, "icon": FontAwesomeIcons.building, "color": Color(0xFF7CB646)},
-  {"name": "Apartamento", "devices": 12, "icon": FontAwesomeIcons.house, "color": Color(0xFFC92458)},
   {"name": "Pagos", "devices": 10, "icon": FontAwesomeIcons.moneyBillWave, "color": Color(0xFFEFA325)},
   {"name": "Domicilios", "devices": 5, "icon": FontAwesomeIcons.motorcycle, "color": Color(0xFF7CB646)},
   {"name": "Informes", "devices": 3, "icon": FontAwesomeIcons.fileAlt, "color": Color(0xFFC92458)},

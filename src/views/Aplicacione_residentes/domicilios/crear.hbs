@@ -1,0 +1,48 @@
+<h2>Reportar Domicilio</h2>
+
+<form action="/guardar_domicilio" method="POST" enctype="multipart/form-data">
+    <label for="edificio">Selecciona un Edificio:</label>
+    <select id="edificio" name="edificio" required>
+        <option value="">-- Selecciona un edificio --</option>
+        {{#each edificios}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+
+    <label for="apartamento">Selecciona un Apartamento:</label>
+    <select id="apartamento" name="apartamento" required>
+        <option value="">-- Selecciona un apartamento --</option>
+    </select>
+
+    <label for="observaciones">Observaciones:</label>
+    <textarea id="observaciones" name="observaciones" required></textarea>
+
+    <label for="foto">Adjuntar Foto:</label>
+    <input type="file" id="foto" name="foto" accept="image/*" required>
+
+    <button type="submit">Guardar</button>
+</form>
+
+<script>
+    document.getElementById('edificio').addEventListener('change', function() {
+        const edificioId = this.value;
+        const apartamentoSelect = document.getElementById('apartamento');
+
+        if (edificioId) {
+            fetch(`/obtener_apartamentos/${edificioId}`)
+                .then(response => response.json())
+                .then(data => {
+                    apartamentoSelect.innerHTML = '<option value="">-- Selecciona un apartamento --</option>';
+                    data.forEach(apartamento => {
+                        const option = document.createElement('option');
+                        option.value = apartamento.id;
+                        option.textContent = `Apartamento ${apartamento.numero}`;
+                        apartamentoSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error cargando apartamentos:', error));
+        } else {
+            apartamentoSelect.innerHTML = '<option value="">-- Selecciona un apartamento --</option>';
+        }
+    });
+</script>
