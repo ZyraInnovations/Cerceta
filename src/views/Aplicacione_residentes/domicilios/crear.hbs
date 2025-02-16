@@ -1,27 +1,158 @@
-<h2>Reportar Domicilio</h2>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Domicilio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <style>
+        /* Fuente y estilo global */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://source.unsplash.com/1600x900/?home,building') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-<form action="/guardar_domicilio" method="POST" enctype="multipart/form-data">
-    <label for="edificio">Selecciona un Edificio:</label>
-    <select id="edificio" name="edificio" required>
-        <option value="">-- Selecciona un edificio --</option>
-        {{#each edificios}}
-            <option value="{{this.id}}">{{this.nombre}}</option>
-        {{/each}}
-    </select>
+        /* Contenedor del formulario con efecto transparente */
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
 
-    <label for="apartamento">Selecciona un Apartamento:</label>
-    <select id="apartamento" name="apartamento" required>
-        <option value="">-- Selecciona un apartamento --</option>
-    </select>
+        /* Título con icono */
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
 
-    <label for="observaciones">Observaciones:</label>
-    <textarea id="observaciones" name="observaciones" required></textarea>
+        h2 i {
+            color: #90c9a7;
+            margin-right: 10px;
+        }
 
-    <label for="foto">Adjuntar Foto:</label>
-    <input type="file" id="foto" name="foto" accept="image/*" required>
+        /* Estilos para etiquetas */
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 10px;
+            color: #555;
+        }
 
-    <button type="submit">Guardar</button>
-</form>
+        /* Estilos para los inputs y selects */
+        select, textarea, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+            transition: all 0.3s ease-in-out;
+        }
+
+        select:focus, textarea:focus, input[type="file"]:focus {
+            border-color: #90c9a7;
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(144, 201, 167, 0.6);
+        }
+
+        /* Botón con animación */
+        .submit-btn {
+            width: 100%;
+            background: #90c9a7;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s ease-in-out, background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submit-btn i {
+            margin-left: 10px;
+        }
+
+        .submit-btn:hover {
+            background: #7fae90;
+            transform: scale(1.05);
+        }
+
+        /* Estilos de iconos */
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .icon-container i {
+            font-size: 24px;
+            color: #90c9a7;
+        }
+
+        /* Responsividad */
+        @media (max-width: 600px) {
+            .form-container {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2><i class="fas fa-home"></i> Reportar Domicilio</h2>
+
+    <form action="/guardar_domicilio" method="POST" enctype="multipart/form-data">
+        <div class="icon-container">
+            <i class="fas fa-building"></i>
+            <i class="fas fa-door-open"></i>
+            <i class="fas fa-camera"></i>
+        </div>
+
+        <label for="edificio"><i class="fas fa-city"></i> Selecciona un Edificio:</label>
+        <select id="edificio" name="edificio" required>
+            <option value="">-- Selecciona un edificio --</option>
+            {{#each edificios}}
+                <option value="{{this.id}}">{{this.nombre}}</option>
+            {{/each}}
+        </select>
+
+        <label for="apartamento"><i class="fas fa-door-closed"></i> Selecciona un Apartamento:</label>
+        <select id="apartamento" name="apartamento" required>
+            <option value="">-- Selecciona un apartamento --</option>
+        </select>
+
+        <label for="observaciones"><i class="fas fa-comment-alt"></i> Observaciones:</label>
+        <textarea id="observaciones" name="observaciones" rows="4" required></textarea>
+
+        <label for="foto"><i class="fas fa-camera"></i> Adjuntar Foto:</label>
+        <input type="file" id="foto" name="foto" accept="image/*" required>
+
+        <button type="submit" class="submit-btn">Guardar <i class="fas fa-save"></i></button>
+    </form>
+</div>
 
 <script>
     document.getElementById('edificio').addEventListener('change', function() {
@@ -46,3 +177,22 @@
         }
     });
 </script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Seleccionar elementos del DOM
+    const hamburgerMenu = document.getElementById("hamburger-menu");
+    const sidebar = document.getElementById("sidebar");
+
+    if (hamburgerMenu && sidebar) {
+      // Agregar el evento de clic al ícono de hamburguesa
+      hamburgerMenu.addEventListener("click", () => {
+        console.log("Hamburguesa clickeada");
+        sidebar.classList.toggle("open"); // Alternar clase 'open'
+      });
+    } else {
+      console.error("No se encontró el menú hamburguesa o el sidebar.");
+    }
+  });
+</script>
+</body>
+</html>
