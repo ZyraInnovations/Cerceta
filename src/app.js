@@ -9,6 +9,8 @@ const cron = require('node-cron');
 
 const app = express();
 const fileUpload = require('express-fileupload');
+const jwt = require('jsonwebtoken'); // Importa jsonwebtoken
+const SECRET_KEY = 'MiClaveSuperSegura!$%&/()=12345';
 
 // Configurar la sesión
 app.use(session({
@@ -541,6 +543,51 @@ app.get("/menu_contabilidad", async (req, res) => {
 
 
 
+
+
+
+
+
+app.get("/menu_appresidentes", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+
+            const nombreUsuario = req.session.name || req.session.user.name;
+            console.log(`El usuario ${nombreUsuario} está autenticado.`);
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
+            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
+            console.log(`Cargos del usuario: ${cargos}`);
+
+            // Define las variables de cargo en función de si están en el array
+            const esGerente = cargos.includes('Gerente');
+            const esAdministracionOperativa = cargos.includes('administracion_operativa');
+            const esContabilidad = cargos.includes('contabilidad');
+            const esOperativo = cargos.includes('operativo');
+
+            // Muestra en consola para verificar que los valores son correctos
+            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
+            // Consulta para contar la cantidad de empleados
+            // Renderiza la vista y pasa los datos necesarios
+            res.render("Aplicacione_residentes/menu.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                esGerente,
+                esAdministracionOperativa,
+                esContabilidad,
+                esOperativo,
+                userId,
+            });
+        } catch (error) {
+            console.error('Error al obtener el conteo de datos:', error);
+            res.status(500).send('Error al cargar el menú administrativo');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
 
 
 
@@ -4302,15 +4349,15 @@ app.post('/like', (req, res) => {
     });
 });
 
-app.post('/login_app', async (req, res) => {  // ⬅️ Agregar 'async' aquí
-    console.log('🔹 Solicitud recibida:', req.body);  
+app.post('/login_app', async (req, res) => {
+    console.log('🔹 Solicitud recibida:', req.body);
 
-    const { email, password, fcm_token } = req.body;  
+    const { email, password, fcm_token } = req.body;
     const query = 'SELECT id, email, password FROM usuarios WHERE email = ? AND password = ?';
 
     try {
         console.log('🔍 Ejecutando consulta SQL...');
-        const [result] = await pool.execute(query, [email, password]); // ⬅️ Usamos 'await'
+        const [result] = await pool.execute(query, [email, password]);
 
         console.log('🔹 Resultado de la consulta:', result);
 
@@ -4318,11 +4365,16 @@ app.post('/login_app', async (req, res) => {  // ⬅️ Agregar 'async' aquí
             const userId = result[0].id;
             console.log(`✅ Usuario encontrado. ID: ${userId}`);
 
+            // Actualizar el FCM token en la base de datos
             const updateQuery = 'UPDATE usuarios SET fcm_token = ? WHERE email = ?';
-            await pool.execute(updateQuery, [fcm_token, email]); // ⬅️ También usamos 'await'
+            await pool.execute(updateQuery, [fcm_token, email]);
 
             console.log('✅ Token FCM actualizado correctamente.');
-            res.json({ message: 'Login exitoso', user_id: userId });
+
+            // Generar el token JWT
+            const token = jwt.sign({ userId, email }, SECRET_KEY, { expiresIn: '7d' });
+
+            res.json({ message: 'Login exitoso', user_id: userId, token });
 
         } else {
             console.log('❌ Credenciales incorrectas');

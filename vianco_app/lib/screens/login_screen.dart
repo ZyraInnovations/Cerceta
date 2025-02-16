@@ -55,16 +55,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _saveSession(String token, String userId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_token', token);
-      await prefs.setString('user_id', userId);
-      print("✅ Sesión guardada correctamente");
-    } catch (error) {
-      print("🔴 Error al guardar sesión: $error");
-    }
+Future<void> _saveSession(String token, String userId) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_token', token);
+    await prefs.setString('user_id', userId);
+    print("✅ Sesión guardada correctamente");
+  } catch (error) {
+    print("🔴 Error al guardar sesión: $error");
   }
+}
 
   void _navigateToHome(String userId) {
     if (mounted) {
