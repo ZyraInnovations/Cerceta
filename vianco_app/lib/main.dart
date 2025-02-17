@@ -37,7 +37,6 @@ class _MyAppState extends State<MyApp> {
   bool _isLoading = true;
   String? _userId;
   bool _isLoggedIn = false;
-
   @override
   void initState() {
     super.initState();

@@ -4424,7 +4424,7 @@ app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
 
 
 
-const serviceAccount = require('../src/vianco-cd3a3-firebase-adminsdk-fbsvc-bd74257f42.json');
+const serviceAccount = require('../src/serviceAccountKey.json');
 
 
 admin.initializeApp({
