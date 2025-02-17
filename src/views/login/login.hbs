@@ -96,10 +96,11 @@
           ¿Has olvidado la contraseña?
         </a>
         <br/>
-        <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
-          ¿Necesitas ayuda?
+      <button id="install-btn" style="display: none;">Instalar App</button>
+
         </a>
       </div>
+      
     </form>
   </div>
 </div>
@@ -140,6 +141,38 @@
 </script>
 
 
+<script>
+  let deferredPrompt;
 
+  window.addEventListener("beforeinstallprompt", (event) => {
+    // Evitar el banner automático
+    event.preventDefault();
+    // Guardar el evento para mostrarlo después
+    deferredPrompt = event;
+    // Mostrar el botón de instalación
+    document.getElementById("install-btn").style.display = "block";
+  });
+
+  document.getElementById("install-btn").addEventListener("click", async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    // Mostrar el banner de instalación
+    deferredPrompt.prompt();
+
+    // Esperar la respuesta del usuario
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log("Resultado de la instalación:", outcome);
+
+    // Ocultar el botón si el usuario acepta la instalación
+    if (outcome === "accepted") {
+      document.getElementById("install-btn").style.display = "none";
+    }
+
+    // Limpiar la variable
+    deferredPrompt = null;
+  });
+</script>
+Verifica lo
  </body>
 </html>
