@@ -21,7 +21,7 @@ class _DomiciliosScreenState extends State<DomiciliosScreen> {
   }
 
   Future<void> fetchDomicilios() async {
-    final url = Uri.parse('http://147.93.118.246:3000/domicilios/${widget.userId}'); // Ajusta el puerto según tu servidor
+    final url = Uri.parse('https://sistemacerceta.com/domicilios/${widget.userId}'); // Ajusta el puerto según tu servidor
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

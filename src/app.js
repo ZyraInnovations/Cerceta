@@ -4508,7 +4508,7 @@ app.get("/domicilios/:userId", async (req, res) => {
     try {
         // 1️⃣ Buscar el ID del apartamento del usuario
         const [userResult] = await pool.query(
-            "SELECT apartamento_id FROM usuarios WHERE id = ?",
+            "SELECT apartamento FROM usuarios WHERE id = ?",
             [userId]
         );
 
