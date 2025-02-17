@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "description": "Gestión de bombas hidráulicas",
+  "description": "Cerceta",
   "icons": [
       {
           "src": "imagenes/apk192.png",
@@ -21,7 +21,7 @@
   ],
   "screenshots": [
       {
-          "src": "imagenes/apk1920.png",
+          "src": "imagenes/aplicacion1920.png",
           "sizes": "1920x1080",
           "type": "image/png",
           "form_factor": "wide"

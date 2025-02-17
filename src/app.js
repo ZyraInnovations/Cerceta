@@ -11,6 +11,7 @@ const app = express();
 const fileUpload = require('express-fileupload');
 const jwt = require('jsonwebtoken'); // Importa jsonwebtoken
 const SECRET_KEY = 'MiClaveSuperSegura!$%&/()=12345';
+const admin = require('firebase-admin');
 
 // Configurar la sesión
 app.use(session({
@@ -4423,29 +4424,80 @@ app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
 
 
 
+const serviceAccount = require('../src/vianco-cd3a3-firebase-adminsdk-fbsvc-bd74257f42.json');
+
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+
+
+
+
+
 
 app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
     try {
+        console.log('📌 Recibiendo solicitud en /guardar_domicilio');
+
         const { edificio, apartamento, observaciones } = req.body;
-        const foto = req.file ? req.file.buffer : null; // Foto en binario
+        const foto = req.file ? req.file.buffer : null;
+
+        console.log('📋 Datos recibidos:', { edificio, apartamento, observaciones, foto: foto ? '✅ Foto recibida' : '❌ Sin foto' });
 
         if (!edificio || !apartamento || !observaciones || !foto) {
-            return res.status(400).send('Todos los campos son obligatorios');
+            console.log('⚠️ Faltan datos obligatorios');
+            return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
-        // Guardar en la base de datos
-        await pool.query(
+        const [result] = await pool.query(
             'INSERT INTO domicilios (edificio_id, apartamento_id, observaciones, foto) VALUES (?, ?, ?, ?)',
             [edificio, apartamento, observaciones, foto]
         );
 
-        res.send('Domicilio registrado con éxito');
+        const domicilioId = result.insertId;
+        console.log('✅ Domicilio insertado con ID:', domicilioId);
+
+        // Buscar el token de FCM del usuario
+        const [usuarios] = await pool.query(
+            'SELECT fcm_token FROM usuarios WHERE edificio = ? AND apartamento = ? LIMIT 1',
+            [edificio, apartamento]
+        );
+
+        console.log('🔎 Usuarios encontrados:', usuarios);
+
+        if (usuarios.length > 0 && usuarios[0].fcm_token) {
+            const fcmToken = usuarios[0].fcm_token;
+            console.log('📡 FCM Token encontrado:', fcmToken);
+
+            if (fcmToken) {
+                const message = {
+                    notification: {
+                        title: 'Nuevo Domicilio Registrado',
+                        body: `Se ha registrado un nuevo domicilio en el edificio ${edificio}, apartamento ${apartamento}.`,
+                    },
+                    token: fcmToken
+                };
+
+                try {
+                    console.log('📤 Enviando notificación a FCM Token:', fcmToken);
+                    const response = await admin.messaging().send(message);
+                    console.log('📩 Notificación enviada con éxito:', response);
+                } catch (error) {
+                    console.error('❌ Error al enviar la notificación:', error);
+                }
+            }
+        } else {
+            console.log('⚠️ No se encontró FCM Token para este usuario.');
+        }
+
+        res.json({ success: true, message: 'Domicilio registrado con éxito', domicilioId });
     } catch (error) {
-        console.error('Error al guardar domicilio:', error);
-        res.status(500).send('Error en el servidor');
+        console.error('❌ Error al guardar domicilio:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 });
-
 
 
 
