@@ -4501,6 +4501,42 @@ app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
 
 
 
+
+app.get("/domicilios/:userId", async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // 1️⃣ Buscar el ID del apartamento del usuario
+        const [userResult] = await pool.query(
+            "SELECT apartamento_id FROM usuarios WHERE id = ?",
+            [userId]
+        );
+
+        if (userResult.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+
+        const apartamentoId = userResult[0].apartamento_id;
+
+        // 2️⃣ Buscar los domicilios relacionados con ese apartamento
+        const [domicilios] = await pool.query(
+            "SELECT created_at, observaciones FROM domicilios WHERE apartamento_id = ?",
+            [apartamentoId]
+        );
+
+        res.json(domicilios);
+    } catch (error) {
+        console.error("Error en la consulta:", error);
+        res.status(500).json({ error: "Error al obtener domicilios" });
+    }
+});
+
+
+
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
