@@ -90,14 +90,17 @@ class HomeScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final room = rooms[index];
                         return GestureDetector(
-                          onTap: () {
-                            if (room["name"] == "Domicilios") {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => DomiciliosScreen()),
-                              );
-                            }
-                          },
+                     onTap: () {
+  if (room["name"] == "Domicilios") {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DomiciliosScreen(userId: userId), // 👈 Pasa el userId aquí
+      ),
+    );
+  }
+},
+
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
