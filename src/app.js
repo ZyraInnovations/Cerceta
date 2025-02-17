@@ -4436,7 +4436,6 @@ admin.initializeApp({
 
 
 
-
 app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
     try {
         console.log('📌 Recibiendo solicitud en /guardar_domicilio');
@@ -4451,8 +4450,9 @@ app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
+        // Insertar un nuevo domicilio con estado = 1
         const [result] = await pool.query(
-            'INSERT INTO domicilios (edificio_id, apartamento_id, observaciones, foto) VALUES (?, ?, ?, ?)',
+            'INSERT INTO domicilios (edificio_id, apartamento_id, observaciones, foto, estado) VALUES (?, ?, ?, ?, 1)', // Se agrega el valor 1 a estado
             [edificio, apartamento, observaciones, foto]
         );
 
@@ -4500,39 +4500,64 @@ app.post('/guardar_domicilio', upload.single('foto'), async (req, res) => {
 });
 
 
-
-
 app.get("/domicilios/:userId", async (req, res) => {
     const { userId } = req.params;
-
+  
     try {
-        // 1️⃣ Buscar el ID del apartamento del usuario
-        const [userResult] = await pool.query(
-            "SELECT apartamento FROM usuarios WHERE id = ?",
-            [userId]
-        );
-
-        if (userResult.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
+      // 1️⃣ Buscar el ID del apartamento del usuario
+      const [userResult] = await pool.query(
+        "SELECT apartamento FROM usuarios WHERE id = ?",
+        [userId]
+      );
+  
+      if (userResult.length === 0) {
+        return res.status(404).json({ error: "Usuario no encontrado" });
+      }
+  
+      const apartamentoId = userResult[0].apartamento;  // Ahora es 'apartamento'
+  
+      // 2️⃣ Buscar los domicilios relacionados con ese apartamento, incluyendo el campo 'foto'
+      const [domicilios] = await pool.query(
+        "SELECT created_at, observaciones, estado, foto FROM domicilios WHERE apartamento_id = ?",
+        [apartamentoId]
+      );
+  
+      // Convertir la foto a base64 si existe
+      const domiciliosConFoto = domicilios.map(domicilio => {
+        if (domicilio.foto) {
+          domicilio.foto = domicilio.foto.toString('base64'); // Convertir la foto a base64
         }
-
-        const apartamentoId = userResult[0].apartamento_id;
-
-        // 2️⃣ Buscar los domicilios relacionados con ese apartamento
-        const [domicilios] = await pool.query(
-            "SELECT created_at, observaciones FROM domicilios WHERE apartamento_id = ?",
-            [apartamentoId]
-        );
-
-        res.json(domicilios);
+        return domicilio;
+      });
+  
+      res.json(domiciliosConFoto);
     } catch (error) {
-        console.error("Error en la consulta:", error);
-        res.status(500).json({ error: "Error al obtener domicilios" });
+      console.error("Error en la consulta:", error);
+      res.status(500).json({ error: "Error al obtener domicilios" });
     }
-});
-
-
-
+  });
+  
+  app.put("/domicilio/:id", async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+  
+    try {
+      const [result] = await pool.execute(
+        "UPDATE domicilios SET estado = ? WHERE id = ?",
+        [estado, id]
+      );
+  
+      if (result.affectedRows > 0) {
+        return res.status(200).json({ message: "Domicilio actualizado con éxito" });
+      } else {
+        return res.status(404).json({ message: "Domicilio no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al actualizar el domicilio:", error);
+      return res.status(500).json({ message: "Error al actualizar el domicilio" });
+    }
+  });
+  
 
 
 

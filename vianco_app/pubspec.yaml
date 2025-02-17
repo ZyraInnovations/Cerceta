@@ -24,6 +24,8 @@ dependencies:
   url_launcher: ^6.1.14 # Asegúrate de tener la última versión
   flutter_svg: ^2.0.9
   shared_preferences: ^2.5.1
+  intl: ^0.18.0  # Agregar esta línea
+  flutter_animate: ^3.1.0  # Agregar para animaciones
 
 
 dev_dependencies:
