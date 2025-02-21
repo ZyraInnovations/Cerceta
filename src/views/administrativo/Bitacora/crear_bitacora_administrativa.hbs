@@ -167,6 +167,71 @@ border: 1px solid black;
     margin: 0 auto;
     position: relative;
 }
+#edificio {
+    margin-bottom: 0 !important;
+}
+#tipoMantenimiento {
+    margin-bottom: 0 !important;
+}
+
+  .form-control {
+        display: block;
+        width: 100%;
+        padding: 12px; /* Aumenta el tamaño del padding */
+        font-size: 16px; /* Aumenta el tamaño del texto */
+        border: 2px solid #ccc; /* Bordes más visibles */
+        border-radius: 8px; /* Bordes redondeados */
+        background-color: #fff; /* Fondo blanco */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control:focus {
+        border-color: #007bff; /* Cambia el color del borde al seleccionar */
+        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .section-content {
+        display: flex;
+        gap: 10px;
+    }
+
+    label {
+        font-weight: bold;
+        font-size: 18px;
+        color: #333;
+    }
+
+
+
+    .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    appearance: none; /* Quita los estilos nativos del sistema */
+    overflow: visible; /* Asegura que el texto no se corte */
+    white-space: nowrap; /* Evita el corte del texto */
+    text-overflow: ellipsis; /* Añade "..." si es demasiado largo */
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.section-content {
+    gap: 10px;
+}
+
   </style>
 
 <style>
@@ -207,18 +272,20 @@ border: 1px solid black;
       <h2 class="section-title">
         <input class="input-title" placeholder="">
       </h2>
-<div class="section-content">
- <label for="edificio" class="section-title">Seleccione el Edificio:</label>
-    <select id="edificio" name="edificioId" class="form-control mb-4">
+
+<div class="section-content" style="display: flex; flex-direction: column; gap: 10px;">
+    <label for="edificio" class="section-title">Seleccione el Edificio:</label>
+    <select id="edificio" name="edificioId" class="form-control">
         <option value="" disabled selected>Selecciona un edificio</option>
         {{#each edificios}}
             <option value="{{this.id}}">{{this.nombre}}</option>
         {{/each}}
     </select>
 </div>
-<div class="section-content">
+
+<div class="section-content" style="display: flex; flex-direction: column; gap: 10px;">
     <label for="tipoMantenimiento" class="section-title">Seleccione el tipo de mantenimiento:</label>
-    <select id="tipoMantenimiento" class="form-control mb-4">
+    <select id="tipoMantenimiento" class="form-control">
         <option value="" disabled selected>Selecciona una opción</option>
         <option value="aseo">Aseo</option>
         <option value="equipos">Equipos</option>
@@ -227,13 +294,13 @@ border: 1px solid black;
         <option value="electricidad">Electricidad</option>
         <option value="plomeria">Plomería</option>
         <option value="mantenimiento_general">Mantenimiento General</option>
-        <!-- Puedes agregar más opciones aquí -->
     </select>
 </div>
+
+<br>
 <div id="contenido">
   <div class="section">
         <input class="input-title" placeholder="">
-
     </div>
   </div>
 </div>
