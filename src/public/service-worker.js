@@ -1,74 +1,58 @@
-const CACHE_NAME = "app-cache-v4"; // Cambia el nombre para forzar actualización
-const urlsToCache = [
-  "/", 
-  "/index.html", 
-  "/styles.css",
-  "/app.js", 
-  "/manifest.json",
-  "/imagenes/apk192.png"
-];
 
-// Instalación del Service Worker
-self.addEventListener("install", (event) => {
-  console.log("📢 Instalando nuevo Service Worker...");
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.all(
-        urlsToCache.map((url) => {
-          return fetch(url)
-            .then((response) => {
-              if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-              return cache.put(url, response);
+
+let currentLatitude = null;
+let currentLongitude = null;
+
+// Escuchar mensajes del hilo principal (Frontend)
+self.addEventListener('message', event => {
+    if (event.data && event.data.latitude && event.data.longitude) {
+        currentLatitude = event.data.latitude;
+        currentLongitude = event.data.longitude;
+        console.log('Ubicación recibida del frontend:', currentLatitude, currentLongitude);
+    }
+});
+
+// Sincronizar ubicación cuando se recibe el evento 'sync'
+self.addEventListener('sync', event => {
+    if (event.tag === 'location-sync') {
+        console.log('Intentando sincronizar ubicación...');
+        event.waitUntil(syncLocationData());
+    }
+});
+
+// Función para sincronizar la ubicación con el servidor
+function syncLocationData() {
+    if (currentLatitude && currentLongitude) {
+        console.log('Sincronizando ubicación con el servidor:', currentLatitude, currentLongitude);
+        return fetch('/update-location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude: currentLatitude,
+                longitude: currentLongitude
             })
-            .catch((error) => console.error(`❌ Error cacheando ${url}:`, error));
-        })
-      );
-    }).then(() => self.skipWaiting()) // Activa el SW inmediatamente
-  );
-});
+        }).then(response => {
+            console.log('Respuesta del servidor:', response.status, response.statusText);
+            if (!response.ok) {
+                console.error('Error al sincronizar la ubicación. Estado:', response.status);
+            } else {
+                console.log('Ubicación sincronizada correctamente');
+            }
+        }).catch(error => {
+            console.error('Error de red:', error);
+        });
+    } else {
+        console.error('No hay datos de ubicación disponibles');
+    }
+}
 
-// Activación del Service Worker (Elimina cachés antiguas)
-self.addEventListener("activate", (event) => {
-  console.log("🔄 Activando nuevo Service Worker...");
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log(`🗑 Eliminando caché antigua: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) // Toma control inmediato
-  );
-});
-
-// Interceptor de solicitudes (fetch)
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse; // Devuelve desde caché
-      }
-      return fetch(event.request)
-        .then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-        .catch(() => new Response("No hay conexión y el recurso no está en caché", {
-          status: 408,
-          statusText: "Request Timeout",
-        }));
-    })
-  );
-});
-
-// Escuchar mensajes para actualizar el SW
-self.addEventListener("message", (event) => {
-  if (event.data.action === "skipWaiting") {
-    self.skipWaiting();
-  }
+// Esta es una función extra en caso de que desees manejar la notificación push
+self.addEventListener('push', event => {
+    const data = event.data.json(); // Los datos enviados con la notificación
+    self.registration.showNotification(data.title, {
+        body: data.message,
+        icon: '/imagenes/apk192.png'
+    });
 });

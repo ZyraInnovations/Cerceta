@@ -152,68 +152,104 @@ app.get('/reset-password', (req, res) => {
 
 
 
+const formatDateForMySQL = (date) => {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+};
 
-// Ruta para solicitar restablecimiento de contraseña
+// ✅ Ruta para solicitar restablecimiento de contraseña
 app.post('/request-password-reset', async (req, res) => {
     try {
         const { email } = req.body;
-        const [user] = await pool.query('SELECT id FROM usuarios WHERE email = ?', [email]);
 
-        if (user.length === 0) {
-            return res.status(404).json({ message: 'Correo no encontrado' });
+        // Verificar si el usuario existe
+        const [users] = await pool.query(
+            'SELECT reset_token, reset_token_exp FROM usuarios WHERE email = ?',
+            [email]
+        );
+
+        let token;
+        let expireTime = new Date(Date.now() + 3600000); // Sumar 1 hora en UTC
+        let mysqlExpireTime = formatDateForMySQL(expireTime);
+
+        if (users.length > 0 && users[0].reset_token && new Date(users[0].reset_token_exp) > new Date()) {
+            // Si el usuario ya tiene un token válido, reutilizarlo
+            token = users[0].reset_token;
+            mysqlExpireTime = users[0].reset_token_exp; // Mantener la fecha de expiración original
+        } else {
+            // Generar un nuevo token y actualizar en la base de datos
+            token = crypto.randomBytes(32).toString('hex');
+            const [result] = await pool.query(
+                'UPDATE usuarios SET reset_token = ?, reset_token_exp = ? WHERE email = ?',
+                [token, mysqlExpireTime, email]
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(400).json({ message: 'No se pudo actualizar el token, verifica el correo.' });
+            }
         }
 
-        const token = crypto.randomBytes(32).toString('hex');
-        const expireTime = new Date(Date.now() + 3600000); // 1 hora
+        console.log("✅ Token generado:", token);
+        console.log("✅ Fecha de expiración guardada:", mysqlExpireTime);
 
-        await pool.query(
-            'UPDATE usuarios SET reset_token = ?, reset_token_exp = ? WHERE email = ?',
-            [token, expireTime, email]
+        // Verificar que el token realmente se guardó en la base de datos
+        const [checkToken] = await pool.query(
+            'SELECT reset_token, reset_token_exp FROM usuarios WHERE email = ?', 
+            [email]
         );
+        console.log("🔍 Token en la BD después de la actualización:", checkToken[0]?.reset_token);
+        console.log("🔍 Expiración en la BD:", checkToken[0]?.reset_token_exp);
+
+        // Construir enlace de restablecimiento
+        const resetLink = `http://sistemacerceta.com/reset-password/${encodeURIComponent(token)}`;
 
         // Configuración del correo
         const transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: 'zyrainnovations@gmail.com', // Tu correo
-                pass: 'hykrxuzhpokjlwhu'            // Tu contraseña o App Password
+                user: 'zyrainnovations@gmail.com',
+                pass: 'hykrxuzhpokjlwhu'
             }
         });
 
-        const resetLink = `http://localhost:3000/reset-password/${token}`;
-        const uniqueId = new Date().toISOString(); // Utilizamos la fecha-hora actual para hacer único el asunto
-
+        // Enviar el correo con el enlace
         await transporter.sendMail({
             from: 'no-reply@tusitio.com',
             to: email,
-            subject: `Restablece tu contraseña - ${uniqueId}`,  // Asunto único por cada envío
+            subject: `Restablece tu contraseña`,
             html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
                    <a href="${resetLink}">${resetLink}</a>`
         });
 
         res.json({ message: 'Se ha enviado un enlace a tu correo.' });
+
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error en /request-password-reset:", error);
         res.status(500).json({ message: 'Error en el servidor' });
     }
 });
 
-
+// ✅ Ruta para validar el token y mostrar el formulario de restablecimiento
 app.get('/reset-password/:token', async (req, res) => {
     try {
         const { token } = req.params;
+        console.log("🔑 Token recibido en la URL:", token);
 
         // Verificar si el token es válido y no ha expirado
-        const [user] = await pool.query('SELECT id FROM usuarios WHERE reset_token = ? AND reset_token_exp > NOW()', [token]);
+        const [users] = await pool.query(
+            'SELECT id FROM usuarios WHERE reset_token = ? AND CONVERT_TZ(reset_token_exp, "+00:00", "+00:00") > UTC_TIMESTAMP()', 
+            [token]
+        );
+        
+        console.log("🔎 Resultado de la consulta:", users);
 
-        if (user.length === 0) {
-            return res.send("El enlace para restablecer la contraseña es inválido o ha expirado.");
+        if (!users || users.length === 0) {
+            return res.send("⚠️ El enlace para restablecer la contraseña es inválido o ha expirado.");
         }
 
-        // Renderizar la vista con el formulario para ingresar la nueva contraseña
-        res.render('login/reset-password.hbs', { token });
+        res.render('login/change-password.hbs', { token });
+
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error en /reset-password/:token:", error);
         res.status(500).send("Error en el servidor.");
     }
 });
@@ -223,10 +259,41 @@ app.get('/reset-password/:token', async (req, res) => {
 
 
 
+app.post('/update-password', async (req, res) => {
+    try {
+        const { token, password, confirmPassword } = req.body;
 
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Las contraseñas no coinciden.' });
+        }
 
+        if (password.length < 8) {
+            return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres.' });
+        }
 
+        const [users] = await pool.query(
+            'SELECT id, reset_token_exp FROM usuarios WHERE reset_token = ? AND reset_token_exp > UTC_TIMESTAMP()', 
+            [token]
+        );
 
+        if (users.length === 0) {
+            return res.status(400).json({ message: 'El enlace para restablecer la contraseña es inválido o ha expirado.' });
+        }
+
+        const userId = users[0].id;
+
+        await pool.query(
+            'UPDATE usuarios SET password = ?, reset_token = NULL, reset_token_exp = NULL WHERE id = ?', 
+            [password, userId]
+        );
+
+        res.json({ message: "Contraseña actualizada con éxito.", redirect: "/login" });
+
+    } catch (error) {
+        console.error("❌ Error en /update-password:", error);
+        res.status(500).json({ message: 'Error en el servidor' });
+    }
+});
 
 
 
