@@ -107,37 +107,23 @@ app.post('/login', async (req, res) => {
 
 
 
-
-if ('serviceWorker' in navigator) {
+// Verifica que el código se ejecuta en el navegador antes de registrar el Service Worker
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/service-worker.js")
         .then((registration) => {
-          console.log("✅ Service Worker registrado:", registration);
-  
-          // Escuchar cambios en el Service Worker
-          registration.onupdatefound = () => {
-            const newWorker = registration.installing;
-            newWorker.onstatechange = () => {
-              if (newWorker.state === "installed") {
-                if (navigator.serviceWorker.controller) {
-                  console.log("🔄 Nueva versión disponible, actualizando...");
-                  newWorker.postMessage({ action: "skipWaiting" });
-                }
-              }
-            };
-          };
+          console.log("✅ Service Worker registrado correctamente:", registration);
         })
-        .catch((error) => console.error("❌ Error registrando el Service Worker:", error));
+        .catch((error) => console.error("❌ Error al registrar el Service Worker:", error));
     });
   
-    // Recargar página cuando se active un nuevo SW
+    // Recargar la página cuando se active un nuevo SW
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       console.log("♻️ Nueva versión activa, recargando página...");
       window.location.reload();
     });
   }
   
-
 
 
 
