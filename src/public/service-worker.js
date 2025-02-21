@@ -1,4 +1,4 @@
-const CACHE_NAME = "app-cache-v4"; // Cambia la versión para forzar la actualización
+const CACHE_NAME = "app-cache-v4"; // Cambia el nombre para forzar actualización
 const urlsToCache = [
   "/", 
   "/index.html", 
@@ -12,20 +12,17 @@ const urlsToCache = [
 self.addEventListener("install", (event) => {
   console.log("📢 Instalando nuevo Service Worker...");
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      for (const url of urlsToCache) {
-        try {
-          console.log(`📂 Intentando cachear: ${url}`);
-          const response = await fetch(url, { mode: "no-cors" }); // Evita problemas de CORS
-          if (!response || !response.ok) {
-            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-          }
-          await cache.put(url, response.clone());
-          console.log(`✅ Cacheado correctamente: ${url}`);
-        } catch (error) {
-          console.error(`❌ Error cacheando ${url}:`, error);
-        }
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.all(
+        urlsToCache.map((url) => {
+          return fetch(url)
+            .then((response) => {
+              if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+              return cache.put(url, response);
+            })
+            .catch((error) => console.error(`❌ Error cacheando ${url}:`, error));
+        })
+      );
     }).then(() => self.skipWaiting()) // Activa el SW inmediatamente
   );
 });
@@ -43,7 +40,7 @@ self.addEventListener("activate", (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Forzar control inmediato del SW
+    }).then(() => self.clients.claim()) // Toma control inmediato
   );
 });
 
@@ -67,4 +64,11 @@ self.addEventListener("fetch", (event) => {
         }));
     })
   );
+});
+
+// Escuchar mensajes para actualizar el SW
+self.addEventListener("message", (event) => {
+  if (event.data.action === "skipWaiting") {
+    self.skipWaiting();
+  }
 });

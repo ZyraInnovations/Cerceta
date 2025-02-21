@@ -108,37 +108,31 @@ app.post('/login', async (req, res) => {
 
 
 
-
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js').then(registration => {
-      console.log("✅ Service Worker registrado correctamente.");
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then((registration) => {
+          console.log("✅ Service Worker registrado:", registration);
   
-      // Detectar nueva versión del SW
-      registration.onupdatefound = () => {
-        const newWorker = registration.installing;
-        newWorker.onstatechange = () => {
-          if (newWorker.state === "installed") {
-            if (navigator.serviceWorker.controller) {
-              console.log("🔄 Nueva versión disponible, actualizando...");
-              newWorker.postMessage({ action: "skipWaiting" });
-            }
-          }
-        };
-      };
+          // Escuchar cambios en el Service Worker
+          registration.onupdatefound = () => {
+            const newWorker = registration.installing;
+            newWorker.onstatechange = () => {
+              if (newWorker.state === "installed") {
+                if (navigator.serviceWorker.controller) {
+                  console.log("🔄 Nueva versión disponible, actualizando...");
+                  newWorker.postMessage({ action: "skipWaiting" });
+                }
+              }
+            };
+          };
+        })
+        .catch((error) => console.error("❌ Error registrando el Service Worker:", error));
     });
   
-    // Forzar la actualización del SW cuando el usuario cambia de pestaña
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        navigator.serviceWorker.getRegistration().then(reg => {
-          if (reg) reg.update();
-        });
-      }
-    });
-  
-    // Escuchar el mensaje para recargar la página si hay un SW nuevo
+    // Recargar página cuando se active un nuevo SW
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      console.log("♻️ Recargando la página para aplicar el nuevo Service Worker...");
+      console.log("♻️ Nueva versión activa, recargando página...");
       window.location.reload();
     });
   }
