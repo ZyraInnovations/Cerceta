@@ -231,6 +231,20 @@ border: 1px solid black;
 .section-content {
     gap: 10px;
 }
+.input-subtitle {
+  font-size: 22px;
+  text-align: center;
+  border: none;
+  outline: none;
+  background: none;
+  font-weight: bold;
+  color: #333;
+  width: 100%;
+  padding: 5px;
+  display: block; /* Asegura que el input se comporte como un bloque */
+  margin: auto; /* Centra el título */
+}
+
 
   </style>
 
@@ -308,6 +322,15 @@ border: 1px solid black;
 
 </div>
 </div>
+
+
+<!-- Botón para agregar subtítulos entre imágenes -->
+<div class="text-center mt-4">
+  <button id="addTitleBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition ease-in-out duration-150">
+    Agregar Título
+  </button>
+</div>
+
 <div class="text-center mt-8">
   <button id="addSectionBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition ease-in-out duration-150">
     Agregar Sección
@@ -321,6 +344,45 @@ border: 1px solid black;
     </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+
+<script>
+  function agregarTitulo() {
+    const container = document.getElementById('contenido');
+    
+    // Seleccionar todas las secciones de imágenes
+    const imageSections = container.querySelectorAll('.section-content');
+
+    if (imageSections.length === 0) {
+      alert("No hay imágenes a las cuales agregar un título.");
+      return;
+    }
+
+    // Encontrar la última sección de imágenes
+    const lastImageSection = imageSections[imageSections.length - 1];
+
+    // Crear el contenedor del título
+    const nuevoTitulo = document.createElement('div');
+    nuevoTitulo.className = 'section-title-container';
+    nuevoTitulo.style.textAlign = 'center';
+    nuevoTitulo.style.marginBottom = '10px';
+
+    // Agregar el campo de entrada para el título
+    nuevoTitulo.innerHTML = `
+      <h3 class="section-subtitle">
+        <input type="text" class="input-subtitle" placeholder="Escribe un título aquí..." 
+          style="font-size: 20px; text-align: center; border: none; outline: none; background: none; font-weight: bold; width: 100%;">
+      </h3>
+    `;
+
+    // Insertar el título justo ANTES del último conjunto de imágenes
+    lastImageSection.insertAdjacentElement('beforebegin', nuevoTitulo);
+  }
+
+  // Agregar funcionalidad al botón "Agregar Título"
+  document.getElementById('addTitleBtn').addEventListener('click', agregarTitulo);
+</script>
 <script>
 function agregarSeccion() {
   const container = document.getElementById('contenido');
