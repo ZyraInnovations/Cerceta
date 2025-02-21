@@ -1,30 +1,38 @@
-const CACHE_NAME = "app-cache-v1";
+const CACHE_NAME = "app-cache-v4"; // Cambia la versión para forzar la actualización
 const urlsToCache = [
   "/", 
-  "/login",
+  "/index.html", 
   "/styles.css",
-  "/app.js",
+  "/app.js", 
   "/manifest.json",
-  "/imagenes/apk192.png" 
+  "/imagenes/apk192.png"
 ];
 
 // Instalación del Service Worker
-self.addEventListener("install", function (event) {
+self.addEventListener("install", (event) => {
+  console.log("📢 Instalando nuevo Service Worker...");
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      try {
-        // Intentar agregar todos los archivos a la caché
-        await cache.addAll(urlsToCache);
-        console.log("✅ Archivos cacheados correctamente");
-      } catch (error) {
-        console.error("❌ Error al almacenar en caché:", error);
+      for (const url of urlsToCache) {
+        try {
+          console.log(`📂 Intentando cachear: ${url}`);
+          const response = await fetch(url, { mode: "no-cors" }); // Evita problemas de CORS
+          if (!response || !response.ok) {
+            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+          }
+          await cache.put(url, response.clone());
+          console.log(`✅ Cacheado correctamente: ${url}`);
+        } catch (error) {
+          console.error(`❌ Error cacheando ${url}:`, error);
+        }
       }
-    }).then(() => self.skipWaiting()) // Activar inmediatamente el nuevo Service Worker
+    }).then(() => self.skipWaiting()) // Activa el SW inmediatamente
   );
 });
 
-// Activación del Service Worker (limpiar cachés antiguas)
-self.addEventListener("activate", function (event) {
+// Activación del Service Worker (Elimina cachés antiguas)
+self.addEventListener("activate", (event) => {
+  console.log("🔄 Activando nuevo Service Worker...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -35,32 +43,28 @@ self.addEventListener("activate", function (event) {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Tomar el control de la aplicación
+    }).then(() => self.clients.claim()) // Forzar control inmediato del SW
   );
 });
 
 // Interceptor de solicitudes (fetch)
-self.addEventListener("fetch", function (event) {
+self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      if (response) {
-        return response; // Devolver desde la caché
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse; // Devuelve desde caché
       }
       return fetch(event.request)
         .then((networkResponse) => {
-          // Si la solicitud es exitosa, almacenarla en la caché
           return caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
           });
         })
-        .catch((error) => {
-          console.error("❌ Error al hacer fetch:", error);
-          return new Response("No hay conexión y el recurso no está en caché", {
-            status: 408,
-            statusText: "Request Timeout",
-          });
-        });
+        .catch(() => new Response("No hay conexión y el recurso no está en caché", {
+          status: 408,
+          statusText: "Request Timeout",
+        }));
     })
   );
 });

@@ -109,6 +109,47 @@ app.post('/login', async (req, res) => {
 
 
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log("✅ Service Worker registrado correctamente.");
+  
+      // Detectar nueva versión del SW
+      registration.onupdatefound = () => {
+        const newWorker = registration.installing;
+        newWorker.onstatechange = () => {
+          if (newWorker.state === "installed") {
+            if (navigator.serviceWorker.controller) {
+              console.log("🔄 Nueva versión disponible, actualizando...");
+              newWorker.postMessage({ action: "skipWaiting" });
+            }
+          }
+        };
+      };
+    });
+  
+    // Forzar la actualización del SW cuando el usuario cambia de pestaña
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) reg.update();
+        });
+      }
+    });
+  
+    // Escuchar el mensaje para recargar la página si hay un SW nuevo
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      console.log("♻️ Recargando la página para aplicar el nuevo Service Worker...");
+      window.location.reload();
+    });
+  }
+  
+
+
+
+
+
+
+
 
 // Ruta para el menú administrativo
 app.get('/geolocalizacion', (req, res) => {
@@ -121,6 +162,87 @@ app.get('/geolocalizacion', (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+// Ruta para mostrar la página de restablecimiento de contraseña
+app.get('/reset-password', (req, res) => {
+    res.render('login/reset-password');
+});
+
+
+
+
+// Ruta para solicitar restablecimiento de contraseña
+app.post('/request-password-reset', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const [user] = await pool.query('SELECT id FROM usuarios WHERE email = ?', [email]);
+
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Correo no encontrado' });
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+        const expireTime = new Date(Date.now() + 3600000); // 1 hora
+
+        await pool.query(
+            'UPDATE usuarios SET reset_token = ?, reset_token_exp = ? WHERE email = ?',
+            [token, expireTime, email]
+        );
+
+        // Configuración del correo
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'zyrainnovations@gmail.com', // Tu correo
+                pass: 'hykrxuzhpokjlwhu'            // Tu contraseña o App Password
+            }
+        });
+
+        const resetLink = `http://localhost:3000/reset-password/${token}`;
+        const uniqueId = new Date().toISOString(); // Utilizamos la fecha-hora actual para hacer único el asunto
+
+        await transporter.sendMail({
+            from: 'no-reply@tusitio.com',
+            to: email,
+            subject: `Restablece tu contraseña - ${uniqueId}`,  // Asunto único por cada envío
+            html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+                   <a href="${resetLink}">${resetLink}</a>`
+        });
+
+        res.json({ message: 'Se ha enviado un enlace a tu correo.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error en el servidor' });
+    }
+});
+
+
+app.get('/reset-password/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Verificar si el token es válido y no ha expirado
+        const [user] = await pool.query('SELECT id FROM usuarios WHERE reset_token = ? AND reset_token_exp > NOW()', [token]);
+
+        if (user.length === 0) {
+            return res.send("El enlace para restablecer la contraseña es inválido o ha expirado.");
+        }
+
+        // Renderizar la vista con el formulario para ingresar la nueva contraseña
+        res.render('login/reset-password.hbs', { token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error en el servidor.");
+    }
+});
+
+
+
+
+
+
 
 
 
