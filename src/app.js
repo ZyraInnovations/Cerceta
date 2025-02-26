@@ -4890,6 +4890,99 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
 
 
 
+
+
+
+app.get('/bitacora_conserje', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const name = req.session.name;
+      const userId = req.session.userId;
+      try {
+        // Consulta a la tabla 'edificios' para obtener el nombre de cada edificio
+// Ejemplo en Express:
+const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+        // Renderiza la plantilla y pasa la lista de edificios
+        res.render('administrativo/Bitacora/conserje/crear.hbs', { 
+          name,
+          userId,
+          edificios,
+          layout: 'layouts/nav_admin.hbs'
+        });
+      } catch (err) {
+        console.error("Error al obtener edificios:", err);
+        res.status(500).send("Error en el servidor");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
+
+  app.post('/bitacora_conserje/guardar', async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            console.log("Datos recibidos en el body:", req.body);
+            
+            const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist } = req.body;
+            console.log("Encabezado extraído:", { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha });
+
+            const data = JSON.parse(checklist);
+            console.log("Checklist procesado:", data);
+
+            const values = [
+                edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha,
+                data["Presentacion personal"]?.answer || "", data["Presentacion personal"]?.accion || "", data["Presentacion personal"]?.observacion || "",
+                data["Uso de los elementos que fueron entregados por la empresa"]?.answer || "", data["Uso de los elementos que fueron entregados por la empresa"]?.accion || "", data["Uso de los elementos que fueron entregados por la empresa"]?.observacion || "",
+                data["Diligenciamiento de las minutas"]?.answer || "", data["Diligenciamiento de las minutas"]?.accion || "", data["Diligenciamiento de las minutas"]?.observacion || "",
+                data["Cumplimiento de los horarios"]?.answer || "", data["Cumplimiento de los horarios"]?.accion || "", data["Cumplimiento de los horarios"]?.observacion || "",
+                data["Cumplimiento del manual de funciones"]?.answer || "", data["Cumplimiento del manual de funciones"]?.accion || "", data["Cumplimiento del manual de funciones"]?.observacion || "",
+                data["Mantener el puesto limpio y organizado"]?.answer || "", data["Mantener el puesto limpio y organizado"]?.accion || "", data["Mantener el puesto limpio y organizado"]?.observacion || "",
+                data["Realizar los recorridos y dejando las evidencia"]?.answer || "", data["Realizar los recorridos y dejando las evidencia"]?.accion || "", data["Realizar los recorridos y dejando las evidencia"]?.observacion || "",
+                data["Realizar el mantenimiento del edifico limpio"]?.answer || "", data["Realizar el mantenimiento del edifico limpio"]?.accion || "", data["Realizar el mantenimiento del edifico limpio"]?.observacion || "",
+                data["Realizar la limpieza de los vidrios"]?.answer || "", data["Realizar la limpieza de los vidrios"]?.accion || "", data["Realizar la limpieza de los vidrios"]?.observacion || "",
+                data["Realizar la limpieza de los shup de basuras"]?.answer || "", data["Realizar la limpieza de los shup de basuras"]?.accion || "", data["Realizar la limpieza de los shup de basuras"]?.observacion || "",
+                data["Mantener las areas de los parqueaderos limpias"]?.answer || "", data["Mantener las areas de los parqueaderos limpias"]?.accion || "", data["Mantener las areas de los parqueaderos limpias"]?.observacion || "",
+                data["Informar las novedades que se presentan"]?.answer || "", data["Informar las novedades que se presentan"]?.accion || "", data["Informar las novedades que se presentan"]?.observacion || ""
+            ];
+
+            console.log("Cantidad de elementos en el arreglo:", values.length);
+            console.log("Valores a insertar:", values);
+
+            await pool.query(
+                `INSERT INTO bitacora_conserje (
+                    \`edificio\`, \`puesto_inspeccionado\`, \`inspeccionado_por\`, \`cargo\`, \`fecha\`,
+                    \`presentacion\`, \`presentacion_acc\`, \`presentacion_obs\`,
+                    \`elementos\`, \`elementos_acc\`, \`elementos_obs\`,
+                    \`minutas\`, \`minutas_acc\`, \`minutas_obs\`,
+                    \`horarios\`, \`horarios_acc\`, \`horarios_obs\`,
+                    \`manual\`, \`manual_acc\`, \`manual_obs\`,
+                    \`puesto_limpio\`, \`puesto_limpio_acc\`, \`puesto_limpio_obs\`,
+                    \`recorridos\`, \`recorridos_acc\`, \`recorridos_obs\`,
+                    \`mantenimiento\`, \`mantenimiento_acc\`, \`mantenimiento_obs\`,
+                    \`vidrios\`, \`vidrios_acc\`, \`vidrios_obs\`,
+                    \`shup\`, \`shup_acc\`, \`shup_obs\`,
+                    \`parqueaderos\`, \`parqueaderos_acc\`, \`parqueaderos_obs\`,
+                    \`novedades\`, \`novedades_acc\`, \`novedades_obs\`
+                ) VALUES (${values.map(() => '?').join(', ')})`, values
+            );
+
+            console.log("Inserción en la base de datos completada.");
+            res.redirect('/bitacora_conserje');
+        } catch (err) {
+            console.error("Error al guardar la bitácora de conserje:", err);
+            res.status(500).send("Error en el servidor");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
