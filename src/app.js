@@ -4733,6 +4733,161 @@ app.get("/domicilios/:userId", async (req, res) => {
   
 
 
+  app.get('/bitacora_aseo', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const name = req.session.name;
+      const userId = req.session.userId;
+      try {
+        // Consulta a la tabla 'edificios' para obtener el nombre de cada edificio
+// Ejemplo en Express:
+const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+        // Renderiza la plantilla y pasa la lista de edificios
+        res.render('administrativo/Bitacora/Aseo/crear.hbs', { 
+          name,
+          userId,
+          edificios,
+          layout: 'layouts/nav_admin.hbs'
+        });
+      } catch (err) {
+        console.error("Error al obtener edificios:", err);
+        res.status(500).send("Error en el servidor");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
+
+
+app.post('/bitacora_aseo/guardar', async (req, res) => {
+  if (req.session.loggedin === true) {
+    try {
+      // Extrae los datos del encabezado y del checklist
+      const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist } = req.body;
+      const data = JSON.parse(checklist);
+
+      // Extraer para cada ítem (para este ejemplo, se muestran dos; debes extenderlo para todos)
+      const paredes = data["Las paredes estan limpias y en buen estado"]?.answer || "";
+      const paredes_accion = data["Las paredes estan limpias y en buen estado"]?.accion || "";
+      const paredes_observacion = data["Las paredes estan limpias y en buen estado"]?.observacion || "";
+
+      const ventanas = data["ventanas limpias de la porteria"]?.answer || "";
+      const ventanas_accion = data["ventanas limpias de la porteria"]?.accion || "";
+      const ventanas_observacion = data["ventanas limpias de la porteria"]?.observacion || "";
+
+      const pasillos = data["pasillos de las piso limpias"]?.answer || "";
+      const pasillos_accion = data["pasillos de las piso limpias"]?.accion || "";
+      const pasillos_observacion = data["pasillos de las piso limpias"]?.observacion || "";
+
+      const varandas = data["varandas limpias"]?.answer || "";
+      const varandas_accion = data["varandas limpias"]?.accion || "";
+      const varandas_observacion = data["varandas limpias"]?.observacion || "";
+
+      const salon = data["salon social limpio y en orden"]?.answer || "";
+      const salon_accion = data["salon social limpio y en orden"]?.accion || "";
+      const salon_observacion = data["salon social limpio y en orden"]?.observacion || "";
+
+      const shup = data["shup de basura limpio"]?.answer || "";
+      const shup_accion = data["shup de basura limpio"]?.accion || "";
+      const shup_observacion = data["shup de basura limpio"]?.observacion || "";
+
+      const teraza = data["teraza limpia y en orden"]?.answer || "";
+      const teraza_accion = data["teraza limpia y en orden"]?.accion || "";
+      const teraza_observacion = data["teraza limpia y en orden"]?.observacion || "";
+
+      const zona = data["zona de los parqueadetros limpios"]?.answer || "";
+      const zona_accion = data["zona de los parqueadetros limpios"]?.accion || "";
+      const zona_observacion = data["zona de los parqueadetros limpios"]?.observacion || "";
+
+      const jardineria = data["jardineria en orden"]?.answer || "";
+      const jardineria_accion = data["jardineria en orden"]?.accion || "";
+      const jardineria_observacion = data["jardineria en orden"]?.observacion || "";
+
+      const areas = data["areas comunes limpias"]?.answer || "";
+      const areas_accion = data["areas comunes limpias"]?.accion || "";
+      const areas_observacion = data["areas comunes limpias"]?.observacion || "";
+
+      const porteria = data["porteria (recepcion) limpia"]?.answer || "";
+      const porteria_accion = data["porteria (recepcion) limpia"]?.accion || "";
+      const porteria_observacion = data["porteria (recepcion) limpia"]?.observacion || "";
+
+      // Realiza el INSERT en la tabla (asegúrate de incluir todas las columnas según tu esquema)
+      await pool.query(
+        `INSERT INTO bitacora_aseo (
+          edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha,
+          \`Las paredes estan limpias y en buen estado\`,
+          \`Las paredes estan limpias y en buen estado_Accion propuesta\`,
+          \`Las paredes estan limpias y en buen estado_Observacion\`,
+          \`ventanas limpias de la porteria\`,
+          \`ventanas limpias de la porteria_Accion propuesta\`,
+          \`ventanas limpias de la porteria_Observacion\`,
+          \`pasillos de las piso limpias\`,
+          \`pasillos de las piso limpias_Accion propuesta\`,
+          \`pasillos de las piso limpias_Observacion\`,
+          \`varandas limpias\`,
+          \`varandas limpias_Accion propuesta\`,
+          \`varandas limpias_Observacion\`,
+          \`salon social limpio y en orden\`,
+          \`salon social limpio y en orden_Accion propuesta\`,
+          \`salon social limpio y en orden_Observacion\`,
+          \`shup de basura limpio\`,
+          \`shup de basura limpio_Accion propuesta\`,
+          \`shup de basura limpio_Observacion\`,
+          \`teraza limpia y en orden\`,
+          \`teraza limpia y en orden_Accion propuesta\`,
+          \`teraza limpia y en orden_Observacion\`,
+          \`zona de los parqueadetros limpios\`,
+          \`zona de los parqueadetros limpios_Accion propuesta\`,
+          \`zona de los parqueadetros limpios_Observacion\`,
+          \`jardineria en orden\`,
+          \`jardineria en orden_Accion propuesta\`,
+          \`jardineria en orden_Observacion\`,
+          \`areas comunes limpias\`,
+          \`areas comunes limpias_Accion propuesta\`,
+          \`areas comunes limpias_Observacion\`,
+          \`porteria (recepcion) limpia\`,
+          \`porteria (recepcion) limpia_Accion propuesta\`,
+          \`porteria (recepcion) limpia_Observacion\`
+        ) VALUES (?, ?, ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?,
+                  ?, ?, ?)`
+        ,
+        [
+          edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha,
+          paredes, paredes_accion, paredes_observacion,
+          ventanas, ventanas_accion, ventanas_observacion,
+          pasillos, pasillos_accion, pasillos_observacion,
+          varandas, varandas_accion, varandas_observacion,
+          salon, salon_accion, salon_observacion,
+          shup, shup_accion, shup_observacion,
+          teraza, teraza_accion, teraza_observacion,
+          zona, zona_accion, zona_observacion,
+          jardineria, jardineria_accion, jardineria_observacion,
+          areas, areas_accion, areas_observacion,
+          porteria, porteria_accion, porteria_observacion
+        ]
+      );
+      res.redirect('/bitacora_aseo');
+    } catch (err) {
+      console.error("Error al guardar la bitácora de aseo:", err);
+      res.status(500).send("Error en el servidor");
+    }
+  } else {
+    res.redirect('/login');
+  }
+});
+
 
 
 app.get('/', (req, res) => {
