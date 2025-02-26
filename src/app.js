@@ -4741,11 +4741,16 @@ app.get("/domicilios/:userId", async (req, res) => {
         // Consulta a la tabla 'edificios' para obtener el nombre de cada edificio
 // Ejemplo en Express:
 const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-        // Renderiza la plantilla y pasa la lista de edificios
+     
+
+const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
+
+// Renderiza la plantilla y pasa la lista de edificios
         res.render('administrativo/Bitacora/Aseo/crear.hbs', { 
           name,
           userId,
           edificios,
+          admins, // Pasamos la lista de admins
           layout: 'layouts/nav_admin.hbs'
         });
       } catch (err) {
@@ -4891,32 +4896,34 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
 
 
 
-
-
 app.get('/bitacora_conserje', async (req, res) => {
     if (req.session.loggedin === true) {
-      const name = req.session.name;
-      const userId = req.session.userId;
-      try {
-        // Consulta a la tabla 'edificios' para obtener el nombre de cada edificio
-// Ejemplo en Express:
-const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-        // Renderiza la plantilla y pasa la lista de edificios
-        res.render('administrativo/Bitacora/conserje/crear.hbs', { 
-          name,
-          userId,
-          edificios,
-          layout: 'layouts/nav_admin.hbs'
-        });
-      } catch (err) {
-        console.error("Error al obtener edificios:", err);
-        res.status(500).send("Error en el servidor");
-      }
+        const name = req.session.name;
+        const userId = req.session.userId;
+        try {
+            // Obtener edificios
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+
+            // Obtener usuarios con rol "admin"
+            const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
+
+            // Renderiza la plantilla y pasa los datos
+            res.render('administrativo/Bitacora/conserje/crear.hbs', { 
+                name,
+                userId,
+                edificios,
+                admins, // Pasamos la lista de admins
+                layout: 'layouts/nav_admin.hbs'
+            });
+        } catch (err) {
+            console.error("Error al obtener datos:", err);
+            res.status(500).send("Error en el servidor");
+        }
     } else {
-      res.redirect('/login');
+        res.redirect('/login');
     }
-  });
-  
+});
+
 
 
 

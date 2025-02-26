@@ -46,10 +46,16 @@
             <p class="font-bold">Puesto de trabajo inspeccionado</p>
             <input type="text" name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full" placeholder="Escribe aquí..." />
           </div>
-          <div>
-            <p class="font-bold">Inspeccionado por</p>
-            <input type="text" name="inspeccionado_por" class="border border-gray-300 h-8 w-full" placeholder="Escribe aquí..." />
-          </div>
+         <div>
+    <p class="font-bold">Inspeccionado por</p>
+    <select name="inspeccionado_por" class="border border-gray-300 h-8 w-full">
+        <option value="">Seleccione un administrador</option>
+        {{#each admins}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+</div>
+
           <div>
             <p class="font-bold">Cargo</p>
             <input type="text" name="cargo" class="border border-gray-300 h-8 w-full" placeholder="Escribe aquí..." />
