@@ -1,14 +1,76 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'domicilios.dart'; // Pantalla de Domicilios
 
-class HomeScreen extends StatelessWidget {
+// Widget para el badge animado con movimiento más notorio y bonito
+class AnimatedBadge extends StatefulWidget {
+  final int count;
+  const AnimatedBadge({Key? key, required this.count}) : super(key: key);
+
+  @override
+  _AnimatedBadgeState createState() => _AnimatedBadgeState();
+}
+
+class _AnimatedBadgeState extends State<AnimatedBadge>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Animación pulsante de escala de 1.0 a 1.5 con una curva marcada y bonita.
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
+    );
+  }
+  
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _animation,
+      child: Container(
+        padding: EdgeInsets.all(10), // Tamaño mayor para el badge
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          '${widget.count}',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16, // Fuente algo más grande
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
   final String userId;
   HomeScreen({required this.userId});
 
-  // Ruta de tu logo (colócalo en assets/images/)
-  final String logoImage = 'assets/images/2022cercetafinal_blanco.png';
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Timer? _timer;
 
   // Lista estática para otros items
   final List<Map<String, dynamic>> rooms = [
@@ -33,17 +95,31 @@ class HomeScreen extends StatelessWidget {
     },
   ];
 
+  // Ruta de tu logo (colócalo en assets/images/)
+  final String logoImage = 'assets/images/2022cercetafinal_blanco.png';
+
+  @override
+  void initState() {
+    super.initState();
+    // Configura un Timer que refresca la pantalla cada 3 segundos
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   /// Consulta el endpoint y retorna el número de domicilios cuyo estado sea "pendiente"
   Future<int> fetchDomiciliosPendientes(String userId) async {
-    final url = 'http://localhost:3000/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
+    final url = 'https://appvianco.com/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
     final response = await http.get(Uri.parse(url));
-    print("Respuesta del API: ${response.body}");
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      int count = data
-          .where((d) =>
-              d["estado"].toString().toLowerCase() == "pendiente")
-          .length;
+      int count = data.where((d) => d["estado"] == 1).length;
       print("Cantidad de domicilios pendientes: $count");
       return count;
     } else {
@@ -211,7 +287,7 @@ class HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PedidosScreen(userId: userId),
+                  builder: (context) => PedidosScreen(userId: widget.userId),
                 ),
               );
             }
@@ -243,10 +319,10 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Para "Domicilios", se usa la consulta al endpoint con depuración
+                // Para "Domicilios", se usa la consulta al endpoint
                 if (room["name"] == "Domicilios")
                   FutureBuilder<int>(
-                    future: fetchDomiciliosPendientes(userId),
+                    future: fetchDomiciliosPendientes(widget.userId),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Positioned(
@@ -279,22 +355,7 @@ class HomeScreen extends StatelessWidget {
                         return Positioned(
                           right: 12,
                           top: 12,
-                          child: Container(
-                            padding: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '${snapshot.data}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          child: AnimatedBadge(count: snapshot.data!),
                         );
                       }
                       return Container();
