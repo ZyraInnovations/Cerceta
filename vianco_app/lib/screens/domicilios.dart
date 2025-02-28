@@ -97,13 +97,50 @@ class _PedidosScreenState extends State<PedidosScreen> {
           title: Text("Mis Pedidos"),
           backgroundColor: Colors.lightBlueAccent,
           elevation: 0,
-          bottom: TabBar(
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(text: "Pendientes"),
-              Tab(text: "Completados"),
-            ],
+
+
+
+
+
+
+         bottom: TabBar(
+  indicatorColor: Colors.white,
+  tabs: [
+    Tab(
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Text("Pendientes"),
           ),
+          if (getFilteredDomicilios(1).length > 0)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '${getFilteredDomicilios(1).length}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+    Tab(text: "Completados"),
+  ],
+),
+
+
+
           actions: [
             IconButton(
               icon: Icon(Icons.filter_alt_outlined),
@@ -317,35 +354,43 @@ class DetalleDomicilioScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 30),
-                Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _recibirDomicilio(context, domicilio, onDomicilioUpdated);
-                      },
-                      child: Text('Recibir Domicilio'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Aquí implementa la acción para reportar novedades
-                      },
-                      child: Text('Reportar Novedad'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
-                    ),
-                  ],
-                ),
+
+
+         Column(
+  children: [
+    if (domicilio['estado'] == 1)
+      ElevatedButton(
+        onPressed: () {
+          _recibirDomicilio(context, domicilio, onDomicilioUpdated);
+        },
+        child: Text('Recibir Domicilio'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        ),
+      ),
+    SizedBox(height: 15),
+    ElevatedButton(
+      onPressed: () {
+        // Aquí implementa la acción para reportar novedades
+      },
+      child: Text('Reportar Novedad'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+    ),
+  ],
+)
+
+
+
+
+
               ],
             ),
           ),
