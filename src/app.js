@@ -4592,6 +4592,7 @@ app.get('/crear_domicilios', async (req, res) => {
 });
 
 
+
 app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
     try {
         const { edificio_id } = req.params;
@@ -4603,6 +4604,7 @@ app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener los apartamentos' });
     }
 });
+
 
 
 
@@ -4998,6 +5000,25 @@ app.get('/bitacora_conserje', async (req, res) => {
 });
 
 
+
+
+app.get('/crear_alerta_app', async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Obtener edificios
+            res.render('Aplicacione_residentes/alertas/crear.hbs', { 
+                name: req.session.name, 
+                edificios, 
+                layout: 'layouts/nav_admin.hbs' 
+            });
+        } catch (error) {
+            console.error('Error obteniendo edificios:', error);
+            res.status(500).send('Error en el servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
