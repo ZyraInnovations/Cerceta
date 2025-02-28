@@ -112,10 +112,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _timer?.cancel();
     super.dispose();
   }
-
+Future<int> fetchApartamento(String userId) async {
+  final url = 'https://localhost:3000/user_info/$userId'; // Reemplaza con la URL real
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['apartamento']; // Se asume que es un entero
+  } else {
+    throw Exception("Error al cargar el apartamento");
+  }
+}
   /// Consulta el endpoint y retorna el número de domicilios cuyo estado sea "pendiente"
   Future<int> fetchDomiciliosPendientes(String userId) async {
-    final url = 'https://appvianco.com/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
+    final url = 'https://sistemacerceta.com/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -127,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
       throw Exception("Error al cargar domicilios");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -223,54 +233,68 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Widget _buildApartmentCard() {
-    return Container(
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF1E99D3), Color(0xFF1565C0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+Widget _buildApartmentCard() {
+  return FutureBuilder<int>(
+    future: fetchApartamento(widget.userId),
+    builder: (context, snapshot) {
+      String aptText = "43 Devices"; // Valor por defecto o mientras carga
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        aptText = "Cargando...";
+      } else if (snapshot.hasError) {
+        aptText = "Error";
+      } else if (snapshot.hasData) {
+        // Aquí puedes decidir si mostrar solo el número de apartamento o combinarlo
+        aptText = "Apt: ${snapshot.data}";
+      }
+      return Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1E99D3), Color(0xFF1565C0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade400,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            )
+          ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade400,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.home, size: 32, color: Colors.white),
-              SizedBox(width: 12),
-              Text(
-                "Apartamento",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.home, size: 32, color: Colors.white),
+                SizedBox(width: 12),
+                Text(
+                  "Apartamento",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Text(
-            "43 Devices",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            Text(
+              aptText,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
   Widget _buildRoomsGrid(BuildContext context) {
     return GridView.builder(
