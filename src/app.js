@@ -1177,6 +1177,8 @@ app.get('/consultar_edificios', async (req, res) => {
     }
 });
 
+
+
 app.get('/editar_miembros_comite', async (req, res) => {
     const edificioId = req.query.edificioId;
 
@@ -2400,6 +2402,7 @@ app.get('/crear_informe_mantenimiento', async (req, res) => {
 
 
 
+
 app.post('/guardar_informe', upload.fields([
     { name: 'imagen_antes', maxCount: 1 },
     { name: 'imagen_durante', maxCount: 1 },
@@ -2535,6 +2538,7 @@ app.post('/guardar_informe', upload.fields([
 
 
 
+
 app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
     const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
     let cargos = req.body['cargo[]'];
@@ -2619,6 +2623,8 @@ app.get('/crear_alerta', async (req, res) => {
 
 
 
+
+
 app.post('/crear_alerta', async (req, res) => {
     try {
         console.log(req.body); // Verificar qué datos están llegando
@@ -2671,6 +2677,8 @@ app.post('/crear_alerta', async (req, res) => {
         res.status(500).send("Hubo un problema al crear la alerta.");
     }
 });
+
+
 
 
 
@@ -2760,7 +2768,6 @@ async function verificarAlertasPendientes() {
 
 
 
-
 // Métodos de notificación
 async function sendEmail(to, actividad, fecha) {
     const transporter = nodemailer.createTransport({
@@ -2787,15 +2794,19 @@ async function sendEmail(to, actividad, fecha) {
     });
 }
 
+
+
 async function sendSMS(to, actividad) {
     console.log(`Enviando SMS a ${to} para la actividad ${actividad}`);
     // Implementación del envío de SMS (puedes usar Twilio, por ejemplo)
 }
 
+
 async function sendPushNotification(to, actividad) {
     console.log(`Enviando notificación push a ${to} para la actividad ${actividad}`);
     // Implementación del envío de notificación push
 }
+
 
 async function sendAppNotification(userId, actividad, fechaEjecucion) {
     if (!userId) {
