@@ -4704,10 +4704,10 @@ app.get("/domicilios/:userId", async (req, res) => {
   
       // 2️⃣ Buscar los domicilios relacionados con ese apartamento, incluyendo el campo 'foto'
       const [domicilios] = await pool.query(
-        "SELECT created_at, observaciones, estado, foto FROM domicilios WHERE apartamento_id = ?",
+        "SELECT id, created_at, observaciones, estado, foto FROM domicilios WHERE apartamento_id = ?",
         [apartamentoId]
       );
-  
+      
       // Convertir la foto a base64 si existe
       const domiciliosConFoto = domicilios.map(domicilio => {
         if (domicilio.foto) {
@@ -4723,6 +4723,11 @@ app.get("/domicilios/:userId", async (req, res) => {
     }
   });
   
+
+
+
+
+
   app.put("/domicilio/:id", async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
