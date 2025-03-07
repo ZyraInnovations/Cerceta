@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'domicilios.dart'; // Pantalla de Domicilios
+import 'package:aplicacion_conductores/screens/pagos.dart';
 
 // Widget para el badge animado con movimiento más notorio y bonito
 class AnimatedBadge extends StatefulWidget {
@@ -74,12 +75,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Lista estática para otros items
   final List<Map<String, dynamic>> rooms = [
+
+
+
     {
       "name": "Pagos",
       "devices": 10,
       "image": "assets/images/pagos.png",
       "pendientes": 2
     },
+
+
+
     // Para "Domicilios", se ignorará el valor estático de "pendientes"
     {
       "name": "Domicilios",
@@ -122,6 +129,9 @@ Future<int> fetchApartamento(String userId) async {
     throw Exception("Error al cargar el apartamento");
   }
 }
+
+
+
   /// Consulta el endpoint y retorna el número de domicilios cuyo estado sea "pendiente"
   Future<int> fetchDomiciliosPendientes(String userId) async {
     final url = 'https://sistemacerceta.com/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
@@ -136,6 +146,7 @@ Future<int> fetchApartamento(String userId) async {
       throw Exception("Error al cargar domicilios");
     }
   }
+
 
 
   @override
@@ -162,6 +173,8 @@ Future<int> fetchApartamento(String userId) async {
       bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
+
+
 
   Widget _buildAppBar(BuildContext context) {
     return Container(
@@ -206,6 +219,7 @@ Future<int> fetchApartamento(String userId) async {
       ),
     );
   }
+
 
   Widget _buildContent(BuildContext context) {
     return SingleChildScrollView(
@@ -306,16 +320,28 @@ Widget _buildApartmentCard() {
       itemBuilder: (context, index) {
         final room = rooms[index];
         return GestureDetector(
-          onTap: () {
-            if (room["name"] == "Domicilios") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PedidosScreen(userId: widget.userId),
-                ),
-              );
-            }
-          },
+ onTap: () {
+  if (room["name"] == "Domicilios") {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PedidosScreen(userId: widget.userId),
+      ),
+    );
+  } else if (room["name"] == "Pagos") {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PagosScreen(userId: widget.userId),
+      ),
+    );
+  }
+},
+
+
+
+
+          
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -414,6 +440,8 @@ Widget _buildApartmentCard() {
       },
     );
   }
+
+
 
   Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(

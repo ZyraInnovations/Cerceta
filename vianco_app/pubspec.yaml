@@ -26,6 +26,7 @@ dependencies:
   shared_preferences: ^2.5.1
   intl: ^0.18.0  # Agregar esta línea
   flutter_animate: ^3.1.0  # Agregar para animaciones
+  image_picker: ^1.1.2
 
 
 dev_dependencies:
