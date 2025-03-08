@@ -207,7 +207,7 @@ app.post('/request-password-reset', async (req, res) => {
             service: 'Gmail',
             auth: {
                 user: 'zyrainnovations@gmail.com',
-                pass: 'hykrxuzhpokjlwhu'
+                pass: 'adgvlwokyfyqjqfk'
             }
         });
 
@@ -425,7 +425,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'zyrainnovations@gmail.com', // Coloca tu correo electrónico
-        pass: 'hykrxuzhpokjlwhu' // Coloca tu contraseña de correo electrónico
+        pass: 'adgvlwokyfyqjqfk' // Coloca tu contraseña de correo electrónico
     },
     messageId: uuidv4(), // Genera un Message-ID único para cada correo enviado
 });
@@ -1576,7 +1576,7 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
             secure: false,
             auth: {
                 user: 'zyrainnovations@gmail.com',
-                pass: 'hykrxuzhpokjlwhu'
+                pass: 'adgvlwokyfyqjqfk'
             }
         });
 
@@ -1699,7 +1699,7 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
             secure: false, // true for 465, false for other ports
             auth: {
                 user: 'zyrainnovations@gmail.com', // tu correo electrónico
-                pass: 'hykrxuzhpokjlwhu' // tu contraseña de aplicación
+                pass: 'adgvlwokyfyqjqfk' // tu contraseña de aplicación
             }
         });
 
@@ -2537,10 +2537,8 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-
-
 app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
-    const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
+    const { nombre, user_email, role, fecha_cumpleaños } = req.body;
     let cargos = req.body['cargo[]'];
     const edificio = req.body.edificio || null;
     const apartamento = req.body.apartamento || null;
@@ -2556,12 +2554,15 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
     }
 
     try {
-        const checkQuery = 'SELECT * FROM usuarios WHERE nombre = ? OR email = ?';
-        const [rows] = await pool.query(checkQuery, [nombre, user_email]);
+        const checkQuery = 'SELECT * FROM usuarios WHERE email = ?';
+        const [rows] = await pool.query(checkQuery, [user_email]);
 
         if (rows.length > 0) {
-            res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
+            res.send('<script>alert("El correo ya está en uso."); window.location.href="/agregar_usuarios";</script>');
         } else {
+            // **Generar una contraseña aleatoria**
+            const generatedPassword = crypto.randomBytes(4).toString('hex');
+
             const cargoString = cargos.length > 0 ? cargos.join(', ') : null;
 
             const insertQuery = `
@@ -2572,7 +2573,7 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
             await pool.query(insertQuery, [
                 nombre,
                 user_email,
-                user_password,
+                generatedPassword, // Guardando la contraseña en texto plano (NO SEGURO)
                 role,
                 cargoString,
                 fecha_cumpleaños,
@@ -2581,13 +2582,42 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
                 foto
             ]);
 
-            res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
+            // **Enviar correo con las credenciales**
+            enviarCorreoInvitacion(user_email, nombre, generatedPassword);
+
+            res.send('<script>alert("Usuario guardado y correo enviado."); window.location.href="/agregar_usuarios";</script>');
         }
     } catch (error) {
         console.error('Error al guardar el usuario:', error);
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
+// **Función para enviar el correo**
+async function enviarCorreoInvitacion(email, nombre, password) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail', // Usa otro servicio si no es Gmail
+        auth: {
+            user: 'zyrainnovations@gmail.com',
+            pass: 'adgvlwokyfyqjqfk' // Cambia esto a una variable de entorno en producción
+        }
+    });
+
+    const mailOptions = {
+        from: 'zyrainnovations@gmail.com',
+        to: email,
+        subject: 'Invitación a la plataforma',
+        text: `Hola ${nombre},\n\nSe ha creado una cuenta para ti en nuestra plataforma.\n\nTus credenciales de acceso son:\nEmail: ${email}\nContraseña: ${password}\n\nPor favor, inicia sesión y cambia tu contraseña por seguridad.\n\nSaludos.`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Correo enviado a ${email}`);
+    } catch (error) {
+        console.error('Error al enviar el correo:', error);
+    }
+}
+
 
 
 
@@ -4851,7 +4881,7 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
   if (req.session.loggedin === true) {
     try {
       // Extrae los datos del encabezado y del checklist
-      const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist } = req.body;
+      const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist, firmaSupervisorData, firmaSupervisadoData  } = req.body;
       const data = JSON.parse(checklist);
 
       // Extraer para cada ítem (para este ejemplo, se muestran dos; debes extenderlo para todos)
@@ -4935,7 +4965,9 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
           \`areas comunes limpias_Observacion\`,
           \`porteria (recepcion) limpia\`,
           \`porteria (recepcion) limpia_Accion propuesta\`,
-          \`porteria (recepcion) limpia_Observacion\`
+          \`porteria (recepcion) limpia_Observacion\`,
+              firmaSupervisorData, 
+    firmaSupervisadoData 
         ) VALUES (?, ?, ?, ?, ?,
                   ?, ?, ?,
                   ?, ?, ?,
@@ -4947,7 +4979,8 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
                   ?, ?, ?,
                   ?, ?, ?,
                   ?, ?, ?,
-                  ?, ?, ?)`
+                  ?, ?, ?,
+                  ?,?)`
         ,
         [
           edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha,
@@ -4961,7 +4994,9 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
           zona, zona_accion, zona_observacion,
           jardineria, jardineria_accion, jardineria_observacion,
           areas, areas_accion, areas_observacion,
-          porteria, porteria_accion, porteria_observacion
+          porteria, porteria_accion, porteria_observacion,
+          firmaSupervisorData,  // Aquí se corrige
+          firmaSupervisadoData  // Aquí se corrige
         ]
       );
       res.redirect('/bitacora_aseo');
@@ -5088,6 +5123,30 @@ app.get('/crear_alerta_app', async (req, res) => {
     }
 });
 
+
+
+let deferredPrompt;
+
+if (typeof window !== 'undefined') {
+    // Código que solo debe ejecutarse en el navegador
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installButton.style.display = 'block';
+
+        installButton.addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('El usuario aceptó el prompt de A2HS');
+                } else {
+                    console.log('El usuario desestimó el prompt de A2HS');
+                }
+                deferredPrompt = null;
+            });
+        });
+    });
+}
 
 
 app.get('/', (req, res) => {

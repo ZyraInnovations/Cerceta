@@ -134,10 +134,7 @@
                 <label for="user_email"><i class="fas fa-envelope icon"></i> Email:</label>
                 <input type="email" id="user_email" name="user_email" required autocomplete="nope">
             </div>
-            <div class="form-group">
-                <label for="user_password"><i class="fas fa-lock icon"></i> Contraseña:</label>
-                <input type="password" id="user_password" name="user_password" required autocomplete="new-password">
-            </div>
+ 
 
 
             <div class="form-group">
@@ -146,6 +143,7 @@
                     <option value="">Selecciona un rol</option>
                     <option value="admin">Administrador</option>
                     <option value="residentes">Residente</option>
+                   <option value="Propietario">Propietario</option>
                 </select>
             </div>
 
@@ -231,52 +229,47 @@
         }
     }
 
-  function toggleCargoField() {
-        const roleSelect = document.getElementById("role");
-        const cargoGroup = document.getElementById("cargo-group");
-        const edificioGroup = document.getElementById("edificio-group");
-        const apartamentoGroup = document.getElementById("apartamento-group");
+ function toggleCargoField() {
+      const roleSelect = document.getElementById("role");
+      const cargoGroup = document.getElementById("cargo-group");
+      const edificioGroup = document.getElementById("edificio-group");
+      const apartamentoGroup = document.getElementById("apartamento-group");
 
-        // Mostrar el campo de cargo si el rol es "admin"
-        if (roleSelect.value === "admin") {
-            cargoGroup.style.display = "flex";
-            edificioGroup.style.display = "none";
-            apartamentoGroup.style.display = "none";
-            
-            // Seleccionar automáticamente la opción "Operativo" y deshabilitarla
-            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
-            if (operativoCheckbox) {
-                operativoCheckbox.checked = true;
-                operativoCheckbox.disabled = true; // Deshabilita la casilla
-            }
-        } 
-        // Mostrar los campos de edificio y apartamento si el rol es "residentes"
-        else if (roleSelect.value === "residentes") {
-            cargoGroup.style.display = "none";
-            edificioGroup.style.display = "flex";
-            apartamentoGroup.style.display = "flex";
-            
-            // Habilitar la casilla "Operativo" si se elige otro rol
-            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
-            if (operativoCheckbox) {
-                operativoCheckbox.checked = false;
-                operativoCheckbox.disabled = false; // Habilita la casilla de nuevo
-            }
-        } 
-        // Ocultar todos los campos adicionales si no hay rol seleccionado
-        else {
-            cargoGroup.style.display = "none";
-            edificioGroup.style.display = "none";
-            apartamentoGroup.style.display = "none";
-            
-            // Habilitar la casilla "Operativo" si no hay rol seleccionado
-            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
-            if (operativoCheckbox) {
-                operativoCheckbox.checked = false;
-                operativoCheckbox.disabled = false; // Habilita la casilla de nuevo
-            }
-        }
-    }
+      if (roleSelect.value === "admin") {
+          cargoGroup.style.display = "flex";
+          edificioGroup.style.display = "none";
+          apartamentoGroup.style.display = "none";
+          
+          const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+          if (operativoCheckbox) {
+              operativoCheckbox.checked = true;
+              operativoCheckbox.disabled = true;
+          }
+      } 
+      // Mostrar los campos de edificio y apartamento si el rol es "residentes" o "Propietario"
+      else if (roleSelect.value === "residentes" || roleSelect.value === "Propietario") {
+          cargoGroup.style.display = "none";
+          edificioGroup.style.display = "flex";
+          apartamentoGroup.style.display = (roleSelect.value === "residentes") ? "flex" : "none";
+          
+          const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+          if (operativoCheckbox) {
+              operativoCheckbox.checked = false;
+              operativoCheckbox.disabled = false;
+          }
+      } 
+      else {
+          cargoGroup.style.display = "none";
+          edificioGroup.style.display = "none";
+          apartamentoGroup.style.display = "none";
+          
+          const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+          if (operativoCheckbox) {
+              operativoCheckbox.checked = false;
+              operativoCheckbox.disabled = false;
+          }
+      }
+  }
 
     // Función para validar que se seleccione otro cargo adicional
     function validateForm(event) {

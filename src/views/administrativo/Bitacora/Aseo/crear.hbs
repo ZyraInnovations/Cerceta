@@ -171,6 +171,31 @@
           </tr>
         </tbody>
       </table>
+
+
+      <!-- Sección de firmas -->
+<div class="p-4 border-t border-gray-300">
+  <h2 class="text-lg font-bold mb-4">Firmas</h2>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <p class="font-bold">Firma del Supervisor</p>
+   <canvas id="firmaSupervisor" class="border border-gray-300 w-full h-32"></canvas>
+<input type="hidden" name="firmaSupervisorData" id="firmaSupervisorData">
+<button type="button" onclick="limpiarFirma('firmaSupervisor')" class="mt-2 text-red-500">Limpiar</button>
+
+   
+   
+    </div>
+    <div>
+      <p class="font-bold">Firma del Supervisado</p>
+
+<canvas id="firmaSupervisado" class="border border-gray-300 w-full h-32"></canvas>
+<input type="hidden" name="firmaSupervisadoData" id="firmaSupervisadoData">
+<button type="button" onclick="limpiarFirma('firmaSupervisado')" class="mt-2 text-red-500">Limpiar</button>
+    
+    </div>
+  </div>
+</div>
       
       <!-- Input hidden para enviar el JSON del checklist -->
       <input type="hidden" name="checklist" id="checklistInput" value="" />
@@ -193,6 +218,49 @@
       });
     });
   </script>
+  <script>
+  function inicializarCanvas(idCanvas, idInput) {
+    const canvas = document.getElementById(idCanvas);
+    const ctx = canvas.getContext("2d");
+    let dibujando = false;
+    
+    canvas.addEventListener("mousedown", () => dibujando = true);
+    canvas.addEventListener("mouseup", () => dibujando = false);
+    canvas.addEventListener("mouseleave", () => dibujando = false);
+    canvas.addEventListener("mousemove", (e) => {
+      if (!dibujando) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+    });
+  }
+  
+  function limpiarFirma(idCanvas) {
+    const canvas = document.getElementById(idCanvas);
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  document.addEventListener("DOMContentLoaded", function() {
+    inicializarCanvas("firmaSupervisor", "firmaSupervisorData");
+    inicializarCanvas("firmaSupervisado", "firmaSupervisadoData");
+  });
+</script>
+<script>
+function guardarFirma(idCanvas, idInput) {
+  const canvas = document.getElementById(idCanvas);
+  const input = document.getElementById(idInput);
+  input.value = canvas.toDataURL();
+}
+
+
+document.getElementById("bitacoraForm").addEventListener("submit", function() {
+  guardarFirma("firmaSupervisor", "firmaSupervisorData");
+  guardarFirma("firmaSupervisado", "firmaSupervisadoData");
+});
+
+</script>
+
   <script>
     // Asigna la "x" al hacer clic en las celdas de Si, No y N/A
     document.addEventListener("DOMContentLoaded", function() {
