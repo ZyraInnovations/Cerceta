@@ -44,7 +44,19 @@
           </div>
           <div>
             <p class="font-bold">Puesto de trabajo inspeccionado</p>
-            <input type="text" name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full" placeholder="Escribe aquí..." />
+           
+
+         <select name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full">
+        <option value="">Seleccione un empleado</option>
+        {{#each admins}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+           
+        
+        
+        
+        
           </div>
       <div>
     <p class="font-bold">Inspeccionado por</p>

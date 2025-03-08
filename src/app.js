@@ -5048,7 +5048,7 @@ app.get('/bitacora_conserje', async (req, res) => {
         try {
             console.log("Datos recibidos en el body:", req.body);
             
-            const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist } = req.body;
+            const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist,firmaSupervisorData, firmaSupervisadoData } = req.body;
             console.log("Encabezado extraído:", { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha });
 
             const data = JSON.parse(checklist);
@@ -5067,7 +5067,8 @@ app.get('/bitacora_conserje', async (req, res) => {
                 data["Realizar la limpieza de los vidrios"]?.answer || "", data["Realizar la limpieza de los vidrios"]?.accion || "", data["Realizar la limpieza de los vidrios"]?.observacion || "",
                 data["Realizar la limpieza de los shup de basuras"]?.answer || "", data["Realizar la limpieza de los shup de basuras"]?.accion || "", data["Realizar la limpieza de los shup de basuras"]?.observacion || "",
                 data["Mantener las areas de los parqueaderos limpias"]?.answer || "", data["Mantener las areas de los parqueaderos limpias"]?.accion || "", data["Mantener las areas de los parqueaderos limpias"]?.observacion || "",
-                data["Informar las novedades que se presentan"]?.answer || "", data["Informar las novedades que se presentan"]?.accion || "", data["Informar las novedades que se presentan"]?.observacion || ""
+                data["Informar las novedades que se presentan"]?.answer || "", data["Informar las novedades que se presentan"]?.accion || "", data["Informar las novedades que se presentan"]?.observacion || "",
+                firmaSupervisorData || "", firmaSupervisadoData || ""
             ];
 
             console.log("Cantidad de elementos en el arreglo:", values.length);
@@ -5087,9 +5088,12 @@ app.get('/bitacora_conserje', async (req, res) => {
                     \`vidrios\`, \`vidrios_acc\`, \`vidrios_obs\`,
                     \`shup\`, \`shup_acc\`, \`shup_obs\`,
                     \`parqueaderos\`, \`parqueaderos_acc\`, \`parqueaderos_obs\`,
-                    \`novedades\`, \`novedades_acc\`, \`novedades_obs\`
-                ) VALUES (${values.map(() => '?').join(', ')})`, values
+                    \`novedades\`, \`novedades_acc\`, \`novedades_obs\`,
+                    \`firmaSupervisorData\`, \`firmaSupervisadoData\`
+                ) VALUES (${values.map(() => '?').join(', ')})`,
+                values
             );
+            
 
             console.log("Inserción en la base de datos completada.");
             res.redirect('/bitacora_conserje');
