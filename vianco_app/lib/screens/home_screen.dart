@@ -332,7 +332,7 @@ Widget _buildApartmentCard() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PagosScreen(userId: widget.userId),
+builder: (context) => NuevoPagoScreen(userId: widget.userId),
       ),
     );
   }

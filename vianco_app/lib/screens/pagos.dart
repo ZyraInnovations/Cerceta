@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path; // Importar con alias para evitar conflictos
 import 'package:async/async.dart';
 import 'dart:convert';
 
@@ -59,7 +59,7 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
       var stream = http.ByteStream(DelegatingStream.typed(_documentoPago!.openRead()));
       var length = await _documentoPago!.length();
       var multipartFile = http.MultipartFile('documento_pago', stream, length,
-          filename: basename(_documentoPago!.path));
+          filename: path.basename(_documentoPago!.path));
       request.files.add(multipartFile);
     }
 
@@ -118,7 +118,6 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   ),
                 ),
                 SizedBox(height: 16),
-
                 TextFormField(
                   controller: _valorPagoController,
                   keyboardType: TextInputType.number,
@@ -129,7 +128,6 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   },
                 ),
                 SizedBox(height: 16),
-
                 DropdownButtonFormField<String>(
                   value: _estado,
                   decoration: InputDecoration(labelText: "Estado"),
@@ -146,7 +144,6 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   },
                 ),
                 SizedBox(height: 16),
-
                 TextFormField(
                   controller: _nombreEdificioController,
                   decoration: InputDecoration(labelText: "Nombre del Edificio"),
@@ -156,7 +153,6 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   },
                 ),
                 SizedBox(height: 16),
-
                 TextFormField(
                   controller: _numeroApartamentoController,
                   keyboardType: TextInputType.number,
@@ -167,19 +163,17 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   },
                 ),
                 SizedBox(height: 16),
-
                 Text("Documento de Pago", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 _documentoPago == null
                     ? Text("Ningún archivo seleccionado")
-                    : Text("Archivo: ${basename(_documentoPago!.path)}"),
+                    : Text("Archivo: ${path.basename(_documentoPago!.path)}"),
                 ElevatedButton.icon(
                   onPressed: _pickFile,
                   icon: Icon(Icons.upload_file),
                   label: Text("Seleccionar Archivo"),
                 ),
                 SizedBox(height: 24),
-
                 ElevatedButton(
                   onPressed: _submitPago,
                   child: Text("Registrar Pago"),
