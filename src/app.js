@@ -4797,6 +4797,7 @@ app.get("/domicilios/:userId", async (req, res) => {
 
   app.get("/user_info/:userId", async (req, res) => {
     const { userId } = req.params;
+    console.log("Petición recibida para userId:", userId); // 👈
   
     try {
       const [userResult] = await pool.query(
@@ -4804,17 +4805,29 @@ app.get("/domicilios/:userId", async (req, res) => {
         [userId]
       );
   
+      console.log("Resultado de la consulta:", userResult); // 👈
+  
       if (userResult.length === 0) {
+        console.log("Usuario no encontrado");
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
   
       const apartamento = userResult[0].apartamento;
+      console.log("Apartamento encontrado:", apartamento); // 👈
       res.json({ apartamento });
     } catch (error) {
       console.error("Error en la consulta:", error);
       res.status(500).json({ error: "Error al obtener datos del usuario" });
     }
   });
+  
+
+
+
+
+
+
+
   
   app.put("/domicilio/:id", async (req, res) => {
     const { id } = req.params;

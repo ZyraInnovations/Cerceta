@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'domicilios.dart'; // Pantalla de Domicilios
 import 'package:aplicacion_conductores/screens/pagos.dart';
+import 'domicilios.dart';
+// import 'package:lottie/lottie.dart'; // Comentado porque no se usarán animaciones por ahora
+import 'package:aplicacion_conductores/screens/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Widget para el badge animado con movimiento más notorio y bonito
 class AnimatedBadge extends StatefulWidget {
   final int count;
   const AnimatedBadge({Key? key, required this.count}) : super(key: key);
@@ -18,11 +20,10 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
-    // Animación pulsante de escala de 1.0 a 1.5 con una curva marcada y bonita.
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 800),
@@ -31,19 +32,19 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
     );
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: _animation,
       child: Container(
-        padding: EdgeInsets.all(10), // Tamaño mayor para el badge
+        padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.redAccent,
           shape: BoxShape.circle,
@@ -52,7 +53,7 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
           '${widget.count}',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 16, // Fuente algo más grande
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -72,43 +73,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
-
-  // Lista estática para otros items
   final List<Map<String, dynamic>> rooms = [
-
-
-
-    {
-      "name": "Pagos",
-      "devices": 10,
-      "image": "assets/images/pagos.png",
-      "pendientes": 2
-    },
-
-
-
-    // Para "Domicilios", se ignorará el valor estático de "pendientes"
-    {
-      "name": "Domicilios",
-      "devices": 5,
-      "image": "assets/images/domicilios.png",
-      "pendientes": 0
-    },
-    {
-      "name": "Informes",
-      "devices": 3,
-      "image": "assets/images/informe.png",
-      "pendientes": 1
-    },
+    {"name": "Pagos", "devices": 10, "image": "assets/images/pagos.png", "pendientes": 2},
+    {"name": "Domicilios", "devices": 5, "image": "assets/images/domicilios.png", "pendientes": 0},
+    {"name": "Informes", "devices": 3, "image": "assets/images/informe.png", "pendientes": 1},
   ];
-
-  // Ruta de tu logo (colócalo en assets/images/)
   final String logoImage = 'assets/images/2022cercetafinal_blanco.png';
 
   @override
   void initState() {
     super.initState();
-    // Configura un Timer que refresca la pantalla cada 3 segundos
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       setState(() {});
     });
@@ -119,44 +93,48 @@ class _HomeScreenState extends State<HomeScreen> {
     _timer?.cancel();
     super.dispose();
   }
+
 Future<int> fetchApartamento(String userId) async {
-  final url = 'https://localhost:3000/user_info/$userId'; // Reemplaza con la URL real
-  final response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['apartamento']; // Se asume que es un entero
-  } else {
-    throw Exception("Error al cargar el apartamento");
+  try {
+    final url = 'https://sistemacerceta.com/user_info/$userId';
+    print('Llamando a: $url');
+
+    final response = await http.get(Uri.parse(url));
+    print('Status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print('Apartamento recibido: ${data['apartamento']}');
+      return int.parse(data['apartamento']); // ✅ conversión aquí
+    } else {
+      throw Exception("Error al cargar el apartamento");
+    }
+  } catch (e) {
+    print('Error en fetchApartamento: $e');
+    rethrow;
   }
 }
 
-
-
-  /// Consulta el endpoint y retorna el número de domicilios cuyo estado sea "pendiente"
   Future<int> fetchDomiciliosPendientes(String userId) async {
-    final url = 'https://sistemacerceta.com/domicilios_pendientes/$userId'; // Reemplaza con la URL real de tu API
+    final url = 'https://sistemacerceta.com/domicilios_pendientes/$userId';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       int count = data.where((d) => d["estado"] == 1).length;
-      print("Cantidad de domicilios pendientes: $count");
       return count;
     } else {
-      print("Error en la consulta: ${response.statusCode}");
       throw Exception("Error al cargar domicilios");
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Fondo con degradado sutil para toda la pantalla
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue[50]!, Colors.white],
+            colors: [Color(0xFFE3F2FD), Color(0xFFFFFFFF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -174,141 +152,121 @@ Future<int> fetchApartamento(String userId) async {
     );
   }
 
-
-
   Widget _buildAppBar(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 20),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.black, Colors.grey[900]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Logo a la izquierda
-          Image.asset(
-            logoImage,
-            height: 40,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              "MENU PRINCIPAL",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-                color: Colors.white,
+    return Stack(
+      children: [
+
+
+
+
+ Container(
+  height: 100,
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [
+        Color(0xFFB3E5FC), // azul cielo claro
+        Color(0xFFE1F5FE), // casi blanco azulado
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(30),
+      bottomRight: Radius.circular(30),
+    ),
+  ),
+),
+
+
+
+
+        Positioned(
+          top: 20,
+          left: 20,
+          right: 20,
+          child: Row(
+            children: [
+              ClipOval(
+                child: Image.asset(
+                  logoImage,
+                  height: 50,
+                  width: 50,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("¡Bienvenido!", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  Text("Menú Principal", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Spacer(),
+              Icon(Icons.notifications, color: Colors.white, size: 30)
+            ],
           ),
-          Icon(Icons.notifications, color: Colors.white, size: 28),
-        ],
-      ),
+        )
+      ],
     );
   }
-
 
   Widget _buildContent(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tarjeta informativa del apartamento
             _buildApartmentCard(),
-            SizedBox(height: 30),
-            Text(
-              "Rooms",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
             SizedBox(height: 20),
+            Text("Secciones", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+            SizedBox(height: 12),
             _buildRoomsGrid(context),
-            SizedBox(height: 30),
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
-Widget _buildApartmentCard() {
-  return FutureBuilder<int>(
-    future: fetchApartamento(widget.userId),
-    builder: (context, snapshot) {
-      String aptText = "43 Devices"; // Valor por defecto o mientras carga
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        aptText = "Cargando...";
-      } else if (snapshot.hasError) {
-        aptText = "Error";
-      } else if (snapshot.hasData) {
-        // Aquí puedes decidir si mostrar solo el número de apartamento o combinarlo
-        aptText = "Apt: ${snapshot.data}";
-      }
-      return Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1E99D3), Color(0xFF1565C0)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade400,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            )
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.home, size: 32, color: Colors.white),
-                SizedBox(width: 12),
-                Text(
-                  "Apartamento",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              aptText,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
 
+  Widget _buildApartmentCard() {
+    return FutureBuilder<int>(
+      future: fetchApartamento(widget.userId),
+      builder: (context, snapshot) {
+        String aptText = "Cargando...";
+        if (snapshot.hasData) {
+          aptText = "Apartamento: ${snapshot.data}";
+        } else if (snapshot.hasError) {
+          aptText = "Error al cargar";
+        }
+        return Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.blue[700],
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.apartment, color: Colors.white, size: 32),
+              SizedBox(width: 16),
+              Text(
+                aptText,
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildRoomsGrid(BuildContext context) {
     return GridView.builder(
@@ -316,33 +274,35 @@ Widget _buildApartmentCard() {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 1.1),
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.9,
+      ),
       itemBuilder: (context, index) {
         final room = rooms[index];
+
         return GestureDetector(
- onTap: () {
-  if (room["name"] == "Domicilios") {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PedidosScreen(userId: widget.userId),
-      ),
-    );
-  } else if (room["name"] == "Pagos") {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-builder: (context) => NuevoPagoScreen(userId: widget.userId),
-      ),
-    );
-  }
-},
-
-
-
-
-          
-          child: Container(
+          onTap: () {
+            if (room["name"] == "Domicilios") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PedidosScreen(userId: widget.userId),
+                ),
+              );
+            } else if (room["name"] == "Pagos") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NuevoPagoScreen(userId: widget.userId),
+                ),
+              );
+            }
+          },
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               gradient: LinearGradient(
@@ -353,8 +313,8 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.shade300,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
+                  blurRadius: 12,
+                  offset: Offset(0, 6),
                 ),
               ],
             ),
@@ -362,14 +322,24 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
               children: [
                 Center(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Image.asset(
-                      room["image"],
-                      fit: BoxFit.contain,
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(room["image"], height: 64),
+                        SizedBox(height: 12),
+                        Text(
+                          room["name"],
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                // Para "Domicilios", se usa la consulta al endpoint
                 if (room["name"] == "Domicilios")
                   FutureBuilder<int>(
                     future: fetchDomiciliosPendientes(widget.userId),
@@ -394,11 +364,10 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
                         );
                       }
                       if (snapshot.hasError) {
-                        print("Error en FutureBuilder: ${snapshot.error}");
                         return Positioned(
                           right: 12,
                           top: 12,
-                          child: Icon(Icons.error, color: Colors.redAccent, size: 24),
+                          child: Icon(Icons.error, color: Colors.redAccent, size: 22),
                         );
                       }
                       if (snapshot.hasData && snapshot.data! > 0) {
@@ -411,7 +380,6 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
                       return Container();
                     },
                   )
-                // Para otros rooms, se usa el valor estático si es mayor a 0
                 else if (room["pendientes"] > 0)
                   Positioned(
                     right: 12,
@@ -426,7 +394,7 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
                         '${room["pendientes"]}',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -441,41 +409,51 @@ builder: (context) => NuevoPagoScreen(userId: widget.userId),
     );
   }
 
-
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade400,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+Widget _buildBottomNavigationBar(BuildContext context) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.shade400,
+          blurRadius: 10,
+          offset: Offset(0, -2),
         ),
+      ],
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20),
+        topRight: Radius.circular(20),
       ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Articles'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-        currentIndex: 0,
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          // Implementa la navegación según el índice
-        },
-      ),
-    );
-  }
+    ),
+    child: BottomNavigationBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Blog'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Cerrar sesión'),
+      ],
+      currentIndex: 0,
+      selectedItemColor: Colors.deepPurple,
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
+      onTap: (index) async {
+        if (index == 3) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
+
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+          );
+        }
+      },
+    ),
+  );
 }
+
+
+
+}
+

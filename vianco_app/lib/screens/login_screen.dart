@@ -84,104 +84,208 @@ Future<void> _saveSession(String token, String userId) async {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
+
+
+
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFedf5ff), Color(0xFFe1ecf7)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image.asset(
-                'assets/images/2022cercetafinal_blanco.png',
-                height: 100,
-                width: 100,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'INICIO DE SESIÓN',
-                style: TextStyle(
-                  color: Color(0xFF1E99D3),
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 600),
+            curve: Curves.easeOutExpo,
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.96),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 25,
+                  offset: Offset(0, 8),
                 ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.person),
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock),
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: Duration(milliseconds: 1000),
+                  child: Image.asset(
+                    'assets/images/2022cercetafinal_blanco.png',
+                    height: 100,
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink,
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                SizedBox(height: 20),
+                Text(
+                  'Bienvenido',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1E99D3),
                   ),
                 ),
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Ingresar', style: TextStyle(color: Colors.white)),
-              ),
-              SizedBox(height: 20),
-              Text('Visítanos'),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(FontAwesomeIcons.facebook, color: Colors.blue),
-                    onPressed: () async {
-                      final Uri url = Uri.parse('https://www.facebook.com');
-                      if (await canLaunchUrl(url)) await launchUrl(url);
-                    },
+                SizedBox(height: 6),
+                Text(
+                  'Inicia sesión para continuar',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 30),
+
+                // Email Input
+                _buildAnimatedInput(
+                  controller: _emailController,
+                  label: 'Correo electrónico',
+                  icon: Icons.person_outline,
+                ),
+                SizedBox(height: 20),
+
+                // Password Input
+                _buildAnimatedInput(
+                  controller: _passwordController,
+                  label: 'Contraseña',
+                  icon: Icons.lock_outline,
+                  obscure: true,
+                ),
+                SizedBox(height: 30),
+
+                // Botón
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 400),
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
+                    ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFec4899), Color(0xFF8b5cf6)],
+                        ),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: _isLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                                'Ingresar',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.language, color: Colors.green),
-                    onPressed: () async {
-                      final Uri url = Uri.parse('https://cercetasolucionesempresariales.com');
-                      if (await canLaunchUrl(url)) await launchUrl(url);
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("No puedo ingresar"),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text('ayuda', style: TextStyle(color: Colors.pink)),
-                  ),
-                ],
-              ),
-            ],
+                ),
+
+                SizedBox(height: 35),
+
+                // Redes sociales
+                Text(
+                  'Visítanos',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(FontAwesomeIcons.facebook, color: Colors.blue),
+                      onPressed: () async {
+                        final Uri url = Uri.parse('https://www.facebook.com');
+                        if (await canLaunchUrl(url)) await launchUrl(url);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.language, color: Colors.green),
+                      onPressed: () async {
+                        final Uri url = Uri.parse('https://cercetasolucionesempresariales.com');
+                        if (await canLaunchUrl(url)) await launchUrl(url);
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("¿No puedes ingresar?", style: TextStyle(color: Colors.grey[600])),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text('Ayuda', style: TextStyle(color: Colors.pinkAccent)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+}
+
+
+Widget _buildAnimatedInput({
+  required TextEditingController controller,
+  required String label,
+  required IconData icon,
+  bool obscure = false,
+}) {
+  return AnimatedContainer(
+    duration: Duration(milliseconds: 400),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14.0),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black12,
+          blurRadius: 12,
+          offset: Offset(0, 5),
+        ),
+      ],
+    ),
+    child: TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.pinkAccent),
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[700]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14.0),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      ),
+    ),
+  );
 }

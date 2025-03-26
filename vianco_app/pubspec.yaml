@@ -27,6 +27,7 @@ dependencies:
   intl: ^0.18.0  # Agregar esta línea
   flutter_animate: ^3.1.0  # Agregar para animaciones
   image_picker: ^1.1.2
+  lottie: ^2.6.0
 
 
 dev_dependencies:
