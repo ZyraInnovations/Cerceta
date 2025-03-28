@@ -1,8 +1,15 @@
 plugins {
-      id "com.android.application"
+    id "com.android.application"
     id "kotlin-android"
-    id "com.google.gms.google-services"  // Para usar Firebase y otros servicios de Google
-    id "dev.flutter.flutter-gradle-plugin" // Plugin de Flutter
+    id "com.google.gms.google-services"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+// 👇 Agrega esto ANTES del bloque android { }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -17,12 +24,13 @@ android {
         versionName "1.0"
     }
 
+    // 👇 REEMPLAZA por este bloque
     signingConfigs {
         release {
-            storeFile file(project.hasProperty("MY_RELEASE_STORE_FILE") ? MY_RELEASE_STORE_FILE : "debug.keystore")
-            storePassword project.hasProperty("MY_RELEASE_STORE_PASSWORD") ? MY_RELEASE_STORE_PASSWORD : "android"
-            keyAlias project.hasProperty("MY_RELEASE_KEY_ALIAS") ? MY_RELEASE_KEY_ALIAS : "androiddebugkey"
-            keyPassword project.hasProperty("MY_RELEASE_KEY_PASSWORD") ? MY_RELEASE_KEY_PASSWORD : "android"
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
         }
     }
 
@@ -39,6 +47,7 @@ android {
         }
     }
 }
+
 
 java {
     toolchain {
