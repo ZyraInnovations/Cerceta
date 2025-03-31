@@ -6,6 +6,7 @@ import 'home_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
+
   Future<void> _login() async {
     print("🔵 Iniciando sesión...");
 
@@ -24,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
-    final String url = 'https://sistemacerceta.com/login_app';
+    final String url = 'http://localhost:3000/login_app';
 
     try {
       String? fcmToken = await FirebaseMessaging.instance.getToken();
@@ -203,33 +205,58 @@ Widget build(BuildContext context) {
 
                 SizedBox(height: 35),
 
-                // Redes sociales
-                Text(
-                  'Visítanos',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(FontAwesomeIcons.facebook, color: Colors.blue),
-                      onPressed: () async {
-                        final Uri url = Uri.parse('https://www.facebook.com');
-                        if (await canLaunchUrl(url)) await launchUrl(url);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.language, color: Colors.green),
-                      onPressed: () async {
-                        final Uri url = Uri.parse('https://cercetasolucionesempresariales.com');
-                        if (await canLaunchUrl(url)) await launchUrl(url);
-                      },
-                    ),
-                  ],
-                ),
+             // Redes sociales
+Text(
+  'Visítanos',
+  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+),
+SizedBox(height: 16),
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: <Widget>[
+    IconButton(
+      icon: Icon(FontAwesomeIcons.facebook, color: Colors.blue),
+      onPressed: () async {
+        final Uri url = Uri.parse('https://www.facebook.com/share/194HAjyF3u/?mibextid=wwXIfr');
+        if (await canLaunchUrl(url)) await launchUrl(url);
+      },
+    ),
+    IconButton(
+      icon: Icon(FontAwesomeIcons.tiktok, color: Colors.black),
+      onPressed: () async {
+        final Uri url = Uri.parse('https://www.tiktok.com/@cerceta.solucion?_t=ZS-8v2GfV6wzLE&_r=1');
+        if (await canLaunchUrl(url)) await launchUrl(url);
+      },
+    ),
+    IconButton(
+      icon: Icon(Icons.language, color: Colors.green),
+      onPressed: () async {
+        final Uri url = Uri.parse('https://cercetasolucionesempresariales.com');
+        if (await canLaunchUrl(url)) await launchUrl(url);
+      },
+    ),
+  ],
+),
+
 
                 SizedBox(height: 20),
+
+                Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Text("¿No tienes cuenta?", style: TextStyle(color: Colors.grey[600])),
+    TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RegisterScreen()),
+        );
+      },
+      child: Text("Registrarme", style: TextStyle(color: Colors.pinkAccent)),
+    ),
+  ],
+),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -242,6 +269,12 @@ Widget build(BuildContext context) {
                 ),
               ],
             ),
+
+
+
+
+
+            
           ),
         ),
       ),

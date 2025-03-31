@@ -4564,11 +4564,21 @@ app.post('/like', (req, res) => {
     });
 });
 
+
+
+
+
+
+
+
+
+
 app.post('/login_app', async (req, res) => {
     console.log('🔹 Solicitud recibida:', req.body);
 
     const { email, password, fcm_token } = req.body;
-    const query = 'SELECT id, email, password FROM usuarios WHERE email = ? AND password = ?';
+    // Incluimos los campos "role" y "estado" en la consulta
+    const query = 'SELECT id, email, password, role, estado FROM usuarios WHERE email = ? AND password = ?';
 
     try {
         console.log('🔍 Ejecutando consulta SQL...');
@@ -4577,10 +4587,29 @@ app.post('/login_app', async (req, res) => {
         console.log('🔹 Resultado de la consulta:', result);
 
         if (result.length > 0) {
-            const userId = result[0].id;
+            const user = result[0];
+
+            // Validar que el rol sea "residentes"
+            if (user.role !== 'residentes') {
+                console.log('❌ Usuario no es residente');
+                return res.status(403).json({ message: 'No eres residente' });
+            }
+
+            // Validar que el estado sea "activo"
+            if (user.estado !== 'activo') {
+                if (user.estado === 'pendiente') {
+                    console.log('❌ La cuenta aún está en verificación');
+                    return res.status(403).json({ message: 'Su cuenta aún está en verificación' });
+                } else {
+                    console.log('❌ Cuenta inactiva');
+                    return res.status(403).json({ message: 'Cuenta inactiva' });
+                }
+            }
+
+            const userId = user.id;
             console.log(`✅ Usuario encontrado. ID: ${userId}`);
 
-            // Actualizar el FCM token en la base de datos
+            // Actualizar el token FCM en la base de datos
             const updateQuery = 'UPDATE usuarios SET fcm_token = ? WHERE email = ?';
             await pool.execute(updateQuery, [fcm_token, email]);
 
@@ -4590,7 +4619,6 @@ app.post('/login_app', async (req, res) => {
             const token = jwt.sign({ userId, email }, SECRET_KEY, { expiresIn: '7d' });
 
             res.json({ message: 'Login exitoso', user_id: userId, token });
-
         } else {
             console.log('❌ Credenciales incorrectas');
             res.status(401).json({ message: 'Email o contraseña incorrectos' });
@@ -4600,6 +4628,7 @@ app.post('/login_app', async (req, res) => {
         res.status(500).json({ message: 'Error en la base de datos', error: err });
     }
 });
+
 
 
 
@@ -5261,9 +5290,70 @@ app.get('/info_ususuario/:id', async (req, res) => {
 
 
 
+  app.get('/api/edificios_app', async function (req, res) {
+    try {
+      const [rows] = await pool.query('SELECT id, nombre FROM edificios');
+      res.json(rows);
+    } catch (error) {
+      console.error('❌ Error al obtener edificios:', error);
+      res.status(500).json({ message: 'Error al obtener edificios' });
+    }
+  });
 
 
+// Endpoint para obtener apartamentos filtrados por edificio_id
+app.get('/api/apartamentos_app', async (req, res) => {
+    try {
+      const { edificio_id } = req.query;
+      if (!edificio_id) {
+        return res.status(400).json({ error: 'El parámetro edificio_id es requerido' });
+      }
   
+      // Consulta a la base de datos filtrando por el edificio_id recibido
+      const [rows] = await pool.query(
+        'SELECT id, numero FROM apartamentos WHERE edificio_id = ?',
+        [edificio_id]
+      );
+  
+      res.json(rows);
+    } catch (error) {
+      console.error('Error en la consulta de apartamentos: ', error);
+      res.status(500).json({ error: 'Error interno en el servidor' });
+    }
+  });
+
+
+  app.post('/api/register', async (req, res) => {
+    try {
+      // Extraemos los datos enviados en el cuerpo de la petición
+      const { nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento } = req.body;
+  
+      // Validamos que los campos requeridos existan
+      if (!nombre || !email || !password || !fecha_cumpleaños || !edificio || !apartamento) {
+        return res.status(400).json({ error: 'Faltan campos requeridos' });
+      }
+  
+      // Se asigna el estado "pendiente" de forma predeterminada
+      const estado = "pendiente";
+  
+      // Consulta para insertar el nuevo usuario en la base de datos
+      const [result] = await pool.query(
+        `INSERT INTO usuarios (nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento, estado)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento, estado]
+      );
+  
+      res.status(201).json({ message: 'Usuario registrado correctamente', userId: result.insertId });
+    } catch (error) {
+      console.error('Error al registrar usuario: ', error);
+      res.status(500).json({ error: 'Error interno en el servidor' });
+    }
+  });
+  
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
