@@ -98,15 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
 Future<int> fetchApartamento(String userId) async {
   try {
     final url = 'https://sistemacerceta.com/user_info/$userId';
-    print('Llamando a: $url');
 
     final response = await http.get(Uri.parse(url));
-    print('Status code: ${response.statusCode}');
-    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print('Apartamento recibido: ${data['apartamento']}');
       return int.parse(data['apartamento']); // ✅ conversión aquí
     } else {
       throw Exception("Error al cargar el apartamento");

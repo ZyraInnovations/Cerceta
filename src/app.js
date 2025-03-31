@@ -5550,6 +5550,51 @@ app.get('/eliminar_usuario/:id', async (req, res) => {
   });
   
 
+  const bufferToBase64 = (buffer) => {
+    return buffer.toString('base64');
+  };
+  
+  app.get('/api/blog', async (req, res) => {
+      const userId = req.query.userId;
+  
+      if (!userId) {
+          return res.status(400).json({ error: 'Falta el userId' });
+      }
+  
+      try {
+          // Obtener el edificio del usuario
+          const [userRows] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
+  
+          if (userRows.length === 0) {
+              return res.status(404).json({ error: 'Usuario no encontrado' });
+          }
+  
+          const edificioId = userRows[0].edificio;
+          console.log(`🏢 Edificio del usuario ${userId}:`, edificioId);
+  
+          // Obtener publicaciones del edificio
+          const [publicaciones] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ?', [edificioId]);
+          console.log(`📚 Publicaciones para edificio ${edificioId}:`, publicaciones);
+  
+          // Convertir los buffers a base64 para las imágenes y archivos
+          const publicacionesConBase64 = publicaciones.map((publicacion) => {
+              return {
+                  ...publicacion,
+                  imagen: publicacion.imagen ? bufferToBase64(publicacion.imagen) : null,
+                  pdf: publicacion.pdf ? bufferToBase64(publicacion.pdf) : null,
+                  word: publicacion.word ? bufferToBase64(publicacion.word) : null,
+                  excel: publicacion.excel ? bufferToBase64(publicacion.excel) : null,
+              };
+          });
+  
+          res.json(publicacionesConBase64);
+      } catch (error) {
+          console.error('Error al obtener publicaciones:', error);
+          res.status(500).json({ error: 'Error interno del servidor' });
+      }
+  });
+  
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
