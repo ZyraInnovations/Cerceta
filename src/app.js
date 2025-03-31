@@ -5508,6 +5508,46 @@ app.get('/api/apartamentos_app', async (req, res) => {
 
 
 
+app.get('/eliminar_usuario/:id', async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      // 1. Obtener el email del usuario
+      const [rows] = await pool.query('SELECT email FROM usuarios WHERE id = ?', [id]);
+  
+      if (rows.length === 0) {
+        return res.status(404).send('Usuario no encontrado');
+      }
+  
+      const emailUsuario = rows[0].email;
+  
+      // 2. Enviar el correo
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'zyrainnovations@gmail.com',
+            pass: 'hykrxuzhpokjlwhu'  
+        }
+      });
+  
+      const mailOptions = {
+        from: 'zyrainnovations@gmail.com',
+        to: emailUsuario,
+        subject: 'Validación no aprobada - Cerceta',
+        text: 'Lo sentimos, la validación no fue aprobada. No cumples con los datos correctos para usar la aplicación de Cerceta.'
+      };
+  
+      await transporter.sendMail(mailOptions);
+  
+      // 3. Eliminar al usuario
+      await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
+  
+      res.redirect('/validar_usuarios');
+    } catch (error) {
+      console.error('Error al eliminar usuario y enviar correo:', error);
+      res.status(500).send('Error al eliminar el usuario');
+    }
+  });
   
 
 app.get('/', (req, res) => {
