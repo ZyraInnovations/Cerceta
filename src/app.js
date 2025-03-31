@@ -5166,6 +5166,104 @@ if (typeof window !== 'undefined') {
 }
 
 
+
+app.get('/info_ususuario/:id', async (req, res) => {
+    const userId = req.params.id;
+  
+    try {
+      const [rows] = await pool.query(
+        'SELECT edificio, apartamento FROM usuarios WHERE id = ?',
+        [userId]
+      );
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+  
+      const { edificio, apartamento } = rows[0];
+      res.json({ edificio, apartamento }); // 👈 asegúrate que se devuelvan ambos
+    } catch (error) {
+      console.error('Error consultando usuario:', error);
+      res.status(500).json({ error: 'Error del servidor' });
+    }
+  });
+
+  
+
+  app.get('/edificios/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+      const [rows] = await pool.query('SELECT nombre FROM edificios WHERE id = ?', [id]);
+      if (rows.length === 0) return res.status(404).json({ error: 'Edificio no encontrado' });
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error al obtener edificio:', error);
+      res.status(500).json({ error: 'Error del servidor' });
+    }
+  });
+  
+
+  app.get('/apartamentos/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+      const [rows] = await pool.query('SELECT numero FROM apartamentos WHERE id = ?', [id]);
+      if (rows.length === 0) return res.status(404).json({ error: 'Apartamento no encontrado' });
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error al obtener apartamento:', error);
+      res.status(500).json({ error: 'Error del servidor' });
+    }
+  });
+  
+
+
+  app.post('/api/pagos', upload.single('documento_pago'), async (req, res) => {
+    try {
+      const {
+        apartamento_id,
+        fecha_pago,
+        valor_pago,
+        estado,
+        edificio_id,
+      } = req.body;
+  
+      const documento_pago = req.file ? req.file.buffer : null;
+  
+      const sql = `
+        INSERT INTO pagos_apartamentos (
+          apartamento_id,
+          fecha_pago,
+          valor_pago,
+          documento_pago,
+          estado,
+          edificio_id
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `;
+  
+      const [result] = await pool.execute(sql, [
+        apartamento_id,
+        fecha_pago,
+        valor_pago,
+        documento_pago,
+        estado,
+        edificio_id
+      ]);
+  
+      res.status(200).json({ message: 'Pago registrado exitosamente', id: result.insertId });
+    } catch (error) {
+      console.error('Error al registrar el pago:', error);
+      res.status(500).json({ error: 'Error al guardar el pago' });
+    }
+  });
+  
+
+
+
+
+
+
+
+  
 app.get('/', (req, res) => {
     res.redirect('/login');
 });

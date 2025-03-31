@@ -25,21 +25,21 @@ android {
     }
 
     // 👇 REEMPLAZA por este bloque
-    signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-        }
-    }
+ // signingConfigs {
+//     release {
+//         keyAlias keystoreProperties['keyAlias']
+//         keyPassword keystoreProperties['keyPassword']
+//         storeFile file(keystoreProperties['storeFile'])
+//         storePassword keystoreProperties['storePassword']
+//     }
+// }
 
     buildTypes {
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+// signingConfig signingConfigs.release
         }
         debug {
             shrinkResources false

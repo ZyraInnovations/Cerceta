@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert'; // ✅ AÑADE ESTA LÍNEA
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,13 @@ class NuevoPagoScreen extends StatefulWidget {
   _NuevoPagoScreenState createState() => _NuevoPagoScreenState();
 }
 
+
+
+
+
+
+
+
 class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _fechaPago;
@@ -23,43 +31,109 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
   File? _documentoPago;
   final picker = ImagePicker();
 
+// ✅ AGREGA ESTO:
+  int? _apartamentoId;
+  int? _edificioId;
+
   final Color colorPrincipal = Color(0xFF1E99D3);
 
-  Future<void> _pickFile() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _documentoPago = File(pickedFile.path);
-      });
-    }
+
+
+
+ @override
+@override
+void initState() {
+  super.initState();
+  _fechaPago = DateTime.now(); // ⬅️ Establecer la fecha actual como valor inicial
+  cargarInfoUsuario();
+}
+
+  @override
+
+Future<void> _pickFile() async {
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  if (pickedFile != null) {
+    setState(() {
+      _documentoPago = File(pickedFile.path);
+    });
+
+    // 👇 Aquí va el print
+    print('Documento seleccionado: ${_documentoPago!.path}');
   }
+}
+
+
+
+Future<void> cargarInfoUsuario() async {
+  print("Llamando a /info_ususuario/${widget.userId}");
+
+  try {
+    final userResponse = await http.get(Uri.parse('https://sistemacerceta.com/info_ususuario/${widget.userId}'));
+
+    if (userResponse.statusCode == 200) {
+      final userData = jsonDecode(userResponse.body);
+      
+      // 👇 CONVIERTE A ENTERO
+      final edificioId = int.tryParse(userData['edificio'].toString());
+      final apartamentoId = int.tryParse(userData['apartamento'].toString());
+
+      print("Edificio recibido: $edificioId");
+      print("Apartamento recibido: $apartamentoId");
+
+      final edificioResponse = await http.get(Uri.parse('https://sistemacerceta.com/edificios/$edificioId'));
+      final apartamentoResponse = await http.get(Uri.parse('https://sistemacerceta.com/apartamentos/$apartamentoId'));
+
+      if (edificioResponse.statusCode == 200 && apartamentoResponse.statusCode == 200) {
+        final nombreEdificio = jsonDecode(edificioResponse.body)['nombre'];
+        final numeroApartamento = jsonDecode(apartamentoResponse.body)['numero'];
+
+        setState(() {
+          _edificioId = edificioId;
+          _apartamentoId = apartamentoId;
+          _nombreEdificioController.text = nombreEdificio ?? '';
+          _numeroApartamentoController.text = numeroApartamento.toString();
+        });
+      } else {
+        print('Error al obtener edificio/apartamento');
+      }
+    } else {
+      print('Error al obtener usuario: ${userResponse.body}');
+    }
+  } catch (e) {
+    print('Error en cargarInfoUsuario: $e');
+  }
+}
+
 
   Future<void> _submitPago() async {
-    if (!_formKey.currentState!.validate() || _fechaPago == null || _documentoPago == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, completa todos los campos')),
-      );
-      return;
-    }
+ if (_apartamentoId == null || _edificioId == null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('No se ha cargado la información del apartamento o edificio')),
+  );
+  return;
+}
 
-    var uri = Uri.parse("https://tuservidor.com/api/pagos");
+
+    var uri = Uri.parse("https://sistemacerceta.com/api/pagos");
     var request = http.MultipartRequest('POST', uri);
-    request.fields['apartamento_id'] = widget.userId;
-    request.fields['fecha_pago'] = _fechaPago!.toIso8601String();
-    request.fields['valor_pago'] = _valorPagoController.text;
-    request.fields['estado'] = _estado;
-    request.fields['nombre_edificio'] = _nombreEdificioController.text;
-    request.fields['numero_apartamento'] = _numeroApartamentoController.text;
+request.fields['apartamento_id'] = (_apartamentoId ?? 0).toString();
+request.fields['fecha_pago'] = _fechaPago!.toIso8601String();
+request.fields['valor_pago'] = _valorPagoController.text;
+request.fields['estado'] = _estado;
+request.fields['edificio_id'] = (_edificioId ?? 0).toString();
+
 
     if (_documentoPago != null) {
-      var stream = http.ByteStream(DelegatingStream.typed(_documentoPago!.openRead()));
+var stream = http.ByteStream(_documentoPago!.openRead());
       var length = await _documentoPago!.length();
       var multipartFile = http.MultipartFile('documento_pago', stream, length,
           filename: path.basename(_documentoPago!.path));
       request.files.add(multipartFile);
     }
 
-    var response = await request.send();
+var response = await request.send();
+final responseBody = await http.Response.fromStream(response);
+print('Respuesta del servidor: ${responseBody.body}');
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,14 +156,23 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
         backgroundColor: colorPrincipal,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+ body: Padding(
+  padding: const EdgeInsets.all(20),
+  child: Form(
+    key: _formKey,
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tu ID de usuario: ${widget.userId}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueGrey,
+            ),
+          ),
+          SizedBox(height: 10),
                 label("Fecha de Pago"),
                 SizedBox(height: 10),
                 GestureDetector(
@@ -119,22 +202,23 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                     decoration: containerDecoration(),
-                    child: Text(
-                      _fechaPago == null
-                          ? "Seleccionar fecha"
-                          : "${_fechaPago!.toLocal()}".split(' ')[0],
-                      style: TextStyle(color: Colors.grey.shade700),
-                    ),
+            child: Text(
+  _fechaPago == null
+      ? "Seleccionar fecha"
+      : "${_fechaPago!.toLocal()}".split(' ')[0],
+  style: TextStyle(color: Colors.grey.shade700),
+),
+
                   ),
                 ),
                 SizedBox(height: 20),
-                buildTextField(_valorPagoController, "Valor del Pago", TextInputType.number),
+buildTextField(_valorPagoController, "Valor del Pago", type: TextInputType.number),
                 SizedBox(height: 20),
                 buildDropdownField(),
                 SizedBox(height: 20),
-                buildTextField(_nombreEdificioController, "Nombre del Edificio"),
+buildTextField(_nombreEdificioController, "Nombre del Edificio", readOnly: true),
                 SizedBox(height: 20),
-                buildTextField(_numeroApartamentoController, "Número de Apartamento", TextInputType.number),
+buildTextField(_numeroApartamentoController, "Número de Apartamento", type: TextInputType.number, readOnly: true),
                 SizedBox(height: 20),
                 label("Documento de Pago"),
                 SizedBox(height: 10),
@@ -181,28 +265,34 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
     );
   }
 
-  Widget buildTextField(TextEditingController controller, String label, [TextInputType type = TextInputType.text]) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: type,
-      validator: (value) => value == null || value.isEmpty ? "Este campo es obligatorio" : null,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: colorPrincipal),
-        filled: true,
-        fillColor: Colors.white,
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorPrincipal, width: 1.5),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
+Widget buildTextField(
+  TextEditingController controller,
+  String label, {
+  TextInputType type = TextInputType.text,
+  bool readOnly = false,
+}) {
+  return TextFormField(
+    controller: controller,
+    readOnly: readOnly,
+    keyboardType: type,
+    validator: (value) => value == null || value.isEmpty ? "Este campo es obligatorio" : null,
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: colorPrincipal),
+      filled: true,
+      fillColor: Colors.white,
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: colorPrincipal, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+    ),
+  );
+}
 
   Widget buildDropdownField() {
     return DropdownButtonFormField<String>(
