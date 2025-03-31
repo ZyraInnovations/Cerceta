@@ -41,7 +41,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
-  // Estos controllers almacenan el id seleccionado
   final TextEditingController _buildingController = TextEditingController();
   final TextEditingController _apartmentController = TextEditingController();
 
@@ -121,20 +120,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "nombre": _nameController.text,
         "email": _emailController.text,
         "password": _passwordController.text,
-        "role": "residentes", // Siempre se envía "residentes"
-        "cargo": null,         // Se envía null para cargo
+        "role": "residentes",
+        "cargo": null,
         "fecha_cumpleaños": _birthDateController.text,
-        "edificio": _buildingController.text,    // Enviamos el id del edificio seleccionado
-        "apartamento": _apartmentController.text,  // Enviamos el id del apartamento seleccionado
+        "edificio": _buildingController.text,
+        "apartamento": _apartmentController.text,
       }),
     );
 
     if (response.statusCode == 201) {
       print("✅ Usuario registrado correctamente");
-      // Mostrar mensaje de éxito en un diálogo
       showDialog(
         context: context,
-        barrierDismissible: false, // Evita que se cierre tocando fuera
+        barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
             title: Text("Registro exitoso"),
@@ -144,8 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Cerrar el diálogo
-                  // Redirigir a la pantalla de login
+                  Navigator.of(context).pop();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -168,85 +165,120 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Registrarme")),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildInput(_nameController, 'Nombre completo', Icons.person),
-            SizedBox(height: 15),
-            _buildInput(_emailController, 'Correo electrónico', Icons.email),
-            SizedBox(height: 15),
-            _buildInput(_passwordController, 'Contraseña', Icons.lock,
-                obscure: true),
-            SizedBox(height: 15),
-            GestureDetector(
-              onTap: () => _selectDate(context),
-              child: AbsorbPointer(
-                child: _buildInput(_birthDateController, 'Fecha de nacimiento',
-                    Icons.calendar_today),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.indigo.shade400, Colors.blue.shade200],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(20),
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              margin: EdgeInsets.symmetric(horizontal: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      "Crear cuenta",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.indigo.shade800,
+                      ),
+                    ),
+                    SizedBox(height: 25),
+                    _buildInput(_nameController, 'Nombre completo', Icons.person),
+                    SizedBox(height: 15),
+                    _buildInput(_emailController, 'Correo electrónico', Icons.email),
+                    SizedBox(height: 15),
+                    _buildInput(_passwordController, 'Contraseña', Icons.lock, obscure: true),
+                    SizedBox(height: 15),
+                    GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: AbsorbPointer(
+                        child: _buildInput(_birthDateController, 'Fecha de nacimiento', Icons.calendar_today),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    DropdownButtonFormField<Edificio>(
+                      value: _edificioSeleccionado,
+                      items: _edificios.map((edificio) {
+                        return DropdownMenuItem(
+                          value: edificio,
+                          child: Text(edificio.nombre),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _edificioSeleccionado = value;
+                          _buildingController.text = value?.id.toString() ?? '';
+                        });
+                        if (value != null) {
+                          _fetchApartamentos(value.id);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.location_city),
+                        labelText: 'Edificio',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    DropdownButtonFormField<Apartamento>(
+                      value: _apartamentoSeleccionado,
+                      items: _apartamentos.map((apt) {
+                        return DropdownMenuItem(
+                          value: apt,
+                          child: Text(apt.numero),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _apartamentoSeleccionado = value;
+                          _apartmentController.text = value?.id.toString() ?? '';
+                        });
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.apartment),
+                        labelText: 'Apartamento',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: _register,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: Colors.indigo.shade600,
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                      child: Text("Crear cuenta"),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 15),
-            // Dropdown de Edificios
-            DropdownButtonFormField<Edificio>(
-              value: _edificioSeleccionado,
-              items: _edificios.map((edificio) {
-                return DropdownMenuItem(
-                  value: edificio,
-                  child: Text(edificio.nombre),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _edificioSeleccionado = value;
-                  _buildingController.text = value?.id.toString() ?? '';
-                });
-                if (value != null) {
-                  _fetchApartamentos(value.id);
-                }
-              },
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.location_city),
-                labelText: 'Edificio',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            SizedBox(height: 15),
-            // Dropdown de Apartamentos
-            DropdownButtonFormField<Apartamento>(
-              value: _apartamentoSeleccionado,
-              items: _apartamentos.map((apt) {
-                return DropdownMenuItem(
-                  value: apt,
-                  child: Text(apt.numero),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _apartamentoSeleccionado = value;
-                  _apartmentController.text = value?.id.toString() ?? '';
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.apartment),
-                labelText: 'Apartamento',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _register,
-              child: Text("Crear cuenta"),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
+  // ✅ Aquí está el método correctamente ubicado
   Widget _buildInput(TextEditingController controller, String label,
       IconData icon,
       {bool obscure = false}) {
