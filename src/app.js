@@ -5352,6 +5352,104 @@ app.get('/api/apartamentos_app', async (req, res) => {
   
 
 
+  app.get('/validar_usuarios', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const name = req.session.name;
+      try {
+        // Se hace un JOIN entre usuarios, edificios y apartamentos
+        const [usuariosPendientes] = await pool.query(
+          `SELECT 
+             u.id, 
+             u.nombre, 
+             u.email, 
+             u.fecha_cumpleaños, 
+             e.nombre AS edificio, 
+             a.numero AS apartamento
+           FROM usuarios u
+           JOIN edificios e ON u.edificio = e.id
+           JOIN apartamentos a ON u.apartamento = a.id
+           WHERE u.estado = 'pendiente'`
+        );
+        res.render('administrativo/usuarios/validar_usuarios.hbs', { 
+          name, 
+          usuarios: usuariosPendientes, 
+          layout: 'layouts/nav_admin.hbs' 
+        });
+      } catch (error) {
+        console.error('Error al obtener usuarios pendientes:', error);
+        res.status(500).send('Error al obtener usuarios');
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
+
+
+
+
+
+
+  app.get('/aprobar_usuario/:id', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const id = req.params.id;
+      try {
+        // Recupera email y password del usuario
+        const [rows] = await pool.query(
+          'SELECT email, password FROM usuarios WHERE id = ?',
+          [id]
+        );
+        if (rows.length === 0) {
+          return res.status(404).send('Usuario no encontrado');
+        }
+        const user = rows[0];
+  
+        // Actualiza el estado del usuario a 'activo'
+        await pool.query(
+          'UPDATE usuarios SET estado = ? WHERE id = ?',
+          ['activo', id]
+        );
+  
+        // Configura el transporter de nodemailer
+        const nodemailer = require('nodemailer');
+        let transporter = nodemailer.createTransport({
+          service: 'Gmail',
+          auth: {
+                       user: 'zyrainnovations@gmail.com',
+                pass: 'hykrxuzhpokjlwhu'           // Reemplaza con tu contraseña o app password
+          }
+        });
+  
+        // Define el contenido del correo
+        let mailOptions = {
+          from: 'zyrainnovations@gmail.com',             // Remitente
+          to: user.email,                           // Destinatario (email del usuario)
+          subject: 'Cuenta verificada - App cercerta',
+          text: `Su cuenta de la App cercerta ha sido verificada correctamente, ya puedes ingresar a la aplicación.
+  
+  Recuerda tus credenciales son:
+  Email: ${user.email}
+  Password: ${user.password}`
+        };
+  
+        // Envía el correo
+        await transporter.sendMail(mailOptions);
+  
+        res.redirect('/validar_usuarios');
+      } catch (error) {
+        console.error('Error al aprobar usuario:', error);
+        res.status(500).send('Error al aprobar usuario');
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
+
 
 
 app.get('/', (req, res) => {

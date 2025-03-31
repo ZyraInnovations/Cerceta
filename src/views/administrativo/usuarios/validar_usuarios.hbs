@@ -1,0 +1,26 @@
+<table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Edificio</th>
+      <th>Apartamento</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each usuarios}}
+      <tr>
+        <td>{{nombre}}</td>
+        <td>{{email}}</td>
+        <td>{{edificio}}</td>
+        <td>{{apartamento}}</td>
+        <td>
+          <a href="/editar_usuario/{{id}}" class="btn-editar">Editar</a>
+          <a href="/eliminar_usuario/{{id}}" class="btn-eliminar">Eliminar</a>
+          <a href="/aprobar_usuario/{{id}}" class="btn-aprobar">Aprobar</a>
+        </td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
