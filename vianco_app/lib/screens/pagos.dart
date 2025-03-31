@@ -27,7 +27,7 @@ class _NuevoPagoScreenState extends State<NuevoPagoScreen> {
   final TextEditingController _valorPagoController = TextEditingController();
   final TextEditingController _nombreEdificioController = TextEditingController();
   final TextEditingController _numeroApartamentoController = TextEditingController();
-  String _estado = 'Pendiente';
+String _estado = 'Pagado';
   File? _documentoPago;
   final picker = ImagePicker();
 
@@ -294,33 +294,27 @@ Widget buildTextField(
   );
 }
 
-  Widget buildDropdownField() {
-    return DropdownButtonFormField<String>(
-      value: _estado,
-      decoration: InputDecoration(
-        labelText: "Estado",
-        labelStyle: TextStyle(color: colorPrincipal),
-        filled: true,
-        fillColor: Colors.white,
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorPrincipal, width: 1.5),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
+Widget buildDropdownField() {
+  return TextFormField(
+    initialValue: _estado,
+    readOnly: true,
+    decoration: InputDecoration(
+      labelText: "Estado",
+      labelStyle: TextStyle(color: colorPrincipal),
+      filled: true,
+      fillColor: Colors.white,
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: colorPrincipal, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
       ),
-      items: ['Pendiente', 'Aprobado', 'Rechazado'].map((String estado) {
-        return DropdownMenuItem<String>(
-          value: estado,
-          child: Text(estado),
-        );
-      }).toList(),
-      onChanged: (value) => setState(() => _estado = value!),
-    );
-  }
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+    ),
+  );
+}
 
   BoxDecoration containerDecoration() {
     return BoxDecoration(
