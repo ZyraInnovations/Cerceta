@@ -5351,28 +5351,34 @@ app.get('/api/apartamentos_app', async (req, res) => {
   });
   
 
-
   app.get('/validar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
       const name = req.session.name;
       try {
-        // Se hace un JOIN entre usuarios, edificios y apartamentos
+        // Consulta que incluye el id del edificio y el apartamento
         const [usuariosPendientes] = await pool.query(
           `SELECT 
              u.id, 
              u.nombre, 
              u.email, 
              u.fecha_cumpleaños, 
+             e.id AS edificio_id,
              e.nombre AS edificio, 
-             a.numero AS apartamento
+             a.numero AS apartamento,
+             a.id AS apartamento_id
            FROM usuarios u
            JOIN edificios e ON u.edificio = e.id
            JOIN apartamentos a ON u.apartamento = a.id
            WHERE u.estado = 'pendiente'`
         );
+  
+        // Consulta para obtener la lista de edificios
+        const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+  
         res.render('administrativo/usuarios/validar_usuarios.hbs', { 
           name, 
-          usuarios: usuariosPendientes, 
+          usuarios: usuariosPendientes,
+          edificios,
           layout: 'layouts/nav_admin.hbs' 
         });
       } catch (error) {
@@ -5383,7 +5389,38 @@ app.get('/api/apartamentos_app', async (req, res) => {
       res.redirect('/login');
     }
   });
+
+
+
+
+
+
+
+
+
+
   
+  app.get('/api/apartamentos/:edificio_id', async (req, res) => {
+    const edificioId = req.params.edificio_id;
+    console.log('Buscando apartamentos para edificio:', edificioId);
+    try {
+      const [apartamentos] = await pool.query(
+        'SELECT id, numero FROM apartamentos WHERE edificio_id = ?',
+        [edificioId]
+      );
+      res.json(apartamentos);
+    } catch (error) {
+      console.error('Error al obtener apartamentos:', error);
+      res.status(500).json({ error: 'Error al obtener apartamentos' });
+    }
+  });
+  
+
+
+
+
+
+
 
 
 
@@ -5450,7 +5487,28 @@ app.get('/api/apartamentos_app', async (req, res) => {
 
 
 
+  app.post('/editar_usuario_app/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nombre, email, edificio, apartamento } = req.body;
+    
+    try {
+        await pool.query(`
+            UPDATE usuarios 
+            SET nombre = ?, email = ?, edificio = ?, apartamento = ?
+            WHERE id = ?
+        `, [nombre, email, edificio, apartamento, id]);
 
+        // Redireccionamos a la misma página para que se recargue
+        res.redirect('/validar_usuarios'); // Ajusta la ruta según tu configuración
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al actualizar el usuario');
+    }
+});
+
+
+
+  
 
 app.get('/', (req, res) => {
     res.redirect('/login');

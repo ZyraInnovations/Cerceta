@@ -10,17 +10,125 @@
   </thead>
   <tbody>
     {{#each usuarios}}
-      <tr>
-        <td>{{nombre}}</td>
-        <td>{{email}}</td>
-        <td>{{edificio}}</td>
-        <td>{{apartamento}}</td>
-        <td>
-          <a href="/editar_usuario/{{id}}" class="btn-editar">Editar</a>
+      <!-- Fila de visualización -->
+      <tr class="display-row" data-id="{{id}}">
+        <td class="nombre">{{nombre}}</td>
+        <td class="email">{{email}}</td>
+        <td class="edificio">{{edificio}}</td>
+        <td class="apartamento">{{apartamento}}</td>
+        <td class="acciones">
+          <button class="btn-editar">Editar</button>
           <a href="/eliminar_usuario/{{id}}" class="btn-eliminar">Eliminar</a>
           <a href="/aprobar_usuario/{{id}}" class="btn-aprobar">Aprobar</a>
         </td>
       </tr>
+      
+      <!-- Fila de edición (oculta por defecto) -->
+<tr class="edit-row" data-id="{{id}}" data-apartamento_id="{{apartamento_id}}" style="display:none;">
+  <form action="/editar_usuario_app/{{id}}" method="POST">
+    <td>
+      <input type="text" name="nombre" value="{{nombre}}" required>
+    </td>
+    <td>
+      <input type="email" name="email" value="{{email}}" required>
+    </td>
+    <td>
+      <select name="edificio" required>
+        {{!-- Se asume que "edificios" está en el contexto raíz --}}
+        {{#each ../edificios}}
+          <option value="{{this.id}}" {{#if (eq this.id ../edificio_id)}}selected{{/if}}>{{this.nombre}}</option>
+        {{/each}}
+      </select>
+    </td>
+    <td>
+      <select name="apartamento" required id="apartamento-select-{{id}}">
+        <!-- Se llenará dinámicamente según el edificio seleccionado -->
+      </select>
+    </td>
+    <td>
+      <button type="submit">Guardar</button>
+      <button type="button" class="btn-cancelar">Cancelar</button>
+    </td>
+  </form>
+</tr>
+
+
     {{/each}}
   </tbody>
 </table>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Agregar el evento change a cada select de edificio
+    document.querySelectorAll('select[name="edificio"]').forEach(select => {
+      select.addEventListener('change', function() {
+       console.log('Cambio de edificio detectado:', this.value); // 👈 agrega esto
+
+        const edificioId = this.value;
+        const editRow = this.closest('.edit-row');
+        const aptSelect = editRow.querySelector('select[name="apartamento"]');
+        // Obtén el apartamento actual (por defecto) de la fila, si existe
+        const aptDefaultId = editRow.getAttribute('data-apartamento_id');
+
+        // Realiza la petición para obtener los apartamentos
+fetch('/api/apartamentos/' + edificioId)
+          .then(response => response.json())
+          .then(data => {
+            // Vacía el select de apartamentos
+            aptSelect.innerHTML = '';
+            if (data.length > 0) {
+              // Crea las opciones para cada apartamento obtenido
+              data.forEach(apto => {
+                const option = document.createElement('option');
+                option.value = apto.id;
+                option.textContent = apto.numero;
+                // Marca la opción como seleccionada si coincide con el apartamento actual
+                if (apto.id == aptDefaultId) {
+                  option.selected = true;
+                }
+                aptSelect.appendChild(option);
+              });
+            } else {
+              // En caso de no haber apartamentos, muestra un mensaje en la opción
+              aptSelect.innerHTML = '<option value="">No hay apartamentos</option>';
+            }
+          })
+          .catch(err => console.error('Error al cargar apartamentos:', err));
+      });
+    });
+
+    // Al hacer clic en "Editar"
+    document.querySelectorAll('.btn-editar').forEach(button => {
+      button.addEventListener('click', function() {
+        const displayRow = this.closest('.display-row');
+        const id = displayRow.getAttribute('data-id');
+        // Oculta la fila de visualización
+        displayRow.style.display = 'none';
+        // Muestra la fila de edición correspondiente
+        const editRow = document.querySelector('.edit-row[data-id="' + id + '"]');
+        if (editRow) {
+          editRow.style.display = '';
+          // Dispara el evento change para cargar los apartamentos inmediatamente
+          const edificioSelect = editRow.querySelector('select[name="edificio"]');
+          if (edificioSelect) {
+            edificioSelect.dispatchEvent(new Event('change'));
+          }
+        }
+      });
+    });
+
+    // Al hacer clic en "Cancelar" dentro del formulario de edición
+    document.querySelectorAll('.btn-cancelar').forEach(button => {
+      button.addEventListener('click', function() {
+        const editRow = this.closest('.edit-row');
+        const id = editRow.getAttribute('data-id');
+        // Oculta la fila de edición
+        editRow.style.display = 'none';
+        // Vuelve a mostrar la fila de visualización
+        const displayRow = document.querySelector('.display-row[data-id="' + id + '"]');
+        if (displayRow) {
+          displayRow.style.display = '';
+        }
+      });
+    });
+  });
+</script>
