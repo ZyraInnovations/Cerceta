@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/blog_screen.dart'; // Asegúrate de que el archivo exista
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("🔵 Notificación en segundo plano: ${message.notification?.title}, ${message.notification?.body}");
@@ -64,16 +65,20 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Aplicación Conductores',
-      debugShowCheckedModeBanner: false,
-      home: _isLoading
-          ? Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            )
-          : _isLoggedIn && _userId != null
-              ? HomeScreen(userId: _userId!)
-              : LoginScreen(),
-    );
+return MaterialApp(
+  title: 'Aplicación Conductores',
+  debugShowCheckedModeBanner: false,
+  home: _isLoading
+      ? Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        )
+      : _isLoggedIn && _userId != null
+          ? HomeScreen(userId: _userId!)
+          : LoginScreen(),
+  routes: {
+    '/home': (context) => HomeScreen(userId: _userId ?? ''), // fallback
+    '/blog': (context) => BlogScreen(userId: _userId ?? ''),
+  },
+);
   }
 }

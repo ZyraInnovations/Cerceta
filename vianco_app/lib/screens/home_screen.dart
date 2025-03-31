@@ -7,6 +7,7 @@ import 'domicilios.dart';
 // import 'package:lottie/lottie.dart'; // Comentado porque no se usarán animaciones por ahora
 import 'package:aplicacion_conductores/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aplicacion_conductores/screens/blog_screen.dart';
 
 class AnimatedBadge extends StatefulWidget {
   final int count;
@@ -425,35 +426,45 @@ Widget _buildBottomNavigationBar(BuildContext context) {
         topRight: Radius.circular(20),
       ),
     ),
+
     child: BottomNavigationBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Blog'),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Cerrar sesión'),
-      ],
-      currentIndex: 0,
-      selectedItemColor: Colors.deepPurple,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) async {
-        if (index == 3) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.clear();
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  items: [
+    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+    BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Blog'),
+    BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+    BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Cerrar sesión'),
+  ],
+  currentIndex: 0,
+  selectedItemColor: Colors.deepPurple,
+  unselectedItemColor: Colors.grey,
+  type: BottomNavigationBarType.fixed, // ✅ COMA NECESARIA AQUÍ
 
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-            (Route<dynamic> route) => false,
-          );
-        }
-      },
-    ),
-  );
-}
+  onTap: (index) async {
+    if (index == 0) {
+      // Ya estás en Home
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BlogScreen(userId: widget.userId),
+        ),
+      );
+    } else if (index == 2) {
+      // Navegar a Settings si lo implementas
+    } else if (index == 3) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (Route<dynamic> route) => false,
+      );
+    }
+  },
+),
 
+);
+} // ← Cierre de _buildBottomNavigationBar
 
-
-}
-
+} // ← Cierre de clase _HomeScreenState
