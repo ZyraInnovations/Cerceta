@@ -5595,6 +5595,58 @@ app.get('/eliminar_usuario/:id', async (req, res) => {
   });
   
 
+
+
+
+
+  app.get('/blog_residentes_app/:id', async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const [userResult] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
+        if (userResult.length === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        const edificioId = userResult[0].edificio;
+        console.log("Edificio ID del usuario:", edificioId);
+
+        // Consulta para obtener las publicaciones del edificio
+        const [resultados] = await pool.query(
+            'SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC',
+            [edificioId]
+        );
+        console.log("Resultados de publicaciones:", resultados);
+
+        // Convertir los datos binarios a base64
+        const blogPosts = resultados.map((post) => ({
+            ...post,
+            imagen: post.imagen ? post.imagen.toString('base64') : null,
+            pdf: post.pdf ? post.pdf.toString('base64') : null,
+            word: post.word ? post.word.toString('base64') : null,
+            excel: post.excel ? post.excel.toString('base64') : null
+        }));
+
+        res.render('blog/ver_blog.residentes.hbs', {
+            blogPosts,
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error al obtener las entradas del blog');
+    }
+});
+
+   
+
+
+
+
+
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });

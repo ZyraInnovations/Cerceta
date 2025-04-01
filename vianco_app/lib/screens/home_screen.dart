@@ -8,6 +8,8 @@ import 'domicilios.dart';
 import 'package:aplicacion_conductores/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aplicacion_conductores/screens/blog_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AnimatedBadge extends StatefulWidget {
   final int count;
@@ -39,6 +41,11 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
     _controller.dispose();
     super.dispose();
   }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -422,45 +429,55 @@ Widget _buildBottomNavigationBar(BuildContext context) {
         topRight: Radius.circular(20),
       ),
     ),
-
     child: BottomNavigationBar(
-  backgroundColor: Colors.transparent,
-  elevation: 0,
-  items: [
-    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-    BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Blog'),
-    BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-    BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Cerrar sesión'),
-  ],
-  currentIndex: 0,
-  selectedItemColor: Colors.deepPurple,
-  unselectedItemColor: Colors.grey,
-  type: BottomNavigationBarType.fixed, // ✅ COMA NECESARIA AQUÍ
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'Blog'),
+        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Cerrar sesión'),
+      ],
+      currentIndex: 0,
+      selectedItemColor: Colors.deepPurple,
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
 
-  onTap: (index) async {
-    if (index == 0) {
-      // Ya estás en Home
-    } else if (index == 1) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BlogScreen(userId: widget.userId),
-        ),
-      );
-    } else if (index == 2) {
-      // Navegar a Settings si lo implementas
-    } else if (index == 3) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-        (Route<dynamic> route) => false,
+
+
+onTap: (index) async {
+  if (index == 0) {
+    // Ya estás en Home
+  } else if (index == 1) {
+    final url = 'https://sistemacerceta.com/blog_residentes_app/${widget.userId}';
+
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo abrir el blog')),
       );
     }
-  },
-),
+  } else if (index == 2) {
+    // Aquí podrías abrir Settings si existe
+  } else if (index == 3) {
+    final prefs = await SharedPreferences.getInstance();
 
-);
-} // ← Cierre de _buildBottomNavigationBar
+    await prefs.remove('user_token');
+    await prefs.remove('user_id');
 
-} // ← Cierre de clase _HomeScreenState
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+},
+
+
+    ),
+  );
+}
+
+} // cierra _HomeScreenState
+
+
