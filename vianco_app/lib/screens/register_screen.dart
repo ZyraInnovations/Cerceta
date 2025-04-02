@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _fetchEdificios() async {
-    final url = Uri.parse('http://localhost:3000/api/edificios_app');
+    final url = Uri.parse('https://sistemacerceta.com/api/edificios_app');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -77,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _fetchApartamentos(int edificioId) async {
     final url = Uri.parse(
-        'http://localhost:3000/api/apartamentos_app?edificio_id=$edificioId');
+        'https://sistemacerceta.com/api/apartamentos_app?edificio_id=$edificioId');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

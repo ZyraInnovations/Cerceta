@@ -4826,32 +4826,33 @@ app.get("/domicilios/:userId", async (req, res) => {
 
   app.get("/user_info/:userId", async (req, res) => {
     const { userId } = req.params;
-    console.log("Petición recibida para userId:", userId); // 👈
+    console.log("Petición recibida para userId:", userId);
   
     try {
       const [userResult] = await pool.query(
-        "SELECT apartamento FROM usuarios WHERE id = ?",
+        "SELECT apartamento, nombre FROM usuarios WHERE id = ?",
         [userId]
       );
   
-      console.log("Resultado de la consulta:", userResult); // 👈
+      console.log("Resultado de la consulta:", userResult);
   
       if (userResult.length === 0) {
         console.log("Usuario no encontrado");
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
   
-      const apartamento = userResult[0].apartamento;
-      console.log("Apartamento encontrado:", apartamento); // 👈
-      res.json({ apartamento });
+      const { apartamento, nombre } = userResult[0];
+  
+      console.log("Apartamento encontrado:", apartamento);
+      console.log("Nombre encontrado:", nombre);
+  
+      res.json({ apartamento, nombre });
     } catch (error) {
       console.error("Error en la consulta:", error);
       res.status(500).json({ error: "Error al obtener datos del usuario" });
     }
   });
   
-
-
 
 
 

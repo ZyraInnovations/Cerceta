@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "580041916267",
-    "project_id": "vianco-cd3a3",
-    "storage_bucket": "vianco-cd3a3.firebasestorage.app"
+    "project_number": "369682544975",
+    "project_id": "cerceta-85680",
+    "storage_bucket": "cerceta-85680.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:580041916267:android:09c1ad970881f504a7d62e",
+        "mobilesdk_app_id": "1:369682544975:android:2ee77ae34d3374eaad2d3a",
         "android_client_info": {
-          "package_name": "com.vianco.app"
+          "package_name": "com.cerceta.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBJcs_64JWaOQVJmxeQ3zMGMVceIl3A1yw"
+          "current_key": "AIzaSyDAEBaZifbc4L_PhIg42r4CTOSRO5wWzkk"
         }
       ],
       "services": {

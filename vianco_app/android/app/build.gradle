@@ -5,7 +5,7 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-// 👇 Agrega esto ANTES del bloque android { }
+// 👇 CARGA DE LA FIRMA (antes de android { })
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -13,52 +13,50 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'com.vianco.app'
-    compileSdkVersion 34
+    namespace 'com.cerceta.app'
+    compileSdkVersion 35
 
     defaultConfig {
-        applicationId "com.vianco.app"
+        applicationId "com.cerceta.app"
         minSdkVersion 23
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
     }
-
-    // 👇 REEMPLAZA por este bloque
- // signingConfigs {
-//     release {
-//         keyAlias keystoreProperties['keyAlias']
-//         keyPassword keystoreProperties['keyPassword']
-//         storeFile file(keystoreProperties['storeFile'])
-//         storePassword keystoreProperties['storePassword']
-//     }
-// }
+    // 👇 CONFIGURACIÓN DE FIRMA
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
 
     buildTypes {
         release {
-            shrinkResources true
+            signingConfig signingConfigs.release
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-// signingConfig signingConfigs.release
         }
         debug {
-            shrinkResources false
             minifyEnabled false
+            shrinkResources false
         }
     }
-}
 
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)  // Asegura que se use Java 17
+    // 👇 Java toolchain para compilar con Java 17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
     }
 }
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:33.0.0')  // Firebase BOM
-    implementation 'com.google.firebase:firebase-auth'  // Para Firebase Auth
-    implementation 'com.google.firebase:firebase-messaging'  // Para Firebase Messaging
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"  // Kotlin Standard Library
-    // Agrega otras dependencias según tus necesidades...
+    implementation platform('com.google.firebase:firebase-bom:33.0.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
