@@ -4826,27 +4826,30 @@ app.get("/domicilios/:userId", async (req, res) => {
 
   app.get("/user_info/:userId", async (req, res) => {
     const { userId } = req.params;
-    console.log("Petición recibida para userId:", userId);
   
     try {
       const [userResult] = await pool.query(
-        "SELECT apartamento, nombre FROM usuarios WHERE id = ?",
+        `SELECT 
+           u.apartamento, 
+           u.nombre, 
+           a.edificio_id, 
+           e.nombre AS edificio_nombre,
+           a.responsable, 
+           a.piso, 
+           a.correo 
+         FROM usuarios u
+         LEFT JOIN apartamentos a ON u.apartamento = a.id
+         LEFT JOIN edificios e ON a.edificio_id = e.id
+         WHERE u.id = ?`,
         [userId]
       );
   
-      console.log("Resultado de la consulta:", userResult);
-  
       if (userResult.length === 0) {
-        console.log("Usuario no encontrado");
         return res.status(404).json({ error: "Usuario no encontrado" });
       }
   
-      const { apartamento, nombre } = userResult[0];
-  
-      console.log("Apartamento encontrado:", apartamento);
-      console.log("Nombre encontrado:", nombre);
-  
-      res.json({ apartamento, nombre });
+      const data = userResult[0];
+      res.json(data);
     } catch (error) {
       console.error("Error en la consulta:", error);
       res.status(500).json({ error: "Error al obtener datos del usuario" });
@@ -5641,7 +5644,26 @@ app.get('/eliminar_usuario/:id', async (req, res) => {
    
 
 
-
+app.post('/enviar_pqrs', async (req, res) => {
+    const { userId, tipo, descripcion } = req.body;
+  
+    if (!userId || !tipo || !descripcion) {
+      return res.status(400).json({ error: 'Faltan campos requeridos' });
+    }
+  
+    try {
+      const [result] = await pool.query(
+        'INSERT INTO pqrs (user_id, tipo, descripcion) VALUES (?, ?, ?)',
+        [userId, tipo, descripcion]
+      );
+  
+      res.status(200).json({ message: 'PQRS registrada correctamente', id: result.insertId });
+    } catch (error) {
+      console.error('Error al guardar PQRS:', error);
+      res.status(500).json({ error: 'Error del servidor al guardar PQRS' });
+    }
+  });
+  
 
 
 
