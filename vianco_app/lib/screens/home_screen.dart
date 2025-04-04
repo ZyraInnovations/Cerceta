@@ -10,6 +10,7 @@ import 'login_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'informes_screen.dart';
 import 'pqrs_screen.dart';
+import 'vista_general_page.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -185,10 +186,25 @@ Widget _buildHeader() {
       children: [
         Row(
           children: [
-            const CircleAvatar(
-              radius: 24,
-              backgroundImage: AssetImage('assets/images/usuario.png'),
-            ),
+          Container(
+  padding: const EdgeInsets.all(6), // Espaciado interno
+  decoration: BoxDecoration(
+    color: Colors.white, // Fondo blanco para resaltar el logo
+    borderRadius: BorderRadius.circular(12), // Bordes redondeados
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black26,
+        blurRadius: 4,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  child: const CircleAvatar(
+    radius: 24,
+    backgroundColor: Colors.white, // por si el logo tiene fondo transparente
+    backgroundImage: AssetImage('assets/images/2022cercetafinal_blanco.png'),
+  ),
+),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,6 +238,9 @@ Text(
           ],
         ),
         const SizedBox(height: 20),
+
+
+
         Row(
           children: [
             Expanded(
@@ -277,9 +296,15 @@ Text(
     ),
   );
 }
+
+
+
+
+
+
+
 Widget _buildSettingsPanel() {
   bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
   return StatefulBuilder(
     builder: (context, setModalState) {
       return Padding(
@@ -387,6 +412,12 @@ Widget _buildCreditCardSection() {
     ),
   );
 }
+
+
+
+
+
+
 
 
 
@@ -606,6 +637,7 @@ Widget _buildInfoRow(String label, String value) {
 
 
 
+
 Widget _buildBottomNav(BuildContext context) {
   return Stack(
     alignment: Alignment.bottomCenter,
@@ -712,16 +744,21 @@ Widget _buildBottomNav(BuildContext context) {
   color: Colors.purple,
   onPressed: _logout,
 ),
-
           ],
         ),
       ),
       Positioned(
         bottom: 35,
         child: GestureDetector(
-          onTap: () {
-            // acción del botón central
-          },
+  onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => VistaGeneralPage(userId: widget.userId),
+    ),
+  );
+},
+
           child: Container(
             height: 60,
             width: 60,
