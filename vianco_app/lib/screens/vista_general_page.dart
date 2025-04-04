@@ -80,7 +80,6 @@ _buildActionCard(
     );
   },
 ),
-
           _buildActionCard(
             context,
             title: 'Blog',
