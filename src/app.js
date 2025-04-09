@@ -13,7 +13,6 @@ const jwt = require('jsonwebtoken'); // Importa jsonwebtoken
 const SECRET_KEY = 'MiClaveSuperSegura!$%&/()=12345';
 const admin = require('firebase-admin');
 
-// Configurar la sesión
 app.use(session({
     secret: 'mysecret',  // Cambia este secreto
     resave: false,
