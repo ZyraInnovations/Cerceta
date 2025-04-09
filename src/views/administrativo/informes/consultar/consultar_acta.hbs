@@ -1,6 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Actas de Reunión – Descarga Profesional</title>
+  <!-- Aquí puedes incluir Tailwind o tu CSS personalizado -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .hidden { display: none; }
+    .transition-toggle { transition: all 0.3s ease; }
+  </style>
+</head>
+<body class="bg-gray-100">
+
 <div class="max-w-5xl mx-auto px-6 py-10 bg-white shadow-xl rounded-2xl mt-10 space-y-8 transition-all duration-300">
   <h2 class="text-3xl font-bold text-gray-900">🗓️ Consultar Actas de Reunión</h2>
-
   <!-- Formulario -->
   <form id="formConsulta" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl shadow-inner">
     <div>
@@ -17,19 +31,17 @@
       </button>
     </div>
   </form>
-
   <!-- Resultados -->
   <div id="resultados" class="space-y-4"></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-  // Funciones auxiliares fuera del submit
+document.addEventListener('DOMContentLoaded', () => {
+
   function generarListaConclusiones(texto) {
     const puntos = texto.split(/\s*(\d+\.)\s+/).filter(p => p.trim() !== '');
     if (puntos.length <= 1) {
       return `<p><strong class="text-lg underline">🧠 Conclusiones:</strong><br>${texto}</p>`;
     }
-
     let lista = '<p><strong class="text-lg underline">🧠 Conclusiones:</strong></p><ol class="list-decimal ml-6 space-y-2">';
     for (let i = 0; i < puntos.length; i += 2) {
       const contenido = puntos[i + 1] ? puntos[i + 1].trim() : puntos[i].trim();
@@ -47,8 +59,81 @@
     return `${dia}/${mes}/${año}`;
   }
 
+
+function generarPDF(detalle, actaId) {
+  // Guardamos estilos originales
+  const originalStyles = {
+    fontSize: detalle.style.fontSize,
+    width: detalle.style.width,
+    maxWidth: detalle.style.maxWidth
+  };
+
+  // Forzamos ancho como en escritorio (simulación)
+  detalle.style.fontSize = "12px";
+  detalle.style.width = "794px"; // ≈ 210mm a 96dpi
+  detalle.style.maxWidth = "none";
+
+  // Ocultamos el botón de descarga
+  const botonDescarga = detalle.querySelector('.descargar-btn');
+  const originalDisplay = botonDescarga.style.display;
+  botonDescarga.style.display = "none";
+
+  // Ajustamos firmas
+  const firmaImgs = detalle.querySelectorAll('img');
+  const originalFirmas = new Map();
+  firmaImgs.forEach(img => {
+    if (img.alt && img.alt.includes("Firma de")) {
+      originalFirmas.set(img, img.style.width);
+      img.style.width = "80px";
+    }
+  });
+
+  setTimeout(() => {
+    html2canvas(detalle, {
+      scale: 3,
+      backgroundColor: "#ffffff",
+      useCORS: true
+    }).then((canvas) => {
+      // Restauramos estilos y botón
+      detalle.style.fontSize = originalStyles.fontSize;
+      detalle.style.width = originalStyles.width;
+      detalle.style.maxWidth = originalStyles.maxWidth;
+      botonDescarga.style.display = originalDisplay;
+
+      firmaImgs.forEach(img => {
+        if (img.alt && img.alt.includes("Firma de") && originalFirmas.has(img)) {
+          img.style.width = originalFirmas.get(img);
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        precision: 12,
+        compress: true
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'SLOW');
+      pdf.save(`Acta_${actaId}.pdf`);
+    });
+  }, 200);
+}
+
   // Evento del formulario
-  document.getElementById('formConsulta').addEventListener('submit', async (e) => {
+  const formulario = document.getElementById('formConsulta');
+  if (!formulario) {
+    console.error("⚠️ No se encontró el formulario con id 'formConsulta'");
+    return;
+  }
+
+  formulario.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { desde, hasta } = e.target;
     const resultados = document.getElementById('resultados');
@@ -68,82 +153,89 @@
 
       data.forEach((acta) => {
         const container = document.createElement('div');
-        container.className = 'bg-white border border-gray-200 rounded-lg p-6 shadow-md transition hover:shadow-lg relative';
-        container.id = `acta-${acta.id}`;
+        container.className = 'bg-white border border-gray-200 rounded-xl p-4 shadow hover:shadow-lg transition space-y-4';
 
-        container.innerHTML = `
-          <div class="flex items-center justify-between cursor-pointer toggle-summary">
-            <div>
-              <h3 class="text-xl font-semibold text-gray-900">📄 Acta #${acta.id} - ${formatearFecha(acta.fecha)}</h3>
-              <p class="text-gray-700"><strong>Tema:</strong> ${acta.tema}</p>
-              <p class="text-gray-700"><strong>Hora:</strong> ${acta.hora_inicio} - ${acta.hora_fin}</p>
-            </div>
-            <div class="text-2xl text-gray-500 transition-transform transform toggle-icon">➕</div>
+        const resumen = document.createElement('div');
+        resumen.className = 'flex justify-between items-center cursor-pointer';
+        resumen.innerHTML = `
+          <div>
+            <p class="text-sm text-gray-500">📅 ${formatearFecha(acta.fecha)}</p>
+            <h3 class="text-lg font-semibold text-gray-800">📌 ${acta.tema}</h3>
           </div>
-
-          <div class="details hidden mt-4 text-base text-gray-800 transition-all duration-300 space-y-4">
-            ${generarListaConclusiones(acta.conclusiones)}
-            <p><strong>Agenda:</strong> ${acta.agenda}</p>
-
-            <div>
-              <h4 class="font-semibold text-md mt-2">👥 Asistentes:</h4>
-              <ul class="list-disc ml-5 space-y-2">
-                ${acta.asistentes.map(a => `
-                  <li><strong>${a.cargo}:</strong> ${a.nombre}<br>
-                  <img src="${a.firma}" alt="Firma de ${a.nombre}" class="w-40 mt-2 border rounded shadow-lg bg-white p-2" />
-                  </li>
-                `).join('')}
-              </ul>
-            </div>
-
-            <div>
-              <h4 class="font-semibold text-md mt-2">📝 Plan de Acción:</h4>
-              <ul class="list-disc ml-5 space-y-2">
-                ${acta.acciones.map(ac => `
-                  <li>
-                    <strong>Plan:</strong> ${ac.plan}<br>
-                    <strong>Responsable:</strong> ${ac.responsable}<br>
-                    <strong>Fecha:</strong> ${ac.fecha}<br>
-                    <strong>Recursos:</strong> ${ac.recursos}
-                  </li>
-                `).join('')}
-              </ul>
-            </div>
-          </div>
-
-          <button class="descargar-btn mt-4 bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition-all">⬇️ Descargar PNG</button>
+          <button class="ver-mas-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-lg text-sm shadow transition">Ver más</button>
         `;
 
-        // Expansión/colapso de detalles
-        const toggleBtn = container.querySelector('.toggle-summary');
-        toggleBtn.addEventListener('click', () => {
-          const details = container.querySelector('.details');
-          const icon = container.querySelector('.toggle-icon');
-          details.classList.toggle('hidden');
-          icon.textContent = details.classList.contains('hidden') ? '➕' : '➖';
+        const detalle = document.createElement('div');
+        detalle.className = 'hidden';
+        detalle.innerHTML = `
+          <div class="bg-white border border-gray-300 rounded-2xl p-8 shadow-inner space-y-6 text-gray-800 font-serif relative">
+            <div class="text-center border-b border-gray-300 pb-6">
+              <img src="imagenes/Recurso 1hdpi.png" alt="Logo empresa" class="mx-auto h-20 mb-2">
+              <h2 class="text-3xl font-bold tracking-wide">Acta de Reunión</h2>
+              <p class="text-sm text-gray-500 mt-1">N° ${acta.id} — ${formatearFecha(acta.fecha)}</p>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xl font-semibold border-b border-dashed pb-1">📌 Tema</h3>
+              <p>${acta.tema}</p>
+              <p class="text-sm text-gray-600">🕒 De ${acta.hora_inicio} a ${acta.hora_fin}</p>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xl font-semibold border-b border-dashed pb-1">🗂️ Agenda</h3>
+              <p>${acta.agenda}</p>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xl font-semibold border-b border-dashed pb-1">👥 Asistentes</h3>
+              <div class="grid grid-cols-3 gap-4">
+                ${acta.asistentes.map(a => `
+                  <div class="text-center">
+                    <p><strong>${a.cargo}:</strong> ${a.nombre}</p>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="grid grid-cols-3 gap-4 mt-2">
+                ${acta.asistentes.map(a => `
+                  <div class="text-center">
+                    <img src="${a.firma}" alt="Firma de ${a.nombre}" class="w-44 mx-auto border border-gray-400 rounded bg-white p-1 shadow">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xl font-semibold border-b border-dashed pb-1">📝 Plan de Acción</h3>
+              <ul class="ml-5 list-disc space-y-2">
+                ${acta.acciones.map(ac => `
+                  <li>
+                    <p><strong>Plan:</strong> ${ac.plan}</p>
+                    <p><strong>Responsable:</strong> ${ac.responsable}</p>
+                    <p><strong>Fecha:</strong> ${ac.fecha}</p>
+                    <p><strong>Recursos:</strong> ${ac.recursos}</p>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+        <div class="space-y-2">
+         ${generarListaConclusiones(acta.conclusiones)}
+         </div>
+
+            <div class="pt-6 border-t border-gray-200 text-center text-sm text-gray-500">
+              Este documento ha sido generado por <strong>CERCETA</strong>. Todos los derechos reservados.
+            </div>
+            <button class="descargar-btn mt-6 bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition-all">⬇️ Descargar PDF</button>
+          </div>
+        `;
+
+        resumen.querySelector('.ver-mas-btn').addEventListener('click', () => {
+          detalle.classList.toggle('hidden');
+          const btn = resumen.querySelector('.ver-mas-btn');
+          btn.textContent = detalle.classList.contains('hidden') ? 'Ver más' : 'Ver menos';
         });
 
-        // Descarga como PNG ocultando el botón temporalmente
-        const descargarBtn = container.querySelector('.descargar-btn');
-        descargarBtn.addEventListener('click', async () => {
-          const detalles = container.querySelector('.details');
-          detalles.classList.remove('hidden'); // Mostrar detalles antes de exportar
-
-          // Ocultar botón
-          descargarBtn.style.display = 'none';
-
-          // Esperar captura
-          const canvas = await html2canvas(container);
-
-          descargarBtn.style.display = 'inline-block';
-
-          // Descargar imagen
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
-          link.download = `Acta_${acta.id}.png`;
-          link.click();
+        detalle.querySelector('.descargar-btn').addEventListener('click', () => {
+          generarPDF(detalle, acta.id);
         });
 
+        container.appendChild(resumen);
+        container.appendChild(detalle);
         resultados.appendChild(container);
       });
 
@@ -152,4 +244,8 @@
       resultados.innerHTML = `<p class="text-red-600">❌ Error: ${err.message}</p>`;
     }
   });
+});
 </script>
+
+</body>
+</html>
