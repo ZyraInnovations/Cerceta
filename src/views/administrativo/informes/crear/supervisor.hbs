@@ -1,0 +1,804 @@
+<html>
+<head>
+    <title>Supervision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6;
+        }
+        .platilla {
+            width: 90%;
+            border: 1px solid black;
+            margin: auto;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+        .header-container {
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+        .header-content {
+            padding-left: 10px;
+        }
+        .header-container img {
+            width: 120px;
+            height: 120px;
+        }
+        h1 {
+            font-size: 20px;
+        }
+        .header-content p {
+            font-size: 14px;
+            margin: 2px 0;
+        }
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 30px;
+        }
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        .signature-line {
+            border-top: 1px solid black;
+            margin-top: 50px;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            th, td {
+                padding: 4px;
+                font-size: 12px;
+            }
+            .header-container img {
+                width: 100px;
+                height: 100px;
+            }
+            h1 {
+                font-size: 16px;
+                line-height: 1.2;
+            }
+            h2 {
+                font-size: 14px;
+                margin: 0;
+            }
+            .header-content p {
+                font-size: 12px;
+                margin: 0;
+            }
+            .signature-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .signature-box {
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+.platilla {
+    width: 850px; /* Mantén el ancho constante */
+    height: 2100px; /* Aumenta el alto para capturar las firmas */
+    border: 1px solid black;
+    margin: auto;
+    overflow: hidden;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    transform-origin: top left;
+}
+  /* Estilos de botón con Tailwind y personalizaciones */
+    .btn-primary {
+        @apply px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg;
+    }
+
+    /* Botones para dispositivos móviles */
+    @media (max-width: 640px) {
+        .btn-primary {
+            @apply px-4 py-2 text-sm w-full;
+        }
+    }
+
+    /* Efectos adicionales */
+    .btn-primary:hover {
+        @apply scale-105; /* Efecto de agrandamiento al pasar el ratón */
+    }
+
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+<form id="formEnvio" onsubmit="guardarSupervision(event)">
+
+    <div class="platilla">
+        <div class="header-container mb-4">
+            <img alt="Company Logo" class="mb-2" src="imagenes/2022cercetafinal-impresion_Mesa de trabajo 1.png"/>
+            <div class="header-content">
+                <h1 class="text-xl font-bold">CERCETA SOLUCIONES EMPRESARIALES SAS</h1>
+                <p>NIT 901.148.865-9</p>
+                <p>TEL: 3006257756 - 3118952249</p>
+                <p class="text-blue-600">COMERCIAL@CERCETASOLUCIONESEMPRESARIALES.COM</p>
+            </div>
+        </div>
+           <div class="mb-4">
+            <label for="edificio" class="font-bold">Seleccione el Edificio:</label>
+            <select id="edificio" name="edificio" class="w-full border border-gray-300 p-2 rounded">
+                {{#each edificios}}
+                <option value="{{this.id}}">{{this.nombre}}</option>
+                {{/each}}
+            </select>
+              </div>
+    <h2 class="text-center text-lg font-bold mb-4">SUPERVICION</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>AREA</th>
+                    <th>CANTIDAD</th>
+                    <th>CUMPLE</th>
+                    <th>NO CUMPLE</th>
+                    <th>OBSERVACIONES</th>
+                    <th>DIA</th>
+                    <th>MES</th>
+                    <th>AÑO</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+
+                
+    <tr>
+    <td></td>
+    <td>AREA 1</td>
+    <td><input type="text" name="cumple_area1" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_area1" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_area1" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_area1" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_area1" class="w-full border-none" /></td>
+    <td><input type="text" name="año_area1" class="w-full border-none" /></td>
+</tr>
+
+   <tr>
+    <td>AREAS COMUNES</td>
+    <td>AREA 2</td>
+    <td><input type="text" name="cumple_area2" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_area2" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_area2" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_area2" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_area2" class="w-full border-none" /></td>
+    <td><input type="text" name="año_area2" class="w-full border-none" /></td>
+</tr>
+
+      <tr>
+    <td></td>
+    <td>AREA 3</td>
+    <td><input type="text" name="cumple_area3" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_area3" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_area3" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_area3" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_area3" class="w-full border-none" /></td>
+    <td><input type="text" name="año_area3" class="w-full border-none" /></td>
+</tr>
+
+ <tr>
+    <td></td>
+    <td>AREA 4</td>
+    <td><input type="text" name="cumple_area4" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_area4" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_area4" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_area4" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_area4" class="w-full border-none" /></td>
+    <td><input type="text" name="año_area4" class="w-full border-none" /></td>
+</tr>
+
+           <tr>
+    <td>RECEPCION</td>
+    <td>RECEPCION 1</td>
+    <td><input type="text" name="cumple_recepcion1" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_recepcion1" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_recepcion1" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_recepcion1" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_recepcion1" class="w-full border-none" /></td>
+    <td><input type="text" name="año_recepcion1" class="w-full border-none" /></td>
+</tr>
+
+          <tr>
+    <td>PISOS</td>
+    <td>PISO 1</td>
+    <td><input type="text" name="cumple_piso1" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso1" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso1" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso1" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso1" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso1" class="w-full border-none" /></td>
+</tr>
+
+        <tr>
+    <td></td>
+    <td>PISO 2</td>
+    <td><input type="text" name="cumple_piso2" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso2" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso2" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso2" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso2" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso2" class="w-full border-none" /></td>
+</tr>
+
+           <tr>
+    <td></td>
+    <td>PISO 3</td>
+    <td><input type="text" name="cumple_piso3" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso3" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso3" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso3" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso3" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso3" class="w-full border-none" /></td>
+</tr>
+
+             <tr>
+    <td></td>
+    <td>PISO 4</td>
+    <td><input type="text" name="cumple_piso4" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso4" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso4" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso4" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso4" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso4" class="w-full border-none" /></td>
+</tr>
+
+          <tr>
+    <td></td>
+    <td>PISO 5</td>
+    <td><input type="text" name="cumple_piso5" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso5" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso5" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso5" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso5" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso5" class="w-full border-none" /></td>
+</tr>
+
+         <tr>
+    <td></td>
+    <td>PISO 6</td>
+    <td><input type="text" name="cumple_piso6" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_piso6" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_piso6" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_piso6" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_piso6" class="w-full border-none" /></td>
+    <td><input type="text" name="año_piso6" class="w-full border-none" /></td>
+</tr>
+
+           <tr>
+    <td>PASAMANOS</td>
+    <td><input type="text" name="cantidad_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="cumple_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_pasamanos" class="w-full border-none" /></td>
+    <td><input type="text" name="año_pasamanos" class="w-full border-none" /></td>
+</tr>
+
+          <tr>
+    <td>BAÑOS</td>
+    <td>BAÑO 1</td>
+    <td><input type="text" name="cumple_bano_1" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_bano_1" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_bano_1" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_bano_1" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_bano_1" class="w-full border-none" /></td>
+    <td><input type="text" name="año_bano_1" class="w-full border-none" /></td>
+</tr>
+
+           <tr>
+    <td></td>
+    <td>BAÑO 2</td>
+    <td><input type="text" name="cumple_bano_2" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_bano_2" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_bano_2" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_bano_2" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_bano_2" class="w-full border-none" /></td>
+    <td><input type="text" name="año_bano_2" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td></td>
+    <td>BAÑO 3</td>
+    <td><input type="text" name="cumple_bano_3" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_bano_3" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_bano_3" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_bano_3" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_bano_3" class="w-full border-none" /></td>
+    <td><input type="text" name="año_bano_3" class="w-full border-none" /></td>
+</tr>
+
+              <tr>
+    <td></td>
+    <td>BAÑO 4</td>
+    <td><input type="text" name="cumple_bano_4" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_bano_4" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_bano_4" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_bano_4" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_bano_4" class="w-full border-none" /></td>
+    <td><input type="text" name="año_bano_4" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td></td>
+    <td>BAÑO 5</td>
+    <td><input type="text" name="cumple_bano_5" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_bano_5" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_bano_5" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_bano_5" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_bano_5" class="w-full border-none" /></td>
+    <td><input type="text" name="año_bano_5" class="w-full border-none" /></td>
+</tr>
+
+            <tr>
+    <td>VENTANAS</td>
+    <td></td>
+    <td><input type="text" name="cumple_ventanas" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_ventanas" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_ventanas" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_ventanas" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_ventanas" class="w-full border-none" /></td>
+    <td><input type="text" name="año_ventanas" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>PARQUEADEROS</td>
+    <td>PARQUEADERO 1</td>
+    <td><input type="text" name="cumple_parqueadero_1" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_parqueadero_1" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_parqueadero_1" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_parqueadero_1" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_parqueadero_1" class="w-full border-none" /></td>
+    <td><input type="text" name="año_parqueadero_1" class="w-full border-none" /></td>
+</tr>
+
+              <tr>
+    <td></td>
+    <td>PARQUEADERO 2</td>
+    <td><input type="text" name="cumple_parqueadero_2" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_parqueadero_2" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_parqueadero_2" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_parqueadero_2" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_parqueadero_2" class="w-full border-none" /></td>
+    <td><input type="text" name="año_parqueadero_2" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td></td>
+    <td>PARQUEADERO 3</td>
+    <td><input type="text" name="cumple_parqueadero_3" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_parqueadero_3" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_parqueadero_3" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_parqueadero_3" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_parqueadero_3" class="w-full border-none" /></td>
+    <td><input type="text" name="año_parqueadero_3" class="w-full border-none" /></td>
+</tr>
+
+              <tr>
+    <td></td>
+    <td>PARQUEADERO 4</td>
+    <td><input type="text" name="cumple_parqueadero_4" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_parqueadero_4" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_parqueadero_4" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_parqueadero_4" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_parqueadero_4" class="w-full border-none" /></td>
+    <td><input type="text" name="año_parqueadero_4" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>ASCENSOR</td>
+    <td></td>
+    <td><input type="text" name="cumple_ascensor" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_ascensor" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_ascensor" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_ascensor" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_ascensor" class="w-full border-none" /></td>
+    <td><input type="text" name="año_ascensor" class="w-full border-none" /></td>
+</tr>
+
+             <tr>
+    <td>SHUT</td>
+    <td></td>
+    <td><input type="text" name="cumple_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="año_shut" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>CUARTO DE SHUT</td>
+    <td></td>
+    <td><input type="text" name="cumple_cuarto_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_cuarto_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_cuarto_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_cuarto_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_cuarto_shut" class="w-full border-none" /></td>
+    <td><input type="text" name="año_cuarto_shut" class="w-full border-none" /></td>
+</tr>
+
+               <tr>
+    <td>COCINA</td>
+    <td></td>
+    <td><input type="text" name="cumple_cocina" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_cocina" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_cocina" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_cocina" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_cocina" class="w-full border-none" /></td>
+    <td><input type="text" name="año_cocina" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>TERRAZA</td>
+    <td></td>
+    <td><input type="text" name="cumple_terraza" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_terraza" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_terraza" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_terraza" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_terraza" class="w-full border-none" /></td>
+    <td><input type="text" name="año_terraza" class="w-full border-none" /></td>
+</tr>
+
+               <tr>
+    <td>MONTA COCHES</td>
+    <td></td>
+    <td><input type="text" name="cumple_monta_coches" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_monta_coches" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_monta_coches" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_monta_coches" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_monta_coches" class="w-full border-none" /></td>
+    <td><input type="text" name="año_monta_coches" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>JARDIN</td>
+    <td></td>
+    <td><input type="text" name="cumple_jardin" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_jardin" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_jardin" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_jardin" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_jardin" class="w-full border-none" /></td>
+    <td><input type="text" name="año_jardin" class="w-full border-none" /></td>
+</tr>
+
+              <tr>
+    <td>CARGO</td>
+    <td></td>
+    <td><input type="text" name="cumple_cargo" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_cargo" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_cargo" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_cargo" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_cargo" class="w-full border-none" /></td>
+    <td><input type="text" name="año_cargo" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>PRESENTACION</td>
+    <td></td>
+    <td><input type="text" name="cumple_presentacion" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_presentacion" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_presentacion" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_presentacion" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_presentacion" class="w-full border-none" /></td>
+    <td><input type="text" name="año_presentacion" class="w-full border-none" /></td>
+</tr>
+
+              <tr>
+    <td>PRESENTACION PERSONAL</td>
+    <td></td>
+    <td><input type="text" name="cumple_presentacion_personal" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_presentacion_personal" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_presentacion_personal" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_presentacion_personal" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_presentacion_personal" class="w-full border-none" /></td>
+    <td><input type="text" name="año_presentacion_personal" class="w-full border-none" /></td>
+</tr>
+<tr>
+    <td>DISPOSICION PARA EL SERVICIO</td>
+    <td></td>
+    <td><input type="text" name="cumple_disposicion_servicio" class="w-full border-none" /></td>
+    <td><input type="text" name="no_cumple_disposicion_servicio" class="w-full border-none" /></td>
+    <td><input type="text" name="observaciones_disposicion_servicio" class="w-full border-none" /></td>
+    <td><input type="text" name="dia_disposicion_servicio" class="w-full border-none" /></td>
+    <td><input type="text" name="mes_disposicion_servicio" class="w-full border-none" /></td>
+    <td><input type="text" name="año_disposicion_servicio" class="w-full border-none" /></td>
+</tr>
+
+            </tbody>
+        </table>
+    </div>
+     <!-- Sección de firmas -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <p>Firma del Supervisor</p>
+                <canvas id="supervisor-signature"></canvas>
+                <input type="hidden" id="firmaSupervisor" name="firma_supervisor">
+
+                <button onclick="clearCanvas('supervisor-signature')">Borrar Firma</button>
+            </div>
+            <div class="signature-box">
+                <p>Firma del Encargado</p>
+                <canvas id="manager-signature"></canvas>
+                <input type="hidden" id="firmaEncargado" name="firma_encargado">
+
+                <button onclick="clearCanvas('manager-signature')">Borrar Firma</button>
+            </div>
+        </div>
+
+    </div>
+</body>
+<button type="submit" class="px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg">Guardar</button>
+<br>
+<div class="mt-4">
+    <button onclick="downloadAndSend(event)" class="px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg">Enviar y Descargar</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</Form>
+  <script>
+
+
+
+let imageDataURL = ''; // Variable para almacenar la URL de la imagen PNG generada
+
+
+
+function guardarSupervision(event) {
+    event.preventDefault();
+    
+    // Capture signatures before submitting the form
+    guardarFirmas();
+
+    const formData = new FormData(document.getElementById("formEnvio"));
+    
+    // Debugging: Check what formData contains
+    for (let [key, value] of formData.entries()) { 
+        console.log(`${key}: ${value}`); 
+    }
+
+    fetch('/guardar-supervision', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+        } else {
+            alert('Hubo un problema al guardar la supervisión.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
+function downloadTemplate(event) {
+    event.preventDefault();
+    const element = document.querySelector('.platilla');
+    
+    html2canvas(element).then(canvas => {
+        // Genera el archivo PNG
+        imageDataURL = canvas.toDataURL('image/png');
+        
+        // Descarga la imagen
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageDataURL;
+        downloadLink.download = 'plantilla.png';
+        downloadLink.click();
+        
+        // Muestra la imagen en el contenedor de previsualización
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = ''; // Limpia cualquier contenido previo
+        const img = document.createElement('img');
+        img.src = imageDataURL;
+        img.classList.add('w-full', 'h-auto'); // Ajuste de imagen en el contenedor
+        previewContainer.appendChild(img);
+    });
+}
+
+function downloadAndSend(event) {
+    event.preventDefault();
+    
+    // Primero, descarga la plantilla
+    const element = document.querySelector('.platilla');
+    
+    html2canvas(element).then(canvas => {
+        // Genera la imagen PNG
+        const imageDataURL = canvas.toDataURL('image/png');
+        
+        // Descargar la imagen
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageDataURL;
+        downloadLink.download = 'plantilla.png';
+        downloadLink.click();
+
+        // Enviar la imagen al servidor
+        const formData = new FormData();
+        const edificioId = document.getElementById('edificio').value;
+        
+        fetch(imageDataURL)
+            .then(res => res.blob())
+            .then(blob => {
+                formData.append('image', blob, 'plantilla.png');
+                formData.append('edificioId', edificioId);
+
+                fetch('/enviar-png', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('PNG enviado exitosamente al correo del representante.');
+                    } else {
+                        alert('Hubo un error al enviar el correo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+    });
+}
+
+function sendImageToEmail(event) {
+    event.preventDefault();
+
+    const element = document.querySelector('.platilla');
+
+    html2canvas(element, {
+        width: 850, // Ajusta al ancho de la plantilla
+        height: 2100, // Ajusta al nuevo alto de la plantilla
+        scale: 2, // Aumenta la escala para capturar con mejor resolución
+        windowWidth: 800,
+        windowHeight: 2400
+    }).then(canvas => {
+        const imageDataURL = canvas.toDataURL('image/png');
+        const formData = new FormData();
+        const edificioId = document.getElementById('edificio').value;
+
+        fetch(imageDataURL)
+            .then(res => res.blob())
+            .then(blob => {
+                formData.append('image', blob, 'plantilla.png');
+                formData.append('edificioId', edificioId);
+
+                fetch('/enviar-png', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('PNG enviado exitosamente al correo del representante.');
+                    } else {
+                        alert('Hubo un error al enviar el correo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+    });
+}
+
+
+
+
+function guardarFirmas() {
+    const supervisorCanvas = document.getElementById('supervisor-signature');
+    const supervisorDataURL = supervisorCanvas.toDataURL('image/png');
+    document.getElementById('firmaSupervisor').value = supervisorDataURL;
+
+    const managerCanvas = document.getElementById('manager-signature');
+    const managerDataURL = managerCanvas.toDataURL('image/png');
+    document.getElementById('firmaEncargado').value = managerDataURL;
+}
+
+// Inicializar los lienzos de firma
+initCanvas('supervisor-signature');
+initCanvas('manager-signature');
+        function initCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const context = canvas.getContext("2d");
+            let isDrawing = false;
+
+            canvas.addEventListener("mousedown", startDrawing);
+            canvas.addEventListener("mouseup", stopDrawing);
+            canvas.addEventListener("mouseout", stopDrawing);
+            canvas.addEventListener("mousemove", draw);
+            canvas.addEventListener("touchstart", startDrawing, { passive: true });
+            canvas.addEventListener("touchend", stopDrawing, { passive: true });
+            canvas.addEventListener("touchcancel", stopDrawing, { passive: true });
+            canvas.addEventListener("touchmove", draw, { passive: true });
+
+            function startDrawing(event) {
+                isDrawing = true;
+                context.beginPath();
+                context.moveTo(event.offsetX || event.touches[0].clientX - canvas.offsetLeft, 
+                               event.offsetY || event.touches[0].clientY - canvas.offsetTop);
+                event.preventDefault();
+            }
+
+            function draw(event) {
+                if (!isDrawing) return;
+                context.lineTo(event.offsetX || event.touches[0].clientX - canvas.offsetLeft,
+                               event.offsetY || event.touches[0].clientY - canvas.offsetTop);
+                context.strokeStyle = "black";
+                context.lineWidth = 2;
+                context.stroke();
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+                context.closePath();
+            }
+        }
+
+        function clearCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const context = canvas.getContext("2d");
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Inicializar lienzos
+        initCanvas("supervisor-signature");
+        initCanvas("manager-signature");
+        function convertAndSendPNG() {
+    const element = document.querySelector('.platilla'); // Selecciona el contenedor de la plantilla
+
+    // Usa html2canvas para capturar el contenido y convertirlo en un canvas
+    html2canvas(element).then(canvas => {
+        // Convierte el canvas a formato de datos de imagen PNG
+        const imageData = canvas.toDataURL('image/png');
+        
+        // Envía la imagen al servidor
+        fetch('/enviar-png', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageData,
+                edificioId: document.getElementById('edificio').value // ID del edificio seleccionado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('PNG enviado exitosamente por correo.');
+            } else {
+                alert('Hubo un error al enviar el correo.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+}
+
+
+
+
+    </script>
+
+
+</html>

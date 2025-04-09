@@ -1,0 +1,321 @@
+<html>
+ <head>
+  <!-- Estilos y librerías -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+ </head>
+ <body class="p-8">
+  <div class="max-w-4xl mx-auto border border-gray-300">
+    <!-- Encabezado de la bitácora -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-300">
+      <div class="flex items-center">
+        <img alt="CERCETA logo" class="h-16" height="100" src="imagenes/Recurso 1hdpi.png" width="100"/>
+        <div class="ml-4">
+          <h1 class="text-lg font-bold">CERCETA</h1>
+          <p class="text-sm">SOLUCIONES EMPRESARIALES</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-sm">SST-DO-01</p>
+        <p class="text-sm">REVISION 01</p>
+        <p class="text-sm">FECHA 01/02/2025</p>
+        <p class="text-sm">Pagina 01/01</p>
+      </div>
+    </div>
+    
+    <div class="text-center py-4 border-b border-gray-300">
+      <h2 class="text-lg font-bold">PLANILLA DE SUPERVISION DE ASEO</h2>
+    </div>
+    
+    <!-- Formulario: se envían los datos del encabezado y del checklist -->
+    <form id="bitacoraForm" action="/bitacora_aseo/guardar" method="POST">
+      <div class="p-4 border-b border-gray-300">
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+                <p class="font-bold">Edificio</p>
+            <select id="edificioSelect" name="edificio" class="border border-gray-300 h-8 w-full">
+            <option value="">Selecciona un edificio</option>
+            {{#each edificios}}
+                <option value="{{this.id}}">{{this.nombre}}</option>
+            {{/each}}
+            </select>
+          </div>
+          <div>
+            <p class="font-bold">Puesto de trabajo inspeccionado</p>
+           
+
+         <select name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full">
+        <option value="">Seleccione un empleado</option>
+        {{#each admins}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+           
+        
+        
+        
+        
+          </div>
+      <div>
+    <p class="font-bold">Inspeccionado por</p>
+    <select name="inspeccionado_por" class="border border-gray-300 h-8 w-full">
+        <option value="">Seleccione un administrador</option>
+        {{#each admins}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+</div>
+
+          <div>
+            <p class="font-bold">Cargo</p>
+            <input type="text" name="cargo" class="border border-gray-300 h-8 w-full" placeholder="Escribe aquí..." />
+          </div>
+          <div>
+            <p class="font-bold">Fecha</p>
+            <input type="date" name="fecha" class="border border-gray-300 h-8 w-full" />
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tabla con el checklist -->
+      <table id="checklistTable" class="w-full text-left border-collapse">
+        <thead>
+          <tr>
+            <th class="border border-gray-300 p-2">Area a verificar</th>
+            <th class="border border-gray-300 p-2">Si</th>
+            <th class="border border-gray-300 p-2">No</th>
+            <th class="border border-gray-300 p-2">N/A</th>
+            <th class="border border-gray-300 p-2">Accion propuesta</th>
+            <th class="border border-gray-300 p-2">Observacion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Cada fila representa un ítem fijo -->
+          <tr>
+            <td class="border border-gray-300 p-2">Las paredes estan limpias y en buen estado</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">ventanas limpias de la porteria</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">pasillos de las piso limpias</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">varandas limpias</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">salon social limpio y en orden</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">shup de basura limpio</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">teraza limpia y en orden</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">zona de los parqueadetros limpios</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">jardineria en orden</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">areas comunes limpias</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+          <tr>
+            <td class="border border-gray-300 p-2">porteria (recepcion) limpia</td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2 cursor-pointer"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+            <td class="border border-gray-300 p-2" contenteditable="true"></td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <!-- Sección de firmas -->
+<div class="p-4 border-t border-gray-300">
+  <h2 class="text-lg font-bold mb-4">Firmas</h2>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <p class="font-bold">Firma del Supervisor</p>
+   <canvas id="firmaSupervisor" class="border border-gray-300 w-full h-32"></canvas>
+<input type="hidden" name="firmaSupervisorData" id="firmaSupervisorData">
+<button type="button" onclick="limpiarFirma('firmaSupervisor')" class="mt-2 text-red-500">Limpiar</button>
+
+   
+   
+    </div>
+    <div>
+      <p class="font-bold">Firma del Supervisado</p>
+
+<canvas id="firmaSupervisado" class="border border-gray-300 w-full h-32"></canvas>
+<input type="hidden" name="firmaSupervisadoData" id="firmaSupervisadoData">
+<button type="button" onclick="limpiarFirma('firmaSupervisado')" class="mt-2 text-red-500">Limpiar</button>
+    
+    </div>
+  </div>
+</div>
+      
+      <!-- Input hidden para enviar el JSON del checklist -->
+      <input type="hidden" name="checklist" id="checklistInput" value="" />
+      
+      <div class="mt-4">
+        <input type="submit" class="bg-blue-500 text-white py-2 px-4 rounded" value="Guardar Bitácora">
+      </div>
+    </form>
+  </div>
+  
+  <!-- Scripts: jQuery, Select2, y la lógica para recopilar el checklist -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script>
+    // Inicializa Select2 en el campo de Edificio
+    $(document).ready(function() {
+      $('#edificioSelect').select2({
+        placeholder: "Selecciona un edificio",
+        allowClear: true
+      });
+    });
+  </script>
+  <script>
+  function inicializarCanvas(idCanvas, idInput) {
+    const canvas = document.getElementById(idCanvas);
+    const ctx = canvas.getContext("2d");
+    let dibujando = false;
+    
+    canvas.addEventListener("mousedown", () => dibujando = true);
+    canvas.addEventListener("mouseup", () => dibujando = false);
+    canvas.addEventListener("mouseleave", () => dibujando = false);
+    canvas.addEventListener("mousemove", (e) => {
+      if (!dibujando) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+    });
+  }
+  
+  function limpiarFirma(idCanvas) {
+    const canvas = document.getElementById(idCanvas);
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  
+  document.addEventListener("DOMContentLoaded", function() {
+    inicializarCanvas("firmaSupervisor", "firmaSupervisorData");
+    inicializarCanvas("firmaSupervisado", "firmaSupervisadoData");
+  });
+</script>
+<script>
+function guardarFirma(idCanvas, idInput) {
+  const canvas = document.getElementById(idCanvas);
+  const input = document.getElementById(idInput);
+  input.value = canvas.toDataURL();
+}
+
+
+document.getElementById("bitacoraForm").addEventListener("submit", function() {
+  guardarFirma("firmaSupervisor", "firmaSupervisorData");
+  guardarFirma("firmaSupervisado", "firmaSupervisadoData");
+});
+
+</script>
+
+  <script>
+    // Asigna la "x" al hacer clic en las celdas de Si, No y N/A
+    document.addEventListener("DOMContentLoaded", function() {
+      const rows = document.querySelectorAll("#checklistTable tbody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td:nth-child(2), td:nth-child(3), td:nth-child(4)");
+        cells.forEach(cell => {
+          cell.addEventListener("click", function() {
+            cells.forEach(c => c.innerHTML = "");
+            this.innerHTML = "x";
+          });
+        });
+      });
+    });
+  </script>
+  <script>
+    // Al enviar el formulario, recopila los datos del checklist
+// Al enviar el formulario, recopila los datos del checklist
+document.getElementById("bitacoraForm").addEventListener("submit", function(e) {
+  const rows = document.querySelectorAll("#checklistTable tbody tr");
+  let checklistData = {};
+  rows.forEach(row => {
+    const itemText = row.querySelector("td:first-child").innerText.trim();
+    let answer = "";
+    const answerCells = row.querySelectorAll("td:nth-child(2), td:nth-child(3), td:nth-child(4)");
+    answerCells.forEach((cell, index) => {
+      if(cell.innerText.trim() === "x"){
+        if(index === 0) answer = "si";   // Se guarda "si" en lugar de itemText
+        else if(index === 1) answer = "no";
+        else if(index === 2) answer = "na";
+      }
+    });
+    const accion = row.querySelector("td:nth-child(5)").innerText.trim();
+    const observacion = row.querySelector("td:nth-child(6)").innerText.trim();
+    checklistData[itemText] = {
+      answer: answer,
+      accion: accion,
+      observacion: observacion
+    };
+  });
+  document.getElementById("checklistInput").value = JSON.stringify(checklistData);
+});
+
+  </script>
+ </body>
+</html>

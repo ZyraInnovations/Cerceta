@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Alertas</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        /* Filtros */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .filter-container input,
+        .filter-container select,
+        .filter-container button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .filter-container button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        .filter-container button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Responsividad */
+        @media (max-width: 768px) {
+            table, th, td {
+                font-size: 14px;
+            }
+
+            .filter-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            .filter-container input, 
+            .filter-container select, 
+            .filter-container button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Consultar Alertas</h1>
+    <p>Bienvenido, {{name}}</p>
+
+    <!-- Filtros -->
+    <div class="filter-container">
+        <input type="text" placeholder="Buscar por Actividad" id="filterActivity">
+        <select id="filterFrequency">
+            <option value="">Frecuencia</option>
+            <option value="diaria">Diaria</option>
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+        </select>
+        <select id="filterPriority">
+            <option value="">Prioridad</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+        </select>
+        <input type="date" id="filterStartDate" placeholder="Fecha Inicio">
+        <input type="date" id="filterEndDate" placeholder="Fecha Fin">
+        <button onclick="applyFilters()">Aplicar Filtros</button>
+    </div>
+
+    <!-- Tabla de alertas -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Actividad</th>
+                 <th>Edificio</th>
+                <th>Fecha de Ejecución</th>
+                <th>Frecuencia</th>
+                <th>Días Antes</th>
+                <th>Método de Notificación</th>
+                <th>Prioridad</th>
+                <th>Tiempo de Recordatorio</th>
+                <th>Responsable</th>
+                <th>Fecha de Creación</th>
+                   <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="alertTableBody">
+            {{#each alertas}}
+            <tr>
+                <td>{{this.id}}</td>
+                <td>{{this.nombre_actividad}}</td>
+<td>{{this.nombre_edificio}}</td>
+                <td>{{formatDate this.fecha_ejecucion}}</td>
+                <td>{{this.frecuencia_alerta}}</td>
+                <td>{{this.dias_antes_alerta}}</td>
+                <td>{{this.metodo_notificacion}}</td>
+                <td>{{this.prioridad}}</td>
+                <td>{{this.tiempo_recordatorio}}</td>
+<td>{{this.responsable_nombre}}</td>
+                <td>{{formatDate this.fecha_creacion}}</td>
+                   <td>
+            <button onclick="editarAlerta({{this.id}})">✏️ Editar</button>
+            <button onclick="eliminarAlerta({{this.id}})">🗑️ Eliminar</button>
+        </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <script>
+        // Convierte una fecha en formato DD/MM/YYYY a YYYY-MM-DD para comparaciones
+        function parseDate(dmy) {
+            const [day, month, year] = dmy.split('/');
+            return new Date(`${year}-${month}-${day}`);
+        }
+
+        function applyFilters() {
+            const activityFilter = document.getElementById('filterActivity').value.toLowerCase();
+            const frequencyFilter = document.getElementById('filterFrequency').value;
+            const priorityFilter = document.getElementById('filterPriority').value;
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            const rows = document.querySelectorAll('#alertTableBody tr');
+
+            rows.forEach(row => {
+                const activity = row.cells[1].textContent.toLowerCase();
+                const frequency = row.cells[3].textContent;
+                const priority = row.cells[6].textContent;
+                const executionDate = parseDate(row.cells[2].textContent);
+
+                let isMatch = true;
+
+                if (activityFilter && !activity.includes(activityFilter)) {
+                    isMatch = false;
+                }
+
+                if (frequencyFilter && frequency !== frequencyFilter) {
+                    isMatch = false;
+                }
+
+                if (priorityFilter && priority !== priorityFilter) {
+                    isMatch = false;
+                }
+
+                // Comparación de fechas
+                if (startDate && executionDate < new Date(startDate)) {
+                    isMatch = false;
+                }
+                if (endDate && executionDate > new Date(endDate)) {
+                    isMatch = false;
+                }
+
+                row.style.display = isMatch ? '' : 'none';
+            });
+        }
+    </script>
+        <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Seleccionar elementos del DOM
+    const hamburgerMenu = document.getElementById("hamburger-menu");
+    const sidebar = document.getElementById("sidebar");
+
+    if (hamburgerMenu && sidebar) {
+      // Agregar el evento de clic al ícono de hamburguesa
+      hamburgerMenu.addEventListener("click", () => {
+        console.log("Hamburguesa clickeada");
+        sidebar.classList.toggle("open"); // Alternar clase 'open'
+      });
+    } else {
+      console.error("No se encontró el menú hamburguesa o el sidebar.");
+    }
+  });
+</script>
+<script>
+    function editarAlerta(id) {
+        window.location.href = `/editar_alerta/${id}`;
+    }
+
+    function eliminarAlerta(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar esta alerta?")) {
+            fetch(`/eliminar_alerta/${id}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Alerta eliminada correctamente.");
+                        location.reload(); // Recargar la página
+                    } else {
+                        alert("Error al eliminar la alerta.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    }
+</script>
+
+</body>
+</html>

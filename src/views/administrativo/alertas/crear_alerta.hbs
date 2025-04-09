@@ -1,0 +1,124 @@
+<div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-5 text-center text-blue-600">Crear Alerta Operativa</h2>
+    <form action="/crear_alerta" method="POST" class="space-y-6">
+        
+        <!-- Nombre de la Actividad -->
+        <div class="form-group">
+            <label for="nombreActividad" class="block text-sm font-medium text-gray-700">Nombre de la Actividad</label>
+            <input type="text" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="nombreActividad" name="nombreActividad" required>
+        </div>
+<!-- Edificio -->
+<div class="form-group">
+    <label for="edificio" class="block text-sm font-medium text-gray-700">Edificio</label>
+    <select class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="edificio" name="edificio" required>
+        {{#each edificios}}
+            <option value="{{id}}">{{nombre}}</option>
+        {{/each}}
+    </select>
+</div>
+        <!-- Fecha de Ejecución -->
+       <!-- Fecha de Ejecución -->
+            <div class="form-group">
+                <label for="fechaEjecucion" class="block text-sm font-medium text-gray-700">Fecha de Ejecución</label>
+                <input type="date" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="fechaEjecucion" name="fechaEjecucion" required>
+            </div>
+
+        <!-- Frecuencia de Alerta -->
+        <div class="form-group">
+            <label for="frecuenciaAlerta" class="block text-sm font-medium text-gray-700">Frecuencia de Alerta</label>
+            <select class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="frecuenciaAlerta" name="frecuenciaAlerta" required>
+                <option value="diaria">Diaria</option>
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+                <option value="personalizada">Personalizada</option>
+            </select>
+        </div>
+
+        <!-- Días Antes de Ejecución (solo personalizada) -->
+        <div class="form-group" id="diasAntesAlertaContainer" style="display: none;">
+            <label for="diasAntesAlerta" class="block text-sm font-medium text-gray-700">Días Antes de la Ejecución</label>
+            <input type="number" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="diasAntesAlerta" name="diasAntesAlerta" min="1">
+        </div>
+
+        <!-- Método de Notificación -->
+        <div class="form-group">
+            <label for="metodoNotificacion" class="block text-sm font-medium text-gray-700">Método de Notificación</label>
+            <div class="flex space-x-4 mt-2">
+                <div class="form-check">
+                    <input class="form-check-input h-4 w-4" type="checkbox" name="metodoNotificacion[]" value="email" id="notificacionEmail">
+                    <label class="ml-2 text-sm text-gray-700" for="notificacionEmail">Email</label>
+                </div>
+            
+             
+                <div class="form-check">
+                    <input class="form-check-input h-4 w-4" type="checkbox" name="metodoNotificacion[]" value="app" id="notificacionApp">
+                    <label class="ml-2 text-sm text-gray-700" for="notificacionApp">Notificación en App</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prioridad de la Alerta -->
+        <div class="form-group">
+            <label for="prioridad" class="block text-sm font-medium text-gray-700">Prioridad de la Alerta</label>
+            <select class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="prioridad" name="prioridad" required>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+            </select>
+        </div>
+
+        <!-- Tiempo de Recordatorio -->
+        <div class="form-group">
+            <label for="tiempoRecordatorio" class="block text-sm font-medium text-gray-700">Tiempo de Recordatorio (minutos antes)</label>
+            <input type="number" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="tiempoRecordatorio" name="tiempoRecordatorio" min="1">
+        </div>
+
+        <!-- Responsable -->
+        <div class="form-group">
+            <label for="responsable" class="block text-sm font-medium text-gray-700">Responsable</label>
+            <select class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="responsable" name="responsable" required>
+                {{#each administradores}}
+                    <option value="{{id}}" data-email="{{email}}">{{nombre}}</option>
+                {{/each}}
+            </select>
+        </div>
+        
+        <button type="submit" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg w-full transition duration-300 ease-in-out transform hover:-translate-y-1">Crear Alerta</button>
+    </form>
+</div>
+
+<script>
+    // Mostrar el campo de días antes solo si se selecciona "Personalizada"
+    document.getElementById('frecuenciaAlerta').addEventListener('change', function() {
+        const diasAntesAlertaContainer = document.getElementById('diasAntesAlertaContainer');
+        if (this.value === 'personalizada') {
+            diasAntesAlertaContainer.style.display = 'block';
+        } else {
+            diasAntesAlertaContainer.style.display = 'none';
+        }
+    });
+        // Configurar la fecha mínima en el campo de Fecha de Ejecución para que sea hoy
+        const fechaEjecucionInput = document.getElementById('fechaEjecucion');
+        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        fechaEjecucionInput.min = today;
+
+  
+</script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Seleccionar elementos del DOM
+    const hamburgerMenu = document.getElementById("hamburger-menu");
+    const sidebar = document.getElementById("sidebar");
+
+    if (hamburgerMenu && sidebar) {
+      // Agregar el evento de clic al ícono de hamburguesa
+      hamburgerMenu.addEventListener("click", () => {
+        console.log("Hamburguesa clickeada");
+        sidebar.classList.toggle("open"); // Alternar clase 'open'
+      });
+    } else {
+      console.error("No se encontró el menú hamburguesa o el sidebar.");
+    }
+  });
+</script>

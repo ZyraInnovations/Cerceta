@@ -1,0 +1,731 @@
+<html><head>
+  <title>Boletín Informativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* General styles */
+    body.body-bg {
+        font-family: 'Times New Roman', serif;
+        background-color: white;
+        padding: 1rem;
+    }
+    /* Container */
+    .container {
+        max-width: 30rem;
+        margin: 0 auto;
+        border: 1px solid #D1D5DB;
+        padding: 1rem;
+    }
+    /* Title */
+    .title {
+        font-size: 2.25rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    /* Section styles */
+    .section {
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    /* Image Upload Section */
+    .upload-section {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .upload-section img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .upload-section p {
+        font-size: 1rem;
+        text-align: center;
+    }
+    .upload-section input[type="file"] {
+        display: none;
+    }
+    /* Preview Image */
+    .image-preview {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+    /* General styles */
+body.body-bg {
+    font-family: 'Times New Roman', serif;
+    background-color: white;
+    padding: 1rem; /* Reducir el padding general */
+}
+
+/* Container */
+.container {
+    max-width: 30rem; /* Reducir el ancho máximo del contenedor */
+    margin: 0 auto;
+    border: 1px solid #D1D5DB;
+    padding: 1rem; /* Reducir el padding del contenedor */
+}
+/* Title */
+.title {
+    font-size: 2.25rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Section styles */
+.section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Input titles */
+.input-title {
+    width: 100%;
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+/* Section content */
+.section-content {
+    display: flex;
+}
+
+.text-section {
+    width: 50%;
+    padding-right: 1rem;
+}
+
+.image-section {
+    width: 50%;
+}
+
+/* Image */
+.image {
+    width: 100%;
+    margin-bottom: 1rem;
+    height: auto;
+}
+
+/* Textarea content */
+.textarea-content {
+    width: 100%;
+    height: 100%;
+    text-align: justify;
+    padding: 0.5rem;
+}
+
+/* Footer section */
+.footer-section {
+    border-top: 1px solid black;
+    padding-top: 1rem;
+}
+
+.footer-inputs {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+.footer-input {
+    width: 32%;
+    padding: 0.5rem;
+}
+
+.footer-signature {
+    font-weight: bold;
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* Container */
+
+#platilla{
+
+border: 1px solid black;
+  width: 843px;
+    height: auto; /* Ajusta automáticamente a la altura del contenido */
+    margin: 0 auto;
+    position: relative;
+}
+#edificio {
+    margin-bottom: 0 !important;
+}
+#tipoMantenimiento {
+    margin-bottom: 0 !important;
+}
+
+  .form-control {
+        display: block;
+        width: 100%;
+        padding: 12px; /* Aumenta el tamaño del padding */
+        font-size: 16px; /* Aumenta el tamaño del texto */
+        border: 2px solid #ccc; /* Bordes más visibles */
+        border-radius: 8px; /* Bordes redondeados */
+        background-color: #fff; /* Fondo blanco */
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control:focus {
+        border-color: #007bff; /* Cambia el color del borde al seleccionar */
+        box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .section-content {
+        display: flex;
+        gap: 10px;
+    }
+
+    label {
+        font-weight: bold;
+        font-size: 18px;
+        color: #333;
+    }
+
+
+
+    .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    appearance: none; /* Quita los estilos nativos del sistema */
+    overflow: visible; /* Asegura que el texto no se corte */
+    white-space: nowrap; /* Evita el corte del texto */
+    text-overflow: ellipsis; /* Añade "..." si es demasiado largo */
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.section-content {
+    gap: 10px;
+}
+.input-subtitle {
+  font-size: 22px;
+  text-align: center;
+  border: none;
+  outline: none;
+  background: none;
+  font-weight: bold;
+  color: #333;
+  width: 100%;
+  padding: 5px;
+  display: block; /* Asegura que el input se comporte como un bloque */
+  margin: auto; /* Centra el título */
+}
+
+
+  </style>
+
+<style>
+  /* ! tailwindcss v3.4.5 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mt-8{margin-top:2rem}.text-center{text-align:center}</style><style>/* ! tailwindcss v3.4.5 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mt-8{margin-top:2rem}.text-center{text-align:center}</style></head>
+  <!-- Campo de fecha independiente -->
+
+
+
+  <div class="flex justify-center items-center mb-6">
+    <label for="fechaSeleccionada" class="mr-2 text-gray-700 font-semibold">Selecciona la fecha:</label>
+    <input type="date" id="fechaSeleccionada" class="border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+  </div>
+<body class="body-bg" >
+<div class="platilla" id="platilla" >
+  <div id="contenido" class="container" >
+    <!-- Header con logo a la izquierda y fecha a la derecha -->
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #ccc;">
+      <!-- Logo de la empresa -->
+      <div class="logo" style="display: flex; align-items: center;">
+        <img src="../imagenes/CERCETA.png" alt="Logo de la empresa" style="height: 50px;">
+        <span style="font-size: 1.5rem; font-weight: bold; margin-left: 1rem;"></span>
+      </div>
+      
+     
+      <div class="fecha">
+        <span id="fechaActual" style="font-size: 1rem;">23 de octubre de 2024</span>
+      </div>
+    </header>
+
+
+    <h1 class="title">INFORME ADMINISTRATIVO</h1>
+
+
+
+    <div class="section">
+
+        
+      <h2 class="section-title">
+        <input class="input-title" placeholder="">
+      </h2>
+
+<div class="section-content" style="display: flex; flex-direction: column; gap: 10px;">
+    <label for="edificio" class="section-title">Seleccione el Edificio:</label>
+    <select id="edificio" name="edificioId" class="form-control">
+        <option value="" disabled selected>Selecciona un edificio</option>
+        {{#each edificios}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+</div>
+
+<div class="section-content" style="display: flex; flex-direction: column; gap: 10px;">
+    <label for="tipoMantenimiento" class="section-title">Seleccione el tipo de mantenimiento:</label>
+    <select id="tipoMantenimiento" class="form-control">
+        <option value="" disabled selected>Selecciona una opción</option>
+        <option value="aseo">Aseo</option>
+        <option value="equipos">Equipos</option>
+        <option value="jardineria">Jardinería</option>
+        <option value="pintura">Pintura</option>
+        <option value="electricidad">Electricidad</option>
+        <option value="plomeria">Plomería</option>
+        <option value="mantenimiento_general">Mantenimiento General</option>
+           <option value="ascensores">ascensores</option>
+
+   
+   
+    </select>
+</div>
+
+<br>
+<div id="contenido">
+  <div class="section">
+        <input class="input-title" placeholder="">
+    </div>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+
+<!-- Botón para agregar subtítulos entre imágenes -->
+<div class="text-center mt-4">
+  <button id="addTitleBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition ease-in-out duration-150">
+    Agregar Título
+  </button>
+</div>
+
+<div class="text-center mt-8">
+  <button id="addSectionBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition ease-in-out duration-150">
+    Agregar Sección
+  </button>
+</div>
+
+    <div class="text-center mt-8">
+      <button id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition ease-in-out duration-150">
+        Guardar Bitácora
+      </button>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+
+<script>
+  function agregarTitulo() {
+    const container = document.getElementById('contenido');
+    
+    // Seleccionar todas las secciones de imágenes
+    const imageSections = container.querySelectorAll('.section-content');
+
+    if (imageSections.length === 0) {
+      alert("No hay imágenes a las cuales agregar un título.");
+      return;
+    }
+
+    // Encontrar la última sección de imágenes
+    const lastImageSection = imageSections[imageSections.length - 1];
+
+    // Crear el contenedor del título
+    const nuevoTitulo = document.createElement('div');
+    nuevoTitulo.className = 'section-title-container';
+    nuevoTitulo.style.textAlign = 'center';
+    nuevoTitulo.style.marginBottom = '10px';
+
+    // Agregar el campo de entrada para el título
+    nuevoTitulo.innerHTML = `
+      <h3 class="section-subtitle">
+        <input type="text" class="input-subtitle" placeholder="Escribe un título aquí..." 
+          style="font-size: 20px; text-align: center; border: none; outline: none; background: none; font-weight: bold; width: 100%;">
+      </h3>
+    `;
+
+    // Insertar el título justo ANTES del último conjunto de imágenes
+    lastImageSection.insertAdjacentElement('beforebegin', nuevoTitulo);
+  }
+
+  // Agregar funcionalidad al botón "Agregar Título"
+  document.getElementById('addTitleBtn').addEventListener('click', agregarTitulo);
+</script>
+<script>
+function agregarSeccion() {
+  const container = document.getElementById('contenido');
+
+  // Crear un nuevo div de sección
+  const nuevaSeccion = document.createElement('div');
+  nuevaSeccion.className = 'section';
+
+  nuevaSeccion.innerHTML = `
+    <h2 class="section-title">
+    </h2>
+    <div class="section-content">
+      <div class="image-section">
+        <div class="upload-section">
+          <input type="file" accept="image/*">
+          <p>Subir imagen</p>
+          <img class="image" alt="Vista previa de imagen" style="display: none;">
+        </div>
+      </div>
+      <div class="image-section">
+        <div class="upload-section">
+          <input type="file" accept="image/*">
+          <p>Subir imagen</p>
+          <img class="image" alt="Vista previa de imagen" style="display: none;">
+        </div>
+      </div>
+    </div>
+  `;
+
+    
+    container.appendChild(nuevaSeccion);
+  }
+
+  // Funcionalidad para manejar botones
+  document.getElementById('addSectionBtn').addEventListener('click', agregarSeccion);
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const contenedorSecciones = document.getElementById('contenido');
+
+  // Función para manejar la subida de imágenes de manera dinámica
+  function handleImageUpload(event) {
+    const input = event.target;
+    const uploadSection = input.closest('.upload-section');
+    const previewImage = uploadSection.querySelector('.image');
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+        previewImage.style.display = 'block';
+        uploadSection.querySelector('p').style.display = 'none';
+        uploadSection.style.border = 'none';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Funcionalidad para manejar eventos de "arrastrar y soltar"
+  function handleDragOver(event) {
+    event.preventDefault();
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#4A90E2';
+  }
+
+  function handleDragLeave(event) {
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#ccc';
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#ccc';
+    const fileInput = uploadSection.querySelector('input[type="file"]');
+    handleImageUpload({ target: fileInput });
+  }
+
+  // Delegar la lógica de eventos para todas las secciones dinámicamente
+  contenedorSecciones.addEventListener('change', (event) => {
+    if (event.target.matches('input[type="file"]')) {
+      handleImageUpload(event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('dragover', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDragOver.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('dragleave', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDragLeave.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('drop', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDrop.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  // Funcionalidad para que el clic en la sección active el input de imagen
+  contenedorSecciones.addEventListener('click', (event) => {
+    if (event.target.matches('.upload-section')) {
+      const fileInput = event.target.querySelector('input[type="file"]');
+      if (fileInput) fileInput.click();
+    }
+  });
+});
+
+
+</script>
+
+   <script>
+      // Obtener la fecha actual
+      const fechaActual = new Date();
+      const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('fechaActual').textContent = fechaActual.toLocaleDateString('es-ES', opciones);
+    </script>
+
+<script>
+    // Para la primera imagen
+    const uploadSection1 = document.getElementById('uploadSection1');
+    const fileInput1 = document.getElementById('fileInput1');
+    const previewImage1 = document.getElementById('previewImage1');
+
+    // Función para manejar subida de imagen
+    function handleImageUpload(event, previewImage, uploadSection) {
+        const file = event.target.files[0] || event.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                // Ocultar el texto y cambiar el estilo del cuadro de subida
+                uploadSection.querySelector('p').style.display = 'none';
+                uploadSection.style.border = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Manejador para clic y subir
+    fileInput1.addEventListener('change', (event) => handleImageUpload(event, previewImage1, uploadSection1));
+
+    // Manejador para arrastrar y soltar
+    uploadSection1.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        uploadSection1.style.borderColor = "#4A90E2";
+    });
+
+    uploadSection1.addEventListener('dragleave', () => {
+        uploadSection1.style.borderColor = "#ccc";
+    });
+
+    uploadSection1.addEventListener('drop', (event) => {
+        event.preventDefault();
+        uploadSection1.style.borderColor = "#ccc";
+        handleImageUpload(event, previewImage1, uploadSection1);
+    });
+
+    uploadSection1.addEventListener('click', () => fileInput1.click());
+</script>
+<script>
+
+    // Para la segunda imagen (como ejemplo)
+    const uploadSection2 = document.getElementById('uploadSection2');
+    const fileInput2 = document.getElementById('fileInput2');
+    const previewImage2 = document.getElementById('previewImage2');
+
+    // Función para manejar subida de imagen
+    function handleImageUpload(event, previewImage, uploadSection) {
+        const file = event.target.files[0] || event.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                // Ocultar el texto y cambiar el estilo del cuadro de subida
+                uploadSection.querySelector('p').style.display = 'none';
+                uploadSection.style.border = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Manejador para clic y subir
+    fileInput2.addEventListener('change', (event) => handleImageUpload(event, previewImage2, uploadSection2));
+
+    // Manejador para arrastrar y soltar
+    uploadSection2.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        uploadSection2.style.borderColor = "#4A90E2";
+    });
+
+    uploadSection2.addEventListener('dragleave', () => {
+        uploadSection2.style.borderColor = "#ccc";
+    });
+
+    uploadSection2.addEventListener('drop', (event) => {
+        event.preventDefault();
+        uploadSection2.style.borderColor = "#ccc";
+        handleImageUpload(event, previewImage2, uploadSection2);
+    });
+
+    uploadSection2.addEventListener('click', () => fileInput2.click());
+
+
+
+// Para la tercera imagen
+const uploadSection3 = document.getElementById('uploadSection3');
+const fileInput3 = document.getElementById('fileInput3');
+const previewImage3 = document.getElementById('previewImage3');
+
+// Función para manejar subida de imagen específica para la sección 3
+function handleImageUpload3(event) {
+    const file = event.target.files[0] || event.dataTransfer.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage3.src = e.target.result;
+            previewImage3.style.display = 'block';
+            // Ocultar el texto y cambiar el estilo del cuadro de subida
+            uploadSection3.querySelector('p').style.display = 'none';
+            uploadSection3.style.border = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Manejador para clic y subir en el tercer input
+fileInput3.addEventListener('change', handleImageUpload3);
+
+// Manejador para arrastrar y soltar en el tercer contenedor
+uploadSection3.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    uploadSection3.style.borderColor = "#4A90E2";
+});
+
+uploadSection3.addEventListener('dragleave', () => {
+    uploadSection3.style.borderColor = "#ccc";
+});
+
+uploadSection3.addEventListener('drop', (event) => {
+    event.preventDefault();
+    uploadSection3.style.borderColor = "#ccc";
+    handleImageUpload3(event);
+});
+
+// Activar el input de archivo cuando se haga clic en la sección
+uploadSection3.addEventListener('click', () => fileInput3.click());
+
+
+
+
+
+
+</script>
+
+
+<script>
+
+
+
+  
+document.getElementById('saveBtn').addEventListener('click', function () {
+    const platilla = document.getElementById('platilla');
+    const edificioElement = document.getElementById('edificio');
+    const tipoMantenimientoElement = document.getElementById('tipoMantenimiento');
+    const fechaElement = document.getElementById('fechaSeleccionada');
+
+    // Verifica que se haya seleccionado una fecha
+    if (!fechaElement.value) {
+        alert("Por favor, selecciona una fecha.");
+        return;
+    }
+
+    // Verifica que los elementos existen antes de acceder a sus valores
+    if (!edificioElement || !tipoMantenimientoElement) {
+        alert("Error: algunos elementos requeridos no están presentes en el DOM.");
+        return;
+    }
+
+    const edificioId = edificioElement.value;
+    const tipoMantenimiento = tipoMantenimientoElement.value;
+    const fecha = fechaElement.value; // Toma el valor seleccionado de fecha
+
+    html2canvas(platilla, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: platilla.scrollWidth,
+        windowHeight: platilla.scrollHeight
+    }).then(function (canvas) {
+        canvas.toBlob(function (blob) {
+            const formData = new FormData();
+            formData.append('contenidoPng', blob, 'boletin_informativo.png');
+            formData.append('edificioId', edificioId);
+            formData.append('tipoMantenimiento', tipoMantenimiento);
+            formData.append('fecha', fecha); // Envia la fecha seleccionada
+
+            fetch('/guardarBitacora', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Bitácora guardada correctamente');
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'boletin_informativo.png';
+                        link.click();
+                        URL.revokeObjectURL(link.href);
+                    } else {
+                        alert('Hubo un error al guardar la bitácora');
+                    }
+                })
+                .catch(error => console.error('Error en la solicitud fetch:', error));
+        }, 'image/png');
+    });
+});
+
+
+</script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Seleccionar elementos del DOM
+    const hamburgerMenu = document.getElementById("hamburger-menu");
+    const sidebar = document.getElementById("sidebar");
+
+    if (hamburgerMenu && sidebar) {
+      // Agregar el evento de clic al ícono de hamburguesa
+      hamburgerMenu.addEventListener("click", () => {
+        console.log("Hamburguesa clickeada");
+        sidebar.classList.toggle("open"); // Alternar clase 'open'
+      });
+    } else {
+      console.error("No se encontró el menú hamburguesa o el sidebar.");
+    }
+  });
+</script>

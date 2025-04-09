@@ -1,0 +1,251 @@
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+
+<form id="formActa" class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-8 space-y-6">
+
+  <div class="grid grid-cols-3 gap-4">
+    <div>
+      <label class="block text-sm font-medium">Fecha</label>
+      <input type="date" name="fecha" class="mt-1 w-full border px-2 py-1 rounded" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Hora Inicio</label>
+      <input type="time" name="horaInicio" class="mt-1 w-full border px-2 py-1 rounded" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Hora Terminación</label>
+      <input type="time" name="horaFin" class="mt-1 w-full border px-2 py-1 rounded" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium">Tema General de la Reunión</label>
+    <input type="text" name="tema" class="mt-1 w-full border px-2 py-1 rounded" />
+  </div>
+
+  <div>
+    <h3 class="font-semibold mb-2">Asistentes</h3>
+    <div id="asistentes" class="space-y-2">
+<div class="grid grid-cols-3 gap-2">
+  <input name="asistentes[0][cargo]" placeholder="Cargo" class="border px-2 py-1 rounded" />
+  <input name="asistentes[0][nombre]" placeholder="Nombre" class="border px-2 py-1 rounded" />
+</div>
+
+<div class="firma-container col-span-3">
+  <label class="text-sm font-medium block">Firma</label>
+  <canvas class="firma-canvas border rounded bg-white" width="300" height="100"></canvas>
+  <input type="hidden" name="asistentes[0][firma]" />
+  <button type="button" class="limpiar-firma text-sm text-blue-600 mt-1">Limpiar</button>
+</div>
+
+
+    </div>
+    <button type="button" id="agregarAsistente" class="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">
+      + Agregar Asistente
+    </button>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium">Agenda</label>
+    <textarea name="agenda" rows="4" class="mt-1 w-full border px-2 py-1 rounded"></textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium">Desarrollo y Conclusiones de la Reunión</label>
+    <textarea name="conclusiones" rows="6" class="mt-1 w-full border px-2 py-1 rounded"></textarea>
+  </div>
+
+  <div>
+    <h3 class="font-semibold mb-2">Plan de Acción</h3>
+    <div id="acciones" class="space-y-2">
+      <div class="grid grid-cols-4 gap-2">
+        <input name="acciones[0][plan]" placeholder="Plan de acción" class="border px-2 py-1 rounded" />
+        <input name="acciones[0][responsable]" placeholder="Responsable" class="border px-2 py-1 rounded" />
+        <input name="acciones[0][fecha]" type="date" class="border px-2 py-1 rounded" />
+        <input name="acciones[0][recursos]" placeholder="Recursos" class="border px-2 py-1 rounded" />
+      </div>
+    </div>
+    <button type="button" id="agregarAccion" class="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">
+      + Agregar Acción
+    </button>
+  </div>
+
+  <div class="text-center mt-6">
+    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+      Guardar Acta
+    </button>
+  </div>
+</form>
+
+<script>
+  let contadorAsistentes = 1;
+  let contadorAcciones = 1;
+
+ 
+
+  document.getElementById('agregarAccion').addEventListener('click', () => {
+    const contenedor = document.getElementById('acciones');
+    const nuevo = document.createElement('div');
+    nuevo.classList.add('grid', 'grid-cols-4', 'gap-2');
+    nuevo.innerHTML = `
+      <input name="acciones[${contadorAcciones}][plan]" placeholder="Plan de acción" class="border px-2 py-1 rounded" />
+      <input name="acciones[${contadorAcciones}][responsable]" placeholder="Responsable" class="border px-2 py-1 rounded" />
+      <input name="acciones[${contadorAcciones}][fecha]" type="date" class="border px-2 py-1 rounded" />
+      <input name="acciones[${contadorAcciones}][recursos]" placeholder="Recursos" class="border px-2 py-1 rounded" />
+    `;
+    contenedor.appendChild(nuevo);
+    contadorAcciones++;
+  });
+</script>
+<script>
+  const pads = [];
+
+  function inicializarFirma(contenedor) {
+    const canvas = contenedor.querySelector('canvas');
+    const input = contenedor.querySelector('input[type=hidden]');
+    const signaturePad = new SignaturePad(canvas);
+
+    pads.push(signaturePad);
+
+    canvas.addEventListener('mouseup', () => {
+      input.value = signaturePad.toDataURL();
+    });
+    canvas.addEventListener('touchend', () => {
+      input.value = signaturePad.toDataURL();
+    });
+
+    contenedor.querySelector('.limpiar-firma').addEventListener('click', () => {
+      signaturePad.clear();
+      input.value = '';
+    });
+  }
+
+document.getElementById('agregarAsistente').addEventListener('click', () => {
+  const contenedor = document.getElementById('asistentes');
+  const nuevo = document.createElement('div');
+  nuevo.classList.add('grid', 'grid-cols-3', 'gap-2');
+  nuevo.innerHTML = `
+    <input name="asistentes[${contadorAsistentes}][cargo]" placeholder="Cargo" class="border px-2 py-1 rounded" />
+    <input name="asistentes[${contadorAsistentes}][nombre]" placeholder="Nombre" class="border px-2 py-1 rounded" />
+    <div class="firma-container col-span-3">
+      <label class="text-sm font-medium block">Firma</label>
+      <canvas class="firma-canvas border rounded bg-white" width="300" height="100"></canvas>
+      <input type="hidden" name="asistentes[${contadorAsistentes}][firma]" />
+      <button type="button" class="limpiar-firma text-sm text-blue-600 mt-1">Limpiar</button>
+    </div>
+  `;
+  contenedor.appendChild(nuevo);
+  inicializarFirma(nuevo.querySelector('.firma-container'));
+  contadorAsistentes++;
+});
+  window.addEventListener('DOMContentLoaded', () => {
+    const primeraFirma = document.querySelector('.firma-container');
+    if (primeraFirma) {
+      inicializarFirma(primeraFirma);
+    }
+  });
+</script>
+<script>
+  document.getElementById('formActa').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+
+    const formData = new FormData(form);
+
+    // Actualizar firmas
+    pads.forEach((pad, index) => {
+      const input = document.querySelector(`input[name="asistentes[${index}][firma]"]`);
+      if (input && !pad.isEmpty()) {
+        input.value = pad.toDataURL();
+      }
+    });
+
+    // Armar asistentes
+    const asistentes = [];
+    for (let i = 0; i < contadorAsistentes; i++) {
+      const cargo = form.querySelector(`[name="asistentes[${i}][cargo]"]`);
+      const nombre = form.querySelector(`[name="asistentes[${i}][nombre]"]`);
+      const firma = form.querySelector(`[name="asistentes[${i}][firma]"]`);
+
+      if (!cargo || !nombre || !firma) continue;
+      if (!cargo.value || !nombre.value || !firma.value) {
+        alert(`Por favor completa todos los campos y la firma del asistente #${i + 1}`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar Acta';
+        return;
+      }
+
+      asistentes.push({
+        cargo: cargo.value,
+        nombre: nombre.value,
+        firma: firma.value
+      });
+    }
+
+    // Armar acciones
+    const acciones = [];
+    for (let i = 0; i < contadorAcciones; i++) {
+      const plan = form.querySelector(`[name="acciones[${i}][plan]"]`);
+      const responsable = form.querySelector(`[name="acciones[${i}][responsable]"]`);
+      const fecha = form.querySelector(`[name="acciones[${i}][fecha]"]`);
+      const recursos = form.querySelector(`[name="acciones[${i}][recursos]"]`);
+
+      if (plan && responsable && fecha && recursos) {
+        if (plan.value || responsable.value || fecha.value || recursos.value) {
+          acciones.push({
+            plan: plan.value,
+            responsable: responsable.value,
+            fecha: fecha.value,
+            recursos: recursos.value
+          });
+        }
+      }
+    }
+
+    const payload = {
+      fecha: form.querySelector('[name="fecha"]').value,
+      horaInicio: form.querySelector('[name="horaInicio"]').value,
+      horaFin: form.querySelector('[name="horaFin"]').value,
+      tema: form.querySelector('[name="tema"]').value,
+      agenda: form.querySelector('[name="agenda"]').value,
+      conclusiones: form.querySelector('[name="conclusiones"]').value,
+      asistentes,
+      acciones
+    };
+
+    // Validación mínima
+    if (!payload.fecha || !payload.horaInicio || !payload.horaFin || !payload.tema || asistentes.length === 0) {
+      alert('Por favor completa todos los campos principales y al menos un asistente con firma.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Guardar Acta';
+      return;
+    }
+
+    try {
+      const res = await fetch('/acta_reunion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert('Acta guardada correctamente');
+        form.reset();
+        pads.forEach(p => p.clear());
+      } else {
+        alert('Error al guardar el acta: ' + result.message);
+      }
+    } catch (err) {
+      alert('Error de red o servidor.');
+      console.error(err);
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Guardar Acta';
+  });
+</script>
