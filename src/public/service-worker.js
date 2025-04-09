@@ -1,58 +1,63 @@
-
-
 let currentLatitude = null;
 let currentLongitude = null;
 
 // Escuchar mensajes del hilo principal (Frontend)
 self.addEventListener('message', event => {
-    if (event.data && event.data.latitude && event.data.longitude) {
-        currentLatitude = event.data.latitude;
-        currentLongitude = event.data.longitude;
-        console.log('Ubicación recibida del frontend:', currentLatitude, currentLongitude);
+    const data = event.data;
+    if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        currentLatitude = data.latitude;
+        currentLongitude = data.longitude;
+        console.log('[SW] Ubicación recibida del frontend:', currentLatitude, currentLongitude);
     }
 });
 
-// Sincronizar ubicación cuando se recibe el evento 'sync'
+// Evento de sincronización en segundo plano (Background Sync)
 self.addEventListener('sync', event => {
     if (event.tag === 'location-sync') {
-        console.log('Intentando sincronizar ubicación...');
+        console.log('[SW] Evento de sincronización recibido: location-sync');
         event.waitUntil(syncLocationData());
     }
 });
 
-// Función para sincronizar la ubicación con el servidor
-function syncLocationData() {
-    if (currentLatitude && currentLongitude) {
-        console.log('Sincronizando ubicación con el servidor:', currentLatitude, currentLongitude);
-        return fetch('/update-location', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                latitude: currentLatitude,
-                longitude: currentLongitude
-            })
-        }).then(response => {
-            console.log('Respuesta del servidor:', response.status, response.statusText);
+// Función para enviar datos de ubicación al servidor
+async function syncLocationData() {
+    if (currentLatitude != null && currentLongitude != null) {
+        try {
+            const response = await fetch('/update-location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    latitude: currentLatitude,
+                    longitude: currentLongitude
+                })
+            });
+
             if (!response.ok) {
-                console.error('Error al sincronizar la ubicación. Estado:', response.status);
+                console.error('[SW] Falló la sincronización con el servidor:', response.status);
             } else {
-                console.log('Ubicación sincronizada correctamente');
+                console.log('[SW] Ubicación sincronizada correctamente');
             }
-        }).catch(error => {
-            console.error('Error de red:', error);
-        });
+        } catch (error) {
+            console.error('[SW] Error de red durante la sincronización:', error);
+        }
     } else {
-        console.error('No hay datos de ubicación disponibles');
+        console.warn('[SW] No hay datos de ubicación para sincronizar');
     }
 }
 
-// Esta es una función extra en caso de que desees manejar la notificación push
+// Evento opcional para notificaciones push
 self.addEventListener('push', event => {
-    const data = event.data.json(); // Los datos enviados con la notificación
-    self.registration.showNotification(data.title, {
-        body: data.message,
-        icon: '/imagenes/apk192.png'
-    });
+    const data = event.data?.json();
+    if (data) {
+        const title = data.title || 'Nueva notificación';
+        const options = {
+            body: data.message || '',
+            icon: '/imagenes/apk192.png'
+        };
+        event.waitUntil(
+            self.registration.showNotification(title, options)
+        );
+    }
 });
