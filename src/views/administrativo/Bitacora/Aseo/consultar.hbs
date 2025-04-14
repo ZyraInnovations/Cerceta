@@ -70,6 +70,14 @@
       </div>
     </form>
 
+
+
+
+
+
+
+
+
     {{#if registros.length}}
     <div class="overflow-x-auto rounded-lg border border-gray-200">
       <table class="min-w-full text-sm text-left">
@@ -128,46 +136,89 @@
         <div><span class="font-semibold">Cargo:</span> {{this.cargo}}</div>
       </div>
 
-      <!-- Áreas supervisadas -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Interiores -->
-        <div class="bg-white border border-gray-300 rounded-lg shadow p-4">
-          <h3 class="text-base font-semibold border-b pb-2 mb-2 text-gray-700">Áreas Interiores</h3>
-          <table class="w-full table-auto border-collapse text-sm">
-            <tbody>
-              <tr class="border-t"><td class="py-1"><strong>Paredes:</strong></td><td>{{this.paredes}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Ventanas:</strong></td><td>{{this.ventanas}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Pasillos:</strong></td><td>{{this.pasillos}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Varandas:</strong></td><td>{{this.varandas}}</td></tr>
-            </tbody>
-          </table>
-        </div>
+  <!-- Áreas supervisadas -->
+<div class="bg-white border border-gray-300 rounded-lg shadow p-4">
+  <h3 class="text-base font-semibold border-b pb-2 mb-4 text-gray-700">Áreas Supervisadas</h3>
+  <table class="w-full table-auto border-collapse text-sm">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="border px-2 py-1 text-left">Área</th>
+        <th class="border px-2 py-1 text-left">Estado</th>
+        <th class="border px-2 py-1 text-left">Acción Propuesta</th>
+        <th class="border px-2 py-1 text-left">Observación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="border px-2 py-1">Paredes</td>
+        <td class="border px-2 py-1">{{this.paredes}}</td>
+        <td class="border px-2 py-1">{{this.paredes_accion}}</td>
+        <td class="border px-2 py-1">{{this.paredes_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Ventanas Portería</td>
+        <td class="border px-2 py-1">{{this.ventanas}}</td>
+        <td class="border px-2 py-1">{{this.ventanas_accion}}</td>
+        <td class="border px-2 py-1">{{this.ventanas_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Pasillos</td>
+        <td class="border px-2 py-1">{{this.pasillos}}</td>
+        <td class="border px-2 py-1">{{this.pasillos_accion}}</td>
+        <td class="border px-2 py-1">{{this.pasillos_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Varandas</td>
+        <td class="border px-2 py-1">{{this.varandas}}</td>
+        <td class="border px-2 py-1">{{this.varandas_accion}}</td>
+        <td class="border px-2 py-1">{{this.varandas_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Salón Social</td>
+        <td class="border px-2 py-1">{{this.salon}}</td>
+        <td class="border px-2 py-1">{{this.salon_accion}}</td>
+        <td class="border px-2 py-1">{{this.salon_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Shup de Basura</td>
+        <td class="border px-2 py-1">{{this.shup}}</td>
+        <td class="border px-2 py-1">{{this.shup_accion}}</td>
+        <td class="border px-2 py-1">{{this.shup_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Terraza</td>
+        <td class="border px-2 py-1">{{this.terraza}}</td>
+        <td class="border px-2 py-1">{{this.terraza_accion}}</td>
+        <td class="border px-2 py-1">{{this.terraza_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Parqueaderos</td>
+        <td class="border px-2 py-1">{{this.parqueaderos}}</td>
+        <td class="border px-2 py-1">{{this.parqueaderos_accion}}</td>
+        <td class="border px-2 py-1">{{this.parqueaderos_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Jardinería</td>
+        <td class="border px-2 py-1">{{this.jardineria}}</td>
+        <td class="border px-2 py-1">{{this.jardineria_accion}}</td>
+        <td class="border px-2 py-1">{{this.jardineria_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Áreas Comunes</td>
+        <td class="border px-2 py-1">{{this.areas_comunes}}</td>
+        <td class="border px-2 py-1">{{this.areas_comunes_accion}}</td>
+        <td class="border px-2 py-1">{{this.areas_comunes_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Portería</td>
+        <td class="border px-2 py-1">{{this.porteria}}</td>
+        <td class="border px-2 py-1">{{this.porteria_accion}}</td>
+        <td class="border px-2 py-1">{{this.porteria_obs}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-        <!-- Comunes -->
-        <div class="bg-white border border-gray-300 rounded-lg shadow p-4">
-          <h3 class="text-base font-semibold border-b pb-2 mb-2 text-gray-700">Áreas Comunes</h3>
-          <table class="w-full table-auto border-collapse text-sm">
-            <tbody>
-              <tr class="border-t"><td class="py-1"><strong>Salón:</strong></td><td>{{this.salon}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Shup:</strong></td><td>{{this.shup}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Terraza:</strong></td><td>{{this.terraza}}</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Exteriores -->
-        <div class="bg-white border border-gray-300 rounded-lg shadow p-4">
-          <h3 class="text-base font-semibold border-b pb-2 mb-2 text-gray-700">Zonas Exteriores</h3>
-          <table class="w-full table-auto border-collapse text-sm">
-            <tbody>
-              <tr class="border-t"><td class="py-1"><strong>Parqueaderos:</strong></td><td>{{this.parqueaderos}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Jardinería:</strong></td><td>{{this.jardineria}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Áreas comunes:</strong></td><td>{{this.areas_comunes}}</td></tr>
-              <tr class="border-t"><td class="py-1"><strong>Portería:</strong></td><td>{{this.porteria}}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       <!-- Firmas -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 border border-gray-300 rounded-lg shadow mt-6">

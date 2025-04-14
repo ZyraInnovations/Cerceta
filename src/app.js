@@ -5943,6 +5943,15 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
   
 
 
+
+
+
+
+
+
+
+
+
   app.get('/Consulta_conserje', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -5951,6 +5960,95 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+app.post('/bitacora_conserje/consultar', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const { desde, hasta } = req.body;
+  
+      try {
+        const [resultados] = await pool.query(`
+          SELECT 
+            id,
+            edificio,
+            puesto_inspeccionado,
+            inspeccionado_por,
+            cargo,
+            fecha_creacion AS fecha,
+            presentacion,
+            presentacion_acc,
+  
+            \`Las paredes estan limpias y en buen estado\` AS paredes,
+            \`Las paredes estan limpias y en buen estado_Accion propuesta\` AS paredes_accion,
+            \`Las paredes estan limpias y en buen estado_Observacion\` AS paredes_obs,
+  
+            \`ventanas limpias de la porteria\` AS ventanas,
+            \`ventanas limpias de la porteria_Accion propuesta\` AS ventanas_accion,
+            \`ventanas limpias de la porteria_Observacion\` AS ventanas_obs,
+  
+            \`pasillos de las piso limpias\` AS pasillos,
+            \`pasillos de las piso limpias_Accion propuesta\` AS pasillos_accion,
+            \`pasillos de las piso limpias_Observacion\` AS pasillos_obs,
+  
+            \`varandas limpias\` AS varandas,
+            \`varandas limpias_Accion propuesta\` AS varandas_accion,
+            \`varandas limpias_Observacion\` AS varandas_obs,
+  
+            \`salon social limpio y en orden\` AS salon,
+            \`salon social limpio y en orden_Accion propuesta\` AS salon_accion,
+            \`salon social limpio y en orden_Observacion\` AS salon_obs,
+  
+            \`shup de basura limpio\` AS shup,
+            \`shup de basura limpio_Accion propuesta\` AS shup_accion,
+            \`shup de basura limpio_Observacion\` AS shup_obs,
+  
+            \`teraza limpia y en orden\` AS terraza,
+            \`teraza limpia y en orden_Accion propuesta\` AS terraza_accion,
+            \`teraza limpia y en orden_Observacion\` AS terraza_obs,
+  
+            \`zona de los parqueadetros limpios\` AS parqueaderos,
+            \`zona de los parqueadetros limpios_Accion propuesta\` AS parqueaderos_accion,
+            \`zona de los parqueadetros limpios_Observacion\` AS parqueaderos_obs,
+  
+            \`jardineria en orden\` AS jardineria,
+            \`jardineria en orden_Accion propuesta\` AS jardineria_accion,
+            \`jardineria en orden_Observacion\` AS jardineria_obs,
+  
+            \`areas comunes limpias\` AS areas_comunes,
+            \`areas comunes limpias_Accion propuesta\` AS areas_comunes_accion,
+            \`areas comunes limpias_Observacion\` AS areas_comunes_obs,
+  
+            \`porteria (recepcion) limpia\` AS porteria,
+            \`porteria (recepcion) limpia_Accion propuesta\` AS porteria_accion,
+            \`porteria (recepcion) limpia_Observacion\` AS porteria_obs,
+  
+            firmaSupervisorData,
+            firmaSupervisadoData
+  
+          FROM bitacora_aseo
+          WHERE fecha_creacion BETWEEN ? AND ?
+          ORDER BY fecha_creacion DESC
+        `, [desde, hasta]);
+  
+        res.render('administrativo/Bitacora/Aseo/consultar.hbs', {
+          registros: resultados,
+          desde,
+          hasta,
+          name: req.session.name,
+          layout: 'layouts/nav_admin.hbs'
+        });
+  
+      } catch (err) {
+        console.error("Error al consultar bitácora:", err);
+        res.status(500).send("Error al obtener los datos");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
 
 
 
