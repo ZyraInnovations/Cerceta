@@ -231,21 +231,74 @@
     });
   </script>
   <script>
-  function inicializarCanvas(idCanvas, idInput) {
-    const canvas = document.getElementById(idCanvas);
-    const ctx = canvas.getContext("2d");
-    let dibujando = false;
-    
-    canvas.addEventListener("mousedown", () => dibujando = true);
-    canvas.addEventListener("mouseup", () => dibujando = false);
-    canvas.addEventListener("mouseleave", () => dibujando = false);
-    canvas.addEventListener("mousemove", (e) => {
-      if (!dibujando) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-    });
-  }
+function inicializarCanvas(idCanvas, idInput) {
+  const canvas = document.getElementById(idCanvas);
+  const ctx = canvas.getContext("2d");
+  let dibujando = false;
+
+  // Escalar canvas para móviles (opcional)
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  // Versión para mouse
+  canvas.addEventListener("mousedown", (e) => {
+    dibujando = true;
+    ctx.beginPath();
+    const rect = canvas.getBoundingClientRect();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  });
+
+  canvas.addEventListener("mouseup", () => dibujando = false);
+  canvas.addEventListener("mouseleave", () => dibujando = false);
+  canvas.addEventListener("mousemove", (e) => {
+    if (!dibujando) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  });
+
+  // Versión para pantalla táctil
+  canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    dibujando = true;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  });
+
+  canvas.addEventListener("touchend", () => dibujando = false);
+  canvas.addEventListener("touchcancel", () => dibujando = false);
+  canvas.addEventListener("touchmove", (e) => {
+    if (!dibujando) return;
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.stroke();
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   function limpiarFirma(idCanvas) {
     const canvas = document.getElementById(idCanvas);
