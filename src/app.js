@@ -5999,6 +5999,115 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
     }
 });
 
+
+
+
+
+app.post('/bitacora_conserje/consultar', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const { desde, hasta } = req.body;
+  
+      try {
+        const [resultados] = await pool.query(`
+            SELECT
+            id,
+            edificio,
+            puesto_inspeccionado,
+            inspeccionado_por,
+            cargo,
+            fecha_creacion AS fecha,
+            presentacion,
+            presentacion_acc,
+            presentacion_obs,
+            elementos,
+            elementos_acc,
+            elementos_obs,
+            minutas,
+            minutas_acc,
+            minutas_obs,
+            horarios,
+            horarios_acc,
+            minutas_obs,        
+            horarios,
+            horarios_acc,
+            horarios_obs,
+            manual,
+            manual_acc,
+            manual_obs,
+            puesto_limpio,
+            puesto_limpio_acc,
+            puesto_limpio_obs,
+            recorridos,
+            recorridos_acc,
+            recorridos_obs,
+            mantenimiento,
+            mantenimiento_acc,
+            mantenimiento_obs,
+            vidrios,
+            vidrios_acc,
+            vidrios_obs,
+            shup,
+            shup_acc,
+            shup_obs,
+            parqueaderos,
+            parqueaderos_acc,
+            parqueaderos_obs,
+            novedades,
+            novedades_acc,
+            novedades_obs,
+            firmaSupervisorData,
+            firmaSupervisadoData
+  
+          FROM bitacora_aseo
+          WHERE fecha_creacion BETWEEN ? AND ?
+          ORDER BY fecha_creacion DESC
+        `, [desde, hasta]);
+  
+        res.render('administrativo/Bitacora/conserje/consulta.hbs', {
+          registros: resultados,
+          desde,
+          hasta,
+          name: req.session.name,
+          layout: 'layouts/nav_admin.hbs'
+        });
+  
+      } catch (err) {
+        console.error("Error al consultar bitácora:", err);
+        res.status(500).send("Error al obtener los datos");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });

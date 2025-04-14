@@ -54,7 +54,7 @@
       <p class="text-sm text-gray-500">Plataforma CERCETA</p>
     </div>
 
-    <form method="POST" action="/bitacora_aseo/consultar" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+    <form method="POST" action="/bitacora_conserje/consultar" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Desde</label>
         <input type="date" name="desde" value="{{desde}}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm" />
@@ -136,7 +136,7 @@
         <div><span class="font-semibold">Cargo:</span> {{this.cargo}}</div>
       </div>
 
-  <!-- Áreas supervisadas -->
+<!-- Áreas supervisadas -->
 <div class="bg-white border border-gray-300 rounded-lg shadow p-4">
   <h3 class="text-base font-semibold border-b pb-2 mb-4 text-gray-700">Áreas Supervisadas</h3>
   <table class="w-full table-auto border-collapse text-sm">
@@ -150,70 +150,76 @@
     </thead>
     <tbody>
       <tr>
-        <td class="border px-2 py-1">Paredes</td>
-        <td class="border px-2 py-1">{{this.paredes}}</td>
-        <td class="border px-2 py-1">{{this.paredes_accion}}</td>
-        <td class="border px-2 py-1">{{this.paredes_obs}}</td>
+        <td class="border px-2 py-1">Presentación</td>
+        <td class="border px-2 py-1">{{this.presentacion}}</td>
+        <td class="border px-2 py-1">{{this.presentacion_acc}}</td>
+        <td class="border px-2 py-1">{{this.presentacion_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Ventanas Portería</td>
-        <td class="border px-2 py-1">{{this.ventanas}}</td>
-        <td class="border px-2 py-1">{{this.ventanas_accion}}</td>
-        <td class="border px-2 py-1">{{this.ventanas_obs}}</td>
+        <td class="border px-2 py-1">Elementos</td>
+        <td class="border px-2 py-1">{{this.elementos}}</td>
+        <td class="border px-2 py-1">{{this.elementos_acc}}</td>
+        <td class="border px-2 py-1">{{this.elementos_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Pasillos</td>
-        <td class="border px-2 py-1">{{this.pasillos}}</td>
-        <td class="border px-2 py-1">{{this.pasillos_accion}}</td>
-        <td class="border px-2 py-1">{{this.pasillos_obs}}</td>
+        <td class="border px-2 py-1">Minutas</td>
+        <td class="border px-2 py-1">{{this.minutas}}</td>
+        <td class="border px-2 py-1">{{this.minutas_acc}}</td>
+        <td class="border px-2 py-1">{{this.minutas_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Varandas</td>
-        <td class="border px-2 py-1">{{this.varandas}}</td>
-        <td class="border px-2 py-1">{{this.varandas_accion}}</td>
-        <td class="border px-2 py-1">{{this.varandas_obs}}</td>
+        <td class="border px-2 py-1">Horarios</td>
+        <td class="border px-2 py-1">{{this.horarios}}</td>
+        <td class="border px-2 py-1">{{this.horarios_acc}}</td>
+        <td class="border px-2 py-1">{{this.horarios_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Salón Social</td>
-        <td class="border px-2 py-1">{{this.salon}}</td>
-        <td class="border px-2 py-1">{{this.salon_accion}}</td>
-        <td class="border px-2 py-1">{{this.salon_obs}}</td>
+        <td class="border px-2 py-1">Manual</td>
+        <td class="border px-2 py-1">{{this.manual}}</td>
+        <td class="border px-2 py-1">{{this.manual_acc}}</td>
+        <td class="border px-2 py-1">{{this.manual_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Shup de Basura</td>
+        <td class="border px-2 py-1">Puesto Limpio</td>
+        <td class="border px-2 py-1">{{this.puesto_limpio}}</td>
+        <td class="border px-2 py-1">{{this.puesto_limpio_acc}}</td>
+        <td class="border px-2 py-1">{{this.puesto_limpio_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Recorridos</td>
+        <td class="border px-2 py-1">{{this.recorridos}}</td>
+        <td class="border px-2 py-1">{{this.recorridos_acc}}</td>
+        <td class="border px-2 py-1">{{this.recorridos_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Mantenimiento</td>
+        <td class="border px-2 py-1">{{this.mantenimiento}}</td>
+        <td class="border px-2 py-1">{{this.mantenimiento_acc}}</td>
+        <td class="border px-2 py-1">{{this.mantenimiento_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Vidrios</td>
+        <td class="border px-2 py-1">{{this.vidrios}}</td>
+        <td class="border px-2 py-1">{{this.vidrios_acc}}</td>
+        <td class="border px-2 py-1">{{this.vidrios_obs}}</td>
+      </tr>
+      <tr>
+        <td class="border px-2 py-1">Shup</td>
         <td class="border px-2 py-1">{{this.shup}}</td>
-        <td class="border px-2 py-1">{{this.shup_accion}}</td>
+        <td class="border px-2 py-1">{{this.shup_acc}}</td>
         <td class="border px-2 py-1">{{this.shup_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Terraza</td>
-        <td class="border px-2 py-1">{{this.terraza}}</td>
-        <td class="border px-2 py-1">{{this.terraza_accion}}</td>
-        <td class="border px-2 py-1">{{this.terraza_obs}}</td>
       </tr>
       <tr>
         <td class="border px-2 py-1">Parqueaderos</td>
         <td class="border px-2 py-1">{{this.parqueaderos}}</td>
-        <td class="border px-2 py-1">{{this.parqueaderos_accion}}</td>
+        <td class="border px-2 py-1">{{this.parqueaderos_acc}}</td>
         <td class="border px-2 py-1">{{this.parqueaderos_obs}}</td>
       </tr>
       <tr>
-        <td class="border px-2 py-1">Jardinería</td>
-        <td class="border px-2 py-1">{{this.jardineria}}</td>
-        <td class="border px-2 py-1">{{this.jardineria_accion}}</td>
-        <td class="border px-2 py-1">{{this.jardineria_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Áreas Comunes</td>
-        <td class="border px-2 py-1">{{this.areas_comunes}}</td>
-        <td class="border px-2 py-1">{{this.areas_comunes_accion}}</td>
-        <td class="border px-2 py-1">{{this.areas_comunes_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Portería</td>
-        <td class="border px-2 py-1">{{this.porteria}}</td>
-        <td class="border px-2 py-1">{{this.porteria_accion}}</td>
-        <td class="border px-2 py-1">{{this.porteria_obs}}</td>
+        <td class="border px-2 py-1">Novedades</td>
+        <td class="border px-2 py-1">{{this.novedades}}</td>
+        <td class="border px-2 py-1">{{this.novedades_acc}}</td>
+        <td class="border px-2 py-1">{{this.novedades_obs}}</td>
       </tr>
     </tbody>
   </table>
@@ -303,7 +309,7 @@
      
 const opt = {
   margin: 0,
-  filename: 'bitacora_aseo.pdf',
+  filename: 'bitacora_conserje.pdf',
   image: { type: 'jpeg', quality: 1 },
   html2canvas: {
     scale: 2,
