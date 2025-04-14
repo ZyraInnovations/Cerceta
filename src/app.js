@@ -5834,6 +5834,55 @@ app.post('/acta_reunion', async (req, res) => {
 
 
 
+  app.get('/actas', async (req, res) => {
+    const { desde, hasta } = req.query;
+  
+    if (!desde || !hasta) {
+      return res.status(400).json({ message: 'Parámetros "desde" y "hasta" son requeridos' });
+    }
+  
+    try {
+      // Obtener las actas en el rango de fechas
+      const [actas] = await pool.query(
+        `SELECT * FROM actas WHERE fecha BETWEEN ? AND ? ORDER BY fecha DESC`,
+        [desde, hasta]
+      );
+  
+      // Para cada acta, obtener sus asistentes y acciones
+      const resultados = [];
+  
+      for (const acta of actas) {
+        const [asistentes] = await pool.query(
+          'SELECT cargo, nombre, firma FROM asistentes WHERE acta_id = ?',
+          [acta.id]
+        );
+  
+        const [acciones] = await pool.query(
+          'SELECT plan, responsable, fecha, recursos FROM acciones WHERE acta_id = ?',
+          [acta.id]
+        );
+  
+        resultados.push({
+          ...acta,
+          asistentes,
+          acciones
+        });
+      }
+  
+      res.json(resultados);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al consultar actas' });
+    }
+  });
+  
+
+
+
+
+
+
+
   app.get('/Consulta_aseo', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -5893,57 +5942,20 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
   });
   
 
-  app.get('/actas', async (req, res) => {
-    const { desde, hasta } = req.query;
-  
-    if (!desde || !hasta) {
-      return res.status(400).json({ message: 'Parámetros "desde" y "hasta" son requeridos' });
+
+  app.get('/Consulta_conserje', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/Bitacora/conserje/consulta.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
     }
+});
+
+
+
+
   
-    try {
-      // Obtener las actas en el rango de fechas
-      const [actas] = await pool.query(
-        `SELECT * FROM actas WHERE fecha BETWEEN ? AND ? ORDER BY fecha DESC`,
-        [desde, hasta]
-      );
-  
-      // Para cada acta, obtener sus asistentes y acciones
-      const resultados = [];
-  
-      for (const acta of actas) {
-        const [asistentes] = await pool.query(
-          'SELECT cargo, nombre, firma FROM asistentes WHERE acta_id = ?',
-          [acta.id]
-        );
-  
-        const [acciones] = await pool.query(
-          'SELECT plan, responsable, fecha, recursos FROM acciones WHERE acta_id = ?',
-          [acta.id]
-        );
-  
-        resultados.push({
-          ...acta,
-          asistentes,
-          acciones
-        });
-      }
-  
-      res.json(resultados);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error al consultar actas' });
-    }
-  });
-  
-
-
-
-
-
-
-
-
-
 
 app.get('/', (req, res) => {
     res.redirect('/login');
