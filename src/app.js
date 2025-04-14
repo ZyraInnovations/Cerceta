@@ -4922,6 +4922,7 @@ const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = 
 
 
 
+
 app.post('/bitacora_aseo/guardar', async (req, res) => {
   if (req.session.loggedin === true) {
     try {
@@ -5053,6 +5054,13 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
     res.redirect('/login');
   }
 });
+
+
+
+
+
+
+
 
 
 
@@ -5823,6 +5831,67 @@ app.post('/acta_reunion', async (req, res) => {
 
 
 
+
+
+
+  app.get('/Consulta_aseo', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/Bitacora/Aseo/consultar.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+app.post('/bitacora_aseo/consultar', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const { desde, hasta } = req.body;
+  
+      try {
+        const [resultados] = await pool.query(`
+          SELECT 
+            id,
+            edificio,
+            puesto_inspeccionado,
+            inspeccionado_por,
+            cargo,
+            fecha_creacion AS fecha,
+            \`Las paredes estan limpias y en buen estado\` AS paredes,
+            \`ventanas limpias de la porteria\` AS ventanas,
+            \`pasillos de las piso limpias\` AS pasillos,
+            \`varandas limpias\` AS varandas,
+            \`salon social limpio y en orden\` AS salon,
+            \`shup de basura limpio\` AS shup,
+            \`teraza limpia y en orden\` AS terraza,
+            \`zona de los parqueadetros limpios\` AS parqueaderos,
+            \`jardineria en orden\` AS jardineria,
+            \`areas comunes limpias\` AS areas_comunes,
+            \`porteria (recepcion) limpia\` AS porteria,
+            firmaSupervisorData,
+            firmaSupervisadoData
+          FROM bitacora_aseo
+          WHERE fecha_creacion BETWEEN ? AND ?
+          ORDER BY fecha_creacion DESC
+        `, [desde, hasta]);
+  
+        res.render('administrativo/Bitacora/Aseo/consultar.hbs', {
+          registros: resultados,
+          desde,
+          hasta,
+          name: req.session.name,
+          layout: 'layouts/nav_admin.hbs'
+        });
+  
+      } catch (err) {
+        console.error("Error al consultar bitácora:", err);
+        res.status(500).send("Error al obtener los datos");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
 
   app.get('/actas', async (req, res) => {
     const { desde, hasta } = req.query;
