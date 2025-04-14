@@ -23,6 +23,20 @@
       page-break-after: always;
     }
   }
+  @media print {
+  html, body {
+    overflow: hidden !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+  }
+}
+
 </style>
 
 
@@ -174,13 +188,13 @@
           {{/if}}
         </div>
       </div>
+      
+<div class="text-right mt-6">
+  <button onclick="descargarPDF('bitacora-{{this.id}}')" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded shadow font-semibold transition duration-200">
+    Descargar PDF
+  </button>
+</div>
 
-      <!-- Botón PDF -->
-      <div class="text-right mt-6">
-        <button onclick="descargarPDF('bitacora-{{this.id}}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded shadow font-semibold transition duration-200">
-          Descargar PDF
-        </button>
-      </div>
     </div>
   </td>
 </tr>
@@ -225,7 +239,12 @@
         detailRow.classList.remove('hidden');
         wasHidden = true;
       }
-      const element = document.getElementById(elementId);
+
+  const element = document.getElementById(elementId);
+
+  // 🔴 Ocultar todos los botones con la clase no-print antes de exportar
+  const botonesNoPrint = element.querySelectorAll('.no-print');
+  botonesNoPrint.forEach(btn => btn.style.display = 'none');
      
      
      
@@ -251,8 +270,11 @@ const opt = {
 
 
       html2pdf().set(opt).from(element).save().then(() => {
-        if (wasHidden && detailRow) {
-          detailRow.classList.add('hidden');
+  botonesNoPrint.forEach(btn => btn.style.display = '');
+
+    if (wasHidden && detailRow) {
+      detailRow.classList.add('hidden');
+    
         }
       });
     }
