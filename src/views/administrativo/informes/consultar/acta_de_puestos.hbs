@@ -1,106 +1,122 @@
-<h1 class="text-xl font-bold mb-4">Consultar Actas de Puestos</h1>
+<h1 class="text-2xl font-bold text-gray-800 mb-6">📋 Consulta de Actas de Puestos</h1>
 
-<form method="POST" action="/Consulta_acta_puestos" class="flex flex-wrap items-end gap-4">
+<form method="POST" action="/Consulta_acta_puestos" class="flex flex-wrap items-end gap-4 bg-white shadow rounded-lg p-4 mb-8">
   <div>
-    <label class="text-sm font-semibold">Desde:</label>
-    <input type="date" name="desde" required class="border rounded px-2 py-1" value="{{desde}}">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Desde:</label>
+    <input type="date" name="desde" required class="border rounded px-3 py-2 text-sm shadow-sm w-48" value="{{desde}}">
   </div>
   <div>
-    <label class="text-sm font-semibold">Hasta:</label>
-    <input type="date" name="hasta" required class="border rounded px-2 py-1" value="{{hasta}}">
+    <label class="block text-sm font-medium text-gray-700 mb-1">Hasta:</label>
+    <input type="date" name="hasta" required class="border rounded px-3 py-2 text-sm shadow-sm w-48" value="{{hasta}}">
   </div>
-  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Consultar</button>
+  <button type="submit" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded text-sm font-semibold shadow">
+    Consultar
+  </button>
 </form>
 
 {{#if registros.length}}
-  <div class="mt-6">
+  <div class="space-y-6">
     {{#each registros}}
-      <div class="border rounded-lg mb-4 shadow-sm">
-        <div class="flex justify-between items-center px-4 py-2 bg-gray-100">
-          <div>
+      <div class="border rounded-lg shadow-md overflow-hidden">
+        <!-- Cabecera compacta -->
+        <div class="flex justify-between items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-white border-b">
+          <div class="text-sm text-gray-800 space-y-1">
             <p><strong>📅 Fecha:</strong> {{this.fecha}}</p>
             <p><strong>📍 Puesto:</strong> {{this.nombre_puesto}}</p>
             <p><strong>🏢 Empresa Recibe:</strong> {{this.empresa_recibe}}</p>
             <p><strong>🏢 Empresa Entrega:</strong> {{this.empresa_entrega}}</p>
           </div>
-          <button onclick="toggleDetalle('{{this.id}}')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">Ver Detalles</button>
+          <button onclick="toggleDetalle('{{this.id}}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm shadow">
+            Ver Detalles
+          </button>
         </div>
 
-        <div id="detalle-{{this.id}}" class="hidden bg-white px-6 py-4 space-y-4">
-          <div class="grid md:grid-cols-2 gap-4 text-sm">
-            <p><strong>Hora:</strong> {{this.hora}}</p>
-            <p><strong>Instalación:</strong> {{#if this.instalacion}}Sí{{else}}No{{/if}}</p>
-            <p><strong>Levantamiento:</strong> {{#if this.levantamiento}}Sí{{else}}No{{/if}}</p>
-            <p><strong>Responsable Recibe:</strong> {{this.responsable_recibe}}</p>
-            <p><strong>Responsable Entrega:</strong> {{this.responsable_entrega}}</p>
-            <p><strong>Representante Cliente:</strong> {{this.representante_cliente}}</p>
-            <p><strong>Observaciones:</strong> {{this.observaciones}}</p>
+        <!-- Detalle colapsable -->
+        <div id="detalle-{{this.id}}" class="hidden px-6 py-6 bg-white text-sm space-y-6">
+          <!-- Datos generales -->
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <p><strong>⏰ Hora:</strong> {{this.hora}}</p>
+              <p><strong>⚙️ Instalación:</strong> {{#if this.instalacion}}Sí{{else}}No{{/if}}</p>
+              <p><strong>🔧 Levantamiento:</strong> {{#if this.levantamiento}}Sí{{else}}No{{/if}}</p>
+            </div>
+            <div>
+              <p><strong>👤 Responsable Recibe:</strong> {{this.responsable_recibe}}</p>
+              <p><strong>👤 Responsable Entrega:</strong> {{this.responsable_entrega}}</p>
+              <p><strong>👤 Representante Cliente:</strong> {{this.representante_cliente}}</p>
+            </div>
+            <div class="md:col-span-2">
+              <p><strong>📝 Observaciones:</strong> {{this.observaciones}}</p>
+            </div>
           </div>
 
+          <!-- Propiedad del cliente -->
           {{#if this.propiedad_cliente.length}}
           <div>
-            <h3 class="font-bold mt-4 mb-2">Propiedad del Cliente</h3>
-            <table class="w-full border text-xs">
-              <thead class="bg-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-2">📦 Propiedad del Cliente</h3>
+            <table class="w-full text-xs border rounded-lg overflow-hidden">
+              <thead class="bg-gray-100 text-left">
                 <tr>
-                  <th class="border px-2 py-1">Artículo</th>
-                  <th class="border px-2 py-1">Cantidad</th>
-                  <th class="border px-2 py-1">Estado</th>
-                  <th class="border px-2 py-1">Observaciones</th>
+                  <th class="border px-3 py-2">Artículo</th>
+                  <th class="border px-3 py-2">Cantidad</th>
+                  <th class="border px-3 py-2">Estado</th>
+                  <th class="border px-3 py-2">Observaciones</th>
                 </tr>
               </thead>
               <tbody>
                 {{#each this.propiedad_cliente}}
-                  <tr>
-                    <td class="border px-2 py-1">{{this.articulo}}</td>
-                    <td class="border px-2 py-1">{{this.cantidad}}</td>
-                    <td class="border px-2 py-1">{{this.estado}}</td>
-                    <td class="border px-2 py-1">{{this.observaciones}}</td>
-                  </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="border px-3 py-1">{{this.articulo}}</td>
+                  <td class="border px-3 py-1">{{this.cantidad}}</td>
+                  <td class="border px-3 py-1">{{this.estado}}</td>
+                  <td class="border px-3 py-1">{{this.observaciones}}</td>
+                </tr>
                 {{/each}}
               </tbody>
             </table>
           </div>
           {{/if}}
 
+          <!-- Inventario del puesto -->
           {{#if this.inventario_puesto.length}}
           <div>
-            <h3 class="font-bold mt-4 mb-2">Inventario del Puesto</h3>
-            <table class="w-full border text-xs">
-              <thead class="bg-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-2">📋 Inventario del Puesto</h3>
+            <table class="w-full text-xs border rounded-lg overflow-hidden">
+              <thead class="bg-gray-100 text-left">
                 <tr>
-                  <th class="border px-2 py-1">Artículo</th>
-                  <th class="border px-2 py-1">Cantidad</th>
-                  <th class="border px-2 py-1">Estado</th>
-                  <th class="border px-2 py-1">Observaciones</th>
+                  <th class="border px-3 py-2">Artículo</th>
+                  <th class="border px-3 py-2">Cantidad</th>
+                  <th class="border px-3 py-2">Estado</th>
+                  <th class="border px-3 py-2">Observaciones</th>
                 </tr>
               </thead>
               <tbody>
                 {{#each this.inventario_puesto}}
-                  <tr>
-                    <td class="border px-2 py-1">{{this.articulo}}</td>
-                    <td class="border px-2 py-1">{{this.cantidad}}</td>
-                    <td class="border px-2 py-1">{{this.estado}}</td>
-                    <td class="border px-2 py-1">{{this.observaciones}}</td>
-                  </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="border px-3 py-1">{{this.articulo}}</td>
+                  <td class="border px-3 py-1">{{this.cantidad}}</td>
+                  <td class="border px-3 py-1">{{this.estado}}</td>
+                  <td class="border px-3 py-1">{{this.observaciones}}</td>
+                </tr>
                 {{/each}}
               </tbody>
             </table>
           </div>
           {{/if}}
 
-          <div class="grid md:grid-cols-3 gap-4 mt-4 text-center">
+          <!-- Firmas -->
+          <div class="grid md:grid-cols-3 gap-4 text-center mt-6">
             <div>
-              <p class="font-semibold mb-1">Firma Cliente</p>
-              <img src="{{this.firma_cliente}}" alt="Firma cliente" class="border h-32 mx-auto object-contain">
+              <p class="font-semibold mb-1">🖊 Firma Cliente</p>
+              <img src="{{this.firma_cliente}}" alt="Firma cliente" class="border bg-gray-50 h-32 w-full object-contain rounded-md shadow-sm">
             </div>
             <div>
-              <p class="font-semibold mb-1">Firma Recibe</p>
-              <img src="{{this.firma_recibe}}" alt="Firma recibe" class="border h-32 mx-auto object-contain">
+              <p class="font-semibold mb-1">🖊 Firma Recibe</p>
+              <img src="{{this.firma_recibe}}" alt="Firma recibe" class="border bg-gray-50 h-32 w-full object-contain rounded-md shadow-sm">
             </div>
             <div>
-              <p class="font-semibold mb-1">Firma Entrega</p>
-              <img src="{{this.firma_entrega}}" alt="Firma entrega" class="border h-32 mx-auto object-contain">
+              <p class="font-semibold mb-1">🖊 Firma Entrega</p>
+              <img src="{{this.firma_entrega}}" alt="Firma entrega" class="border bg-gray-50 h-32 w-full object-contain rounded-md shadow-sm">
             </div>
           </div>
         </div>
