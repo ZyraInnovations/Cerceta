@@ -129,12 +129,13 @@
         <h2 class="text-xl font-bold tracking-wide text-gray-700 uppercase">Supervisión de conserjes</h2>
       </div>
 
-      <!-- Información general -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-4 border border-gray-300 rounded-lg shadow">
-        <div><span class="font-semibold">Edificio:</span> {{this.edificio}}</div>
-        <div><span class="font-semibold">Inspeccionado por:</span> {{this.inspeccionado_por}}</div>
-        <div><span class="font-semibold">Cargo:</span> {{this.cargo}}</div>
-      </div>
+<!-- Información general -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white p-4 border border-gray-300 rounded-lg shadow">
+  <div><span class="font-semibold">Edificio:</span> {{this.edificio}}</div>
+  <div><span class="font-semibold">Puesto Inspeccionado:</span> {{this.puesto_inspeccionado}}</div>
+  <div><span class="font-semibold">Inspeccionado por:</span> {{this.inspeccionado_por}}</div>
+  <div><span class="font-semibold">Cargo:</span> {{this.cargo}}</div>
+</div>
 
 <!-- Áreas supervisadas -->
 <div class="bg-white border border-gray-300 rounded-lg shadow p-4">
@@ -149,81 +150,22 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td class="border px-2 py-1">Presentación</td>
-        <td class="border px-2 py-1">{{this.presentacion}}</td>
-        <td class="border px-2 py-1">{{this.presentacion_acc}}</td>
-        <td class="border px-2 py-1">{{this.presentacion_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Elementos</td>
-        <td class="border px-2 py-1">{{this.elementos}}</td>
-        <td class="border px-2 py-1">{{this.elementos_acc}}</td>
-        <td class="border px-2 py-1">{{this.elementos_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Minutas</td>
-        <td class="border px-2 py-1">{{this.minutas}}</td>
-        <td class="border px-2 py-1">{{this.minutas_acc}}</td>
-        <td class="border px-2 py-1">{{this.minutas_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Horarios</td>
-        <td class="border px-2 py-1">{{this.horarios}}</td>
-        <td class="border px-2 py-1">{{this.horarios_acc}}</td>
-        <td class="border px-2 py-1">{{this.horarios_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Manual</td>
-        <td class="border px-2 py-1">{{this.manual}}</td>
-        <td class="border px-2 py-1">{{this.manual_acc}}</td>
-        <td class="border px-2 py-1">{{this.manual_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Puesto Limpio</td>
-        <td class="border px-2 py-1">{{this.puesto_limpio}}</td>
-        <td class="border px-2 py-1">{{this.puesto_limpio_acc}}</td>
-        <td class="border px-2 py-1">{{this.puesto_limpio_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Recorridos</td>
-        <td class="border px-2 py-1">{{this.recorridos}}</td>
-        <td class="border px-2 py-1">{{this.recorridos_acc}}</td>
-        <td class="border px-2 py-1">{{this.recorridos_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Mantenimiento</td>
-        <td class="border px-2 py-1">{{this.mantenimiento}}</td>
-        <td class="border px-2 py-1">{{this.mantenimiento_acc}}</td>
-        <td class="border px-2 py-1">{{this.mantenimiento_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Vidrios</td>
-        <td class="border px-2 py-1">{{this.vidrios}}</td>
-        <td class="border px-2 py-1">{{this.vidrios_acc}}</td>
-        <td class="border px-2 py-1">{{this.vidrios_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Shup</td>
-        <td class="border px-2 py-1">{{this.shup}}</td>
-        <td class="border px-2 py-1">{{this.shup_acc}}</td>
-        <td class="border px-2 py-1">{{this.shup_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Parqueaderos</td>
-        <td class="border px-2 py-1">{{this.parqueaderos}}</td>
-        <td class="border px-2 py-1">{{this.parqueaderos_acc}}</td>
-        <td class="border px-2 py-1">{{this.parqueaderos_obs}}</td>
-      </tr>
-      <tr>
-        <td class="border px-2 py-1">Novedades</td>
-        <td class="border px-2 py-1">{{this.novedades}}</td>
-        <td class="border px-2 py-1">{{this.novedades_acc}}</td>
-        <td class="border px-2 py-1">{{this.novedades_obs}}</td>
-      </tr>
+      <tr><td class="border px-2 py-1">Presentación</td><td class="border px-2 py-1">{{this.presentacion}}</td><td class="border px-2 py-1">{{this.presentacion_acc}}</td><td class="border px-2 py-1">{{this.presentacion_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Elementos</td><td class="border px-2 py-1">{{this.elementos}}</td><td class="border px-2 py-1">{{this.elementos_acc}}</td><td class="border px-2 py-1">{{this.elementos_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Minutas</td><td class="border px-2 py-1">{{this.minutas}}</td><td class="border px-2 py-1">{{this.minutas_acc}}</td><td class="border px-2 py-1">{{this.minutas_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Horarios</td><td class="border px-2 py-1">{{this.horarios}}</td><td class="border px-2 py-1">{{this.horarios_acc}}</td><td class="border px-2 py-1">{{this.horarios_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Manual</td><td class="border px-2 py-1">{{this.manual}}</td><td class="border px-2 py-1">{{this.manual_acc}}</td><td class="border px-2 py-1">{{this.manual_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Puesto Limpio</td><td class="border px-2 py-1">{{this.puesto_limpio}}</td><td class="border px-2 py-1">{{this.puesto_limpio_acc}}</td><td class="border px-2 py-1">{{this.puesto_limpio_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Recorridos</td><td class="border px-2 py-1">{{this.recorridos}}</td><td class="border px-2 py-1">{{this.recorridos_acc}}</td><td class="border px-2 py-1">{{this.recorridos_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Mantenimiento</td><td class="border px-2 py-1">{{this.mantenimiento}}</td><td class="border px-2 py-1">{{this.mantenimiento_acc}}</td><td class="border px-2 py-1">{{this.mantenimiento_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Vidrios</td><td class="border px-2 py-1">{{this.vidrios}}</td><td class="border px-2 py-1">{{this.vidrios_acc}}</td><td class="border px-2 py-1">{{this.vidrios_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Shup</td><td class="border px-2 py-1">{{this.shup}}</td><td class="border px-2 py-1">{{this.shup_acc}}</td><td class="border px-2 py-1">{{this.shup_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Parqueaderos</td><td class="border px-2 py-1">{{this.parqueaderos}}</td><td class="border px-2 py-1">{{this.parqueaderos_acc}}</td><td class="border px-2 py-1">{{this.parqueaderos_obs}}</td></tr>
+      <tr><td class="border px-2 py-1">Novedades</td><td class="border px-2 py-1">{{this.novedades}}</td><td class="border px-2 py-1">{{this.novedades_acc}}</td><td class="border px-2 py-1">{{this.novedades_obs}}</td></tr>
     </tbody>
   </table>
 </div>
+
 
 
       <!-- Firmas -->
