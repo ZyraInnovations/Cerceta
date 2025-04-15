@@ -144,54 +144,64 @@
     <button type="submit" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
   </form>
 <script>
-  function inicializarCanvas(idCanvas, idInput) {
-    const canvas = document.getElementById(idCanvas);
-    const input = document.getElementById(idInput);
-    const ctx = canvas.getContext('2d');
-    let dibujando = false;
+ function inicializarCanvas(idCanvas, idInput) {
+  const canvas = document.getElementById(idCanvas);
+  const input = document.getElementById(idInput);
+  const ctx = canvas.getContext('2d');
+  let dibujando = false;
 
-    canvas.addEventListener('mousedown', () => dibujando = true);
-    canvas.addEventListener('mouseup', () => {
-      dibujando = false;
-      guardarFirma(canvas, input);
-    });
-    canvas.addEventListener('mouseout', () => dibujando = false);
-    canvas.addEventListener('mousemove', function (e) {
-      if (!dibujando) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#000";
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
+  // Asegurar dimensiones correctas para móviles
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
 
-    // Soporte táctil para móviles
-    canvas.addEventListener('touchstart', e => {
-      e.preventDefault();
-      dibujando = true;
-    }, { passive: false });
+  // Mouse
+  canvas.addEventListener('mousedown', () => dibujando = true);
+  canvas.addEventListener('mouseup', () => {
+    dibujando = false;
+    guardarFirma(canvas, input);
+  });
+  canvas.addEventListener('mouseout', () => dibujando = false);
+  canvas.addEventListener('mousemove', function (e) {
+    if (!dibujando) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  });
 
-    canvas.addEventListener('touchend', e => {
-      e.preventDefault();
-      dibujando = false;
-      guardarFirma(canvas, input);
-    }, { passive: false });
+  // Touch
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    dibujando = true;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
 
-canvas.addEventListener('touchmove', function (e) {
-  if (!dibujando || !e.touches.length) return;
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#000";
-  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-}, { passive: false });
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    dibujando = false;
+    guardarFirma(canvas, input);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function (e) {
+    if (!dibujando || !e.touches.length) return;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
+}
 
 
   function guardarFirma(canvas, input) {
