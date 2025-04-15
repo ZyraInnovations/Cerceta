@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Acta de Instalación y Levantamiento del Puesto</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="p-6 bg-white text-sm">
-  <form class="space-y-6">
+
+  <form method="POST" action="/guardar_acta_puesto" class="space-y-6">
     <div class="text-center font-bold text-xl">ACTA DE INSTALACIÓN Y LEVANTAMIENTO DEL PUESTO</div>
+
     <div class="flex justify-between text-xs">
       <div>SST-OP-02</div>
       <div>VERSIÓN: 01</div>
@@ -19,19 +21,19 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block font-semibold">Fecha:</label>
-        <input type="date" class="border p-1 w-full" name="fecha" />
+        <input type="date" class="border p-1 w-full" name="fecha" required />
       </div>
       <div>
         <label class="block font-semibold">Hora:</label>
-        <input type="time" class="border p-1 w-full" name="hora" />
+        <input type="time" class="border p-1 w-full" name="hora" required />
       </div>
       <div>
         <label class="block font-semibold">¿Instalación?</label>
-        <input type="checkbox" class="mr-2" name="instalacion" />
+        <input type="checkbox" class="mr-2" name="instalacion" value="1" />
       </div>
       <div>
         <label class="block font-semibold">¿Levantamiento?</label>
-        <input type="checkbox" class="mr-2" name="levantamiento" />
+        <input type="checkbox" class="mr-2" name="levantamiento" value="1" />
       </div>
     </div>
 
@@ -71,7 +73,7 @@
         </thead>
         <tbody id="propiedadCliente"></tbody>
       </table>
-      <button type="button" onclick="agregarFila('propiedadCliente')" class="mt-2 px-2 py-1 bg-blue-500 text-white rounded">Agregar Fila</button>
+      <button type="button" onclick="agregarFila('propiedadCliente', 'propiedad_cliente')" class="mt-2 px-2 py-1 bg-blue-500 text-white rounded">Agregar Fila</button>
     </div>
 
     <!-- Tabla Inventario del Puesto -->
@@ -90,7 +92,7 @@
         </thead>
         <tbody id="inventarioPuesto"></tbody>
       </table>
-      <button type="button" onclick="agregarFila('inventarioPuesto')" class="mt-2 px-2 py-1 bg-blue-500 text-white rounded">Agregar Fila</button>
+      <button type="button" onclick="agregarFila('inventarioPuesto', 'inventario_puesto')" class="mt-2 px-2 py-1 bg-blue-500 text-white rounded">Agregar Fila</button>
     </div>
 
     <!-- Observaciones y Firmas -->
@@ -102,15 +104,15 @@
     <div class="grid grid-cols-2 gap-4 mt-4">
       <div>
         <label class="font-semibold">Firma del representante del cliente:</label>
-        <input type="text" class="border p-1 w-full" />
+        <input type="text" class="border p-1 w-full" name="firma_cliente" />
       </div>
       <div>
         <label class="font-semibold">Firma representante de la empresa que recibe:</label>
-        <input type="text" class="border p-1 w-full" />
+        <input type="text" class="border p-1 w-full" name="firma_recibe" />
       </div>
       <div>
         <label class="font-semibold">Firma representante de la empresa que entrega:</label>
-        <input type="text" class="border p-1 w-full" />
+        <input type="text" class="border p-1 w-full" name="firma_entrega" />
       </div>
     </div>
 
@@ -120,18 +122,21 @@
   </form>
 
   <script>
-    function agregarFila(tablaId) {
+    function agregarFila(tablaId, prefix) {
+      const tbody = document.getElementById(tablaId);
+      const index = tbody.querySelectorAll('tr').length;
       const fila = `
         <tr>
-          <td class='border'><input type='text' name='articulo[]' class='w-full p-1'></td>
-          <td class='border'><input type='number' name='cantidad[]' class='w-full p-1'></td>
-          <td class='border text-center'><input type='radio' name='estadoB${Date.now()}' value='B'></td>
-          <td class='border text-center'><input type='radio' name='estadoB${Date.now()}' value='R'></td>
-          <td class='border text-center'><input type='radio' name='estadoB${Date.now()}' value='M'></td>
-          <td class='border'><input type='text' name='observaciones[]' class='w-full p-1'></td>
+          <td class='border'><input type='text' name='${prefix}_articulo[]' class='w-full p-1'></td>
+          <td class='border'><input type='number' name='${prefix}_cantidad[]' class='w-full p-1'></td>
+          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='B'></td>
+          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='R'></td>
+          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='M'></td>
+          <td class='border'><input type='text' name='${prefix}_observaciones[]' class='w-full p-1'></td>
         </tr>`;
-      document.getElementById(tablaId).insertAdjacentHTML('beforeend', fila);
+      tbody.insertAdjacentHTML('beforeend', fila);
     }
   </script>
+
 </body>
 </html>

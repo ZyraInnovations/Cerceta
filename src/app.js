@@ -5758,6 +5758,128 @@ app.get('/acta_puestos', async (req, res) => {
 
 
 
+
+
+app.post('/guardar_acta_puesto', async (req, res) => {
+    try {
+      console.log('📥 Datos completos recibidos en req.body:', req.body);
+  
+      const {
+        fecha,
+        hora,
+        instalacion,
+        levantamiento,
+        nombre_puesto,
+        empresa_recibe,
+        empresa_entrega,
+        responsable_recibe,
+        responsable_entrega,
+        representante_cliente,
+        observaciones,
+        firma_cliente,
+        firma_recibe,
+        firma_entrega
+      } = req.body;
+  
+      // 🛡️ Función para forzar conversión a array
+      const parseToArray = value => Array.isArray(value) ? value : (value ? [value] : []);
+  
+      // ✅ Acceder correctamente a los campos múltiples (aunque solo haya una fila)
+      const propiedad_cliente_articulo = parseToArray(req.body['propiedad_cliente_articulo[]']);
+      const propiedad_cliente_cantidad = parseToArray(req.body['propiedad_cliente_cantidad[]']);
+      const propiedad_cliente_observaciones = parseToArray(req.body['propiedad_cliente_observaciones[]']);
+  
+      const inventario_puesto_articulo = parseToArray(req.body['inventario_puesto_articulo[]']);
+      const inventario_puesto_cantidad = parseToArray(req.body['inventario_puesto_cantidad[]']);
+      const inventario_puesto_observaciones = parseToArray(req.body['inventario_puesto_observaciones[]']);
+  
+      // 🧩 Insertar acta
+      const [result] = await pool.query(`
+        INSERT INTO acta_puestos (
+          fecha, hora, instalacion, levantamiento, nombre_puesto,
+          empresa_recibe, empresa_entrega, responsable_recibe,
+          responsable_entrega, representante_cliente, observaciones,
+          firma_cliente, firma_recibe, firma_entrega
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        fecha,
+        hora,
+        !!instalacion,
+        !!levantamiento,
+        nombre_puesto,
+        empresa_recibe,
+        empresa_entrega,
+        responsable_recibe,
+        responsable_entrega,
+        representante_cliente,
+        observaciones,
+        firma_cliente,
+        firma_recibe,
+        firma_entrega
+      ]);
+  
+      const actaId = result.insertId;
+      console.log('🆔 ID de acta guardada:', actaId);
+  
+      // 🔍 Recolectar estados dinámicos
+      const propiedadEstados = [];
+      const inventarioEstados = [];
+  
+      for (let i = 0; i < propiedad_cliente_articulo.length; i++) {
+        const estado = req.body[`propiedad_cliente_estado_${i}`];
+        console.log(`🧾 propiedad_cliente_estado_${i}:`, estado);
+        propiedadEstados.push(estado || null);
+      }
+  
+      for (let i = 0; i < inventario_puesto_articulo.length; i++) {
+        const estado = req.body[`inventario_puesto_estado_${i}`];
+        console.log(`📦 inventario_puesto_estado_${i}:`, estado);
+        inventarioEstados.push(estado || null);
+      }
+  
+      // ✅ Insertar propiedad_cliente
+      if (propiedad_cliente_articulo.length > 0) {
+        const propiedadData = propiedad_cliente_articulo.map((_, i) => [
+          actaId,
+          propiedad_cliente_articulo[i],
+          propiedad_cliente_cantidad[i],
+          propiedad_cliente_observaciones[i],
+          propiedadEstados[i]
+        ]);
+        console.log('📤 Insertando propiedad_cliente:', propiedadData);
+        await pool.query(
+          `INSERT INTO propiedad_cliente (acta_puesto_id, articulo, cantidad, observaciones, estado) VALUES ?`,
+          [propiedadData]
+        );
+      }
+  
+      // ✅ Insertar inventario_puesto
+      if (inventario_puesto_articulo.length > 0) {
+        const inventarioData = inventario_puesto_articulo.map((_, i) => [
+          actaId,
+          inventario_puesto_articulo[i],
+          inventario_puesto_cantidad[i],
+          inventario_puesto_observaciones[i],
+          inventarioEstados[i]
+        ]);
+        console.log('📤 Insertando inventario_puesto:', inventarioData);
+        await pool.query(
+          `INSERT INTO inventario_puesto (acta_puesto_id, articulo, cantidad, observaciones, estado) VALUES ?`,
+          [inventarioData]
+        );
+      }
+  
+      res.send('✅ Acta y detalles guardados correctamente');
+    } catch (error) {
+      console.error('❌ Error al guardar acta:', error);
+      res.status(500).send('Error al guardar acta');
+    }
+  });
+  
+  
+
+
+
 app.post('/acta_reunion', async (req, res) => {
     try {
       const {
