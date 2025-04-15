@@ -5760,6 +5760,7 @@ app.get('/acta_puestos', async (req, res) => {
 
 
 
+
 app.post('/guardar_acta_puesto', async (req, res) => {
     try {
       console.log('📥 Datos completos recibidos en req.body:', req.body);
@@ -5880,6 +5881,8 @@ app.post('/guardar_acta_puesto', async (req, res) => {
 
 
 
+
+
 app.post('/acta_reunion', async (req, res) => {
     try {
       const {
@@ -5927,6 +5930,8 @@ app.post('/acta_reunion', async (req, res) => {
       res.status(500).json({ message: 'Error al guardar el acta' });
     }
   });
+
+
 
 
 
@@ -6223,11 +6228,78 @@ app.post('/bitacora_conserje/consultar', async (req, res) => {
 
 
 
+// Mostrar formulario (GET)
+app.get('/Consulta_acta_puestos', (req, res) => {
+    if (req.session.loggedin === true) {
+      const name = req.session.name;
+      const hoy = new Date().toISOString().split('T')[0];
+      res.render('administrativo/informes/consultar/acta_de_puestos.hbs', {
+        name,
+        desde: hoy,
+        hasta: hoy,
+        registros: [],
+        layout: 'layouts/nav_admin.hbs'
+      });
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
 
-
-
-
-
+  app.post('/Consulta_acta_puestos', async (req, res) => {
+    try {
+      const { desde, hasta } = req.body;
+  
+      // 1. Obtener actas
+      const [actas] = await pool.query(`
+        SELECT * FROM acta_puestos
+        WHERE fecha BETWEEN ? AND ?
+        ORDER BY fecha DESC
+      `, [desde, hasta]);
+  
+      // 2. Obtener propiedad_cliente
+      const [propiedades] = await pool.query(`
+        SELECT * FROM propiedad_cliente
+        WHERE acta_puesto_id IN (
+          SELECT id FROM acta_puestos WHERE fecha BETWEEN ? AND ?
+        )
+      `, [desde, hasta]);
+  
+      // 3. Obtener inventario_puesto
+      const [inventarios] = await pool.query(`
+        SELECT * FROM inventario_puesto
+        WHERE acta_puesto_id IN (
+          SELECT id FROM acta_puestos WHERE fecha BETWEEN ? AND ?
+        )
+      `, [desde, hasta]);
+  
+      // 4. Agrupar
+      const registros = actas.map(acta => {
+        const propiedad_cliente = propiedades.filter(p => p.acta_puesto_id === acta.id);
+        const inventario_puesto = inventarios.filter(i => i.acta_puesto_id === acta.id);
+        return {
+          ...acta,
+          propiedad_cliente,
+          inventario_puesto
+        };
+      });
+  
+      res.render('administrativo/informes/consultar/acta_de_puestos.hbs', {
+        name: req.session.name,
+        layout: 'layouts/nav_admin.hbs',
+        registros,
+        desde,
+        hasta
+      });
+  
+    } catch (error) {
+      console.error('❌ Error al consultar actas:', error);
+      res.status(500).send('Error al consultar actas');
+    }
+  });
+  
+  
+  
 
 
 app.get('/', (req, res) => {

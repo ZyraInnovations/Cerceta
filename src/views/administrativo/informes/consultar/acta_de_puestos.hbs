@@ -1,0 +1,119 @@
+<h1 class="text-xl font-bold mb-4">Consultar Actas de Puestos</h1>
+
+<form method="POST" action="/Consulta_acta_puestos" class="flex flex-wrap items-end gap-4">
+  <div>
+    <label class="text-sm font-semibold">Desde:</label>
+    <input type="date" name="desde" required class="border rounded px-2 py-1" value="{{desde}}">
+  </div>
+  <div>
+    <label class="text-sm font-semibold">Hasta:</label>
+    <input type="date" name="hasta" required class="border rounded px-2 py-1" value="{{hasta}}">
+  </div>
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Consultar</button>
+</form>
+
+{{#if registros.length}}
+  <div class="mt-6">
+    {{#each registros}}
+      <div class="border rounded-lg mb-4 shadow-sm">
+        <div class="flex justify-between items-center px-4 py-2 bg-gray-100">
+          <div>
+            <p><strong>📅 Fecha:</strong> {{this.fecha}}</p>
+            <p><strong>📍 Puesto:</strong> {{this.nombre_puesto}}</p>
+            <p><strong>🏢 Empresa Recibe:</strong> {{this.empresa_recibe}}</p>
+            <p><strong>🏢 Empresa Entrega:</strong> {{this.empresa_entrega}}</p>
+          </div>
+          <button onclick="toggleDetalle('{{this.id}}')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">Ver Detalles</button>
+        </div>
+
+        <div id="detalle-{{this.id}}" class="hidden bg-white px-6 py-4 space-y-4">
+          <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <p><strong>Hora:</strong> {{this.hora}}</p>
+            <p><strong>Instalación:</strong> {{#if this.instalacion}}Sí{{else}}No{{/if}}</p>
+            <p><strong>Levantamiento:</strong> {{#if this.levantamiento}}Sí{{else}}No{{/if}}</p>
+            <p><strong>Responsable Recibe:</strong> {{this.responsable_recibe}}</p>
+            <p><strong>Responsable Entrega:</strong> {{this.responsable_entrega}}</p>
+            <p><strong>Representante Cliente:</strong> {{this.representante_cliente}}</p>
+            <p><strong>Observaciones:</strong> {{this.observaciones}}</p>
+          </div>
+
+          {{#if this.propiedad_cliente.length}}
+          <div>
+            <h3 class="font-bold mt-4 mb-2">Propiedad del Cliente</h3>
+            <table class="w-full border text-xs">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border px-2 py-1">Artículo</th>
+                  <th class="border px-2 py-1">Cantidad</th>
+                  <th class="border px-2 py-1">Estado</th>
+                  <th class="border px-2 py-1">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each this.propiedad_cliente}}
+                  <tr>
+                    <td class="border px-2 py-1">{{this.articulo}}</td>
+                    <td class="border px-2 py-1">{{this.cantidad}}</td>
+                    <td class="border px-2 py-1">{{this.estado}}</td>
+                    <td class="border px-2 py-1">{{this.observaciones}}</td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+          {{/if}}
+
+          {{#if this.inventario_puesto.length}}
+          <div>
+            <h3 class="font-bold mt-4 mb-2">Inventario del Puesto</h3>
+            <table class="w-full border text-xs">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border px-2 py-1">Artículo</th>
+                  <th class="border px-2 py-1">Cantidad</th>
+                  <th class="border px-2 py-1">Estado</th>
+                  <th class="border px-2 py-1">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each this.inventario_puesto}}
+                  <tr>
+                    <td class="border px-2 py-1">{{this.articulo}}</td>
+                    <td class="border px-2 py-1">{{this.cantidad}}</td>
+                    <td class="border px-2 py-1">{{this.estado}}</td>
+                    <td class="border px-2 py-1">{{this.observaciones}}</td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+          {{/if}}
+
+          <div class="grid md:grid-cols-3 gap-4 mt-4 text-center">
+            <div>
+              <p class="font-semibold mb-1">Firma Cliente</p>
+              <img src="{{this.firma_cliente}}" alt="Firma cliente" class="border h-32 mx-auto object-contain">
+            </div>
+            <div>
+              <p class="font-semibold mb-1">Firma Recibe</p>
+              <img src="{{this.firma_recibe}}" alt="Firma recibe" class="border h-32 mx-auto object-contain">
+            </div>
+            <div>
+              <p class="font-semibold mb-1">Firma Entrega</p>
+              <img src="{{this.firma_entrega}}" alt="Firma entrega" class="border h-32 mx-auto object-contain">
+            </div>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+{{else}}
+  <p class="mt-6 text-sm text-gray-600">No se encontraron actas en el rango seleccionado.</p>
+{{/if}}
+
+<script>
+  function toggleDetalle(id) {
+    const detalle = document.getElementById('detalle-' + id);
+    detalle.classList.toggle('hidden');
+  }
+</script>
