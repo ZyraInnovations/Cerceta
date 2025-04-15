@@ -6,6 +6,18 @@
   <title>Acta de Instalación y Levantamiento del Puesto</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+  canvas {
+    touch-action: none; /* evita scroll mientras firmas */
+  }
+
+  @media (max-width: 768px) {
+    canvas {
+      height: 160px !important;
+    }
+  }
+</style>
+
 <body class="p-6 bg-white text-sm">
 
   <form method="POST" action="/guardar_acta_puesto" class="space-y-6">
@@ -101,25 +113,107 @@
       <textarea class="border p-1 w-full" name="observaciones" rows="4"></textarea>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mt-4">
-      <div>
-        <label class="font-semibold">Firma del representante del cliente:</label>
-        <input type="text" class="border p-1 w-full" name="firma_cliente" />
-      </div>
-      <div>
-        <label class="font-semibold">Firma representante de la empresa que recibe:</label>
-        <input type="text" class="border p-1 w-full" name="firma_recibe" />
-      </div>
-      <div>
-        <label class="font-semibold">Firma representante de la empresa que entrega:</label>
-        <input type="text" class="border p-1 w-full" name="firma_entrega" />
-      </div>
-    </div>
+<!-- Firmas -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+  <div>
+    <label class="font-semibold block mb-1">Firma del representante del cliente:</label>
+    <canvas id="firma_cliente_canvas" class="border w-full h-32 bg-white"></canvas>
+    <button type="button" onclick="limpiarFirma('firma_cliente_canvas')" class="text-sm mt-1 text-blue-600 underline">Limpiar firma</button>
+    <input type="hidden" name="firma_cliente" id="firma_cliente">
+  </div>
+
+  <div>
+    <label class="font-semibold block mb-1">Firma representante de la empresa que recibe:</label>
+    <canvas id="firma_recibe_canvas" class="border w-full h-32 bg-white"></canvas>
+    <button type="button" onclick="limpiarFirma('firma_recibe_canvas')" class="text-sm mt-1 text-blue-600 underline">Limpiar firma</button>
+    <input type="hidden" name="firma_recibe" id="firma_recibe">
+  </div>
+
+  <div>
+    <label class="font-semibold block mb-1">Firma representante de la empresa que entrega:</label>
+    <canvas id="firma_entrega_canvas" class="border w-full h-32 bg-white"></canvas>
+    <button type="button" onclick="limpiarFirma('firma_entrega_canvas')" class="text-sm mt-1 text-blue-600 underline">Limpiar firma</button>
+    <input type="hidden" name="firma_entrega" id="firma_entrega">
+  </div>
+
+</div>
 
     <p class="text-xs mt-6 text-center">Este documento es confidencial y es propiedad de CERCETA SOLUCIONES EMPRESARIALES, no debe ser divulgado a terceros o usado para razones diferentes para las cuales fue generado.</p>
 
     <button type="submit" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
   </form>
+<script>
+  function inicializarCanvas(idCanvas, idInput) {
+    const canvas = document.getElementById(idCanvas);
+    const input = document.getElementById(idInput);
+    const ctx = canvas.getContext('2d');
+    let dibujando = false;
+
+    canvas.addEventListener('mousedown', () => dibujando = true);
+    canvas.addEventListener('mouseup', () => {
+      dibujando = false;
+      guardarFirma(canvas, input);
+    });
+    canvas.addEventListener('mouseout', () => dibujando = false);
+    canvas.addEventListener('mousemove', function (e) {
+      if (!dibujando) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    // Soporte táctil para móviles
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      dibujando = true;
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+      e.preventDefault();
+      dibujando = false;
+      guardarFirma(canvas, input);
+    }, { passive: false });
+
+canvas.addEventListener('touchmove', function (e) {
+  if (!dibujando || !e.touches.length) return;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#000";
+  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+}, { passive: false });
+
+
+  function guardarFirma(canvas, input) {
+    input.value = canvas.toDataURL();
+  }
+
+  function limpiarFirma(idCanvas) {
+    const canvas = document.getElementById(idCanvas);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const hiddenInput = document.getElementById(idCanvas.replace('_canvas', ''));
+    if (hiddenInput) hiddenInput.value = '';
+  }
+
+  // Inicializar todos los canvas al cargar
+  window.addEventListener('load', () => {
+    inicializarCanvas('firma_cliente_canvas', 'firma_cliente');
+    inicializarCanvas('firma_recibe_canvas', 'firma_recibe');
+    inicializarCanvas('firma_entrega_canvas', 'firma_entrega');
+  });
+</script>
 
   <script>
     function agregarFila(tablaId, prefix) {
