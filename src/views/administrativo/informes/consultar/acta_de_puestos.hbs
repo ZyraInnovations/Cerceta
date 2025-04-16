@@ -174,6 +174,7 @@
   <!-- Se carga la librería html2pdf una única vez -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
+    // Función para mostrar u ocultar detalles
     function toggleDetalle(id) {
       const detalle = document.getElementById('acta-' + id);
       detalle.classList.toggle('hidden');
@@ -181,21 +182,35 @@
 
     function descargarPDF(id) {
       const contenido = document.getElementById('acta-' + id);
-      // Aseguramos que el contenido esté visible para la exportación
-      if (contenido.classList.contains('hidden')) {
-        contenido.classList.remove('hidden');
-      }
-      
+      // Aseguramos que el contenido esté visible
+      contenido.classList.remove('hidden');
+
       const opciones = {
-        margin: [0.5, 0.5, 0.5, 0.5], // Márgenes ajustables (arriba, derecha, abajo, izquierda)
+        margin: [0.5, 0.5, 0.5, 0.5],
         filename: `acta_puesto_${id}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 3, useCORS: true, scrollY: -window.scrollY },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
-      html2pdf().set(opciones).from(contenido).save().then(() => {
-      });
+      // Si el dispositivo tiene ancho menor a 1024px, se clona el contenido en un contenedor de ancho fijo
+      if (window.innerWidth < 1024) {
+        const clonContenido = contenido.cloneNode(true);
+        clonContenido.classList.remove('hidden');
+        
+        const contenedorTemp = document.createElement('div');
+        contenedorTemp.style.width = '1024px';  // ancho fijo para simular vista de PC
+        contenedorTemp.style.margin = '0 auto';
+        contenedorTemp.appendChild(clonContenido);
+        
+        document.body.appendChild(contenedorTemp);
+        html2pdf().set(opciones).from(contenedorTemp).save().then(() => {
+          document.body.removeChild(contenedorTemp);
+        });
+      } else {
+        // Si está en PC (o ancho mayor), se usa el contenido original
+        html2pdf().set(opciones).from(contenido).save();
+      }
     }
   </script>
 </body>
