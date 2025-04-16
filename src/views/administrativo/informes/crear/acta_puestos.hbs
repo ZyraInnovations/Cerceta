@@ -143,6 +143,20 @@
 
     <button type="submit" class="mt-6 px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
   </form>
+  <script>
+document.querySelector("form").addEventListener("submit", function(e) {
+  const cantidades = document.querySelectorAll("input[name^='inventario_puesto_cantidad'], input[name^='propiedad_cliente_cantidad']");
+  for (const input of cantidades) {
+    if (!input.value || Number(input.value) <= 0) {
+      alert("Por favor, completa todas las cantidades antes de guardar.");
+      input.focus();
+      e.preventDefault();
+      return;
+    }
+  }
+});
+</script>
+
 <script>
  function inicializarCanvas(idCanvas, idInput) {
   const canvas = document.getElementById(idCanvas);
@@ -226,20 +240,21 @@
 </script>
 
   <script>
-    function agregarFila(tablaId, prefix) {
-      const tbody = document.getElementById(tablaId);
-      const index = tbody.querySelectorAll('tr').length;
-      const fila = `
-        <tr>
-          <td class='border'><input type='text' name='${prefix}_articulo[]' class='w-full p-1'></td>
-          <td class='border'><input type='number' name='${prefix}_cantidad[]' class='w-full p-1'></td>
-          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='B'></td>
-          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='R'></td>
-          <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='M'></td>
-          <td class='border'><input type='text' name='${prefix}_observaciones[]' class='w-full p-1'></td>
-        </tr>`;
-      tbody.insertAdjacentHTML('beforeend', fila);
-    }
+function agregarFila(tablaId, prefix) {
+  const tbody = document.getElementById(tablaId);
+  const index = tbody.querySelectorAll('tr').length;
+  const fila = `
+    <tr>
+      <td class='border'><input type='text' name='${prefix}_articulo[]' class='w-full p-1'></td>
+      <td class='border'><input type='number' name='${prefix}_cantidad[]' class='w-full p-1' required></td>
+      <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='B'></td>
+      <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='R'></td>
+      <td class='border text-center'><input type='radio' name='${prefix}_estado_${index}' value='M'></td>
+      <td class='border'><input type='text' name='${prefix}_observaciones[]' class='w-full p-1'></td>
+    </tr>`;
+  tbody.insertAdjacentHTML('beforeend', fila);
+}
+
   </script>
 
 </body>
