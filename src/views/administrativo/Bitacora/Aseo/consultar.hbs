@@ -93,8 +93,8 @@
           {{#each registros}}
           <tr class="hover:bg-blue-50">
             <td class="px-4 py-3">{{formatDate this.fecha}}</td>
-            <td class="px-4 py-3">{{this.edificio}}</td>
-            <td class="px-4 py-3">{{this.inspeccionado_por}}</td>
+            <td class="px-4 py-3">{{nombre_edificio}}</td>
+            <td class="px-4 py-3">{{nombre_inspector}}</td>
             <td class="px-4 py-3 text-center">
               <button onclick="toggleDetalle('{{this.id}}')" class="text-blue-600 hover:underline font-medium">
                 Mostrar más
@@ -131,8 +131,8 @@
 
       <!-- Información general -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-4 border border-gray-300 rounded-lg shadow">
-        <div><span class="font-semibold">Edificio:</span> {{this.edificio}}</div>
-        <div><span class="font-semibold">Inspeccionado por:</span> {{this.inspeccionado_por}}</div>
+        <div><span class="font-semibold">Edificio:</span> {{nombre_edificio}}</div>
+        <div><span class="font-semibold">Inspeccionado por:</span> {{nombre_inspector}}</div>
         <div><span class="font-semibold">Cargo:</span> {{this.cargo}}</div>
       </div>
 

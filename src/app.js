@@ -6033,13 +6033,16 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
   
       try {
         const [resultados] = await pool.query(`
-          SELECT 
-            id,
-            edificio,
-            puesto_inspeccionado,
-            inspeccionado_por,
-            cargo,
-            fecha_creacion AS fecha,
+     SELECT 
+  ba.id,
+  ba.edificio,
+  e.nombre AS nombre_edificio,
+  ba.puesto_inspeccionado,
+  ba.inspeccionado_por,
+  u.nombre AS nombre_inspector,  -- Aquí se agrega el nombre del usuario
+  ba.cargo,
+  ba.fecha_creacion AS fecha,
+
   
             \`Las paredes estan limpias y en buen estado\` AS paredes,
             \`Las paredes estan limpias y en buen estado_Accion propuesta\` AS paredes_accion,
@@ -6088,9 +6091,11 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
             firmaSupervisorData,
             firmaSupervisadoData
   
-          FROM bitacora_aseo
-          WHERE fecha_creacion BETWEEN ? AND ?
-          ORDER BY fecha_creacion DESC
+FROM bitacora_aseo AS ba
+LEFT JOIN edificios AS e ON ba.edificio = e.id
+LEFT JOIN usuarios AS u ON ba.inspeccionado_por = u.id
+WHERE ba.fecha_creacion BETWEEN ? AND ?
+ORDER BY ba.fecha_creacion DESC
         `, [desde, hasta]);
   
         res.render('administrativo/Bitacora/Aseo/consultar.hbs', {
