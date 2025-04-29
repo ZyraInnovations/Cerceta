@@ -2077,6 +2077,18 @@ app.get('/agregar_usuarios', async (req, res) => {
     }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
 // Ruta para obtener apartamentos según el edificio seleccionado
 app.get('/api/apartamentosss/:edificioId', async (req, res) => {
     const { edificioId } = req.params;
@@ -2538,16 +2550,21 @@ app.post('/guardar_informe', upload.fields([
 
 app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
     const { nombre, user_email, role, fecha_cumpleaños } = req.body;
-    let cargos = req.body['cargo[]'];
     const edificio = req.body.edificio || null;
     const apartamento = req.body.apartamento || null;
+    let cargos = req.body['cargo[]'];
 
     // Procesar la imagen si existe
     const foto = req.file ? req.file.buffer : null;
 
+    // Normaliza el valor a un array
     if (!Array.isArray(cargos)) {
         cargos = cargos ? [cargos] : [];
     }
+
+    console.log("Cargos procesados:", cargos);
+
+    // Validación segura para admins
     if (role === "admin" && !cargos.includes("operativo")) {
         cargos.push("operativo");
     }
@@ -2559,9 +2576,8 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
         if (rows.length > 0) {
             res.send('<script>alert("El correo ya está en uso."); window.location.href="/agregar_usuarios";</script>');
         } else {
-            // **Generar una contraseña aleatoria**
+            // Generar una contraseña aleatoria
             const generatedPassword = crypto.randomBytes(4).toString('hex');
-
             const cargoString = cargos.length > 0 ? cargos.join(', ') : null;
 
             const insertQuery = `
@@ -2572,7 +2588,7 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
             await pool.query(insertQuery, [
                 nombre,
                 user_email,
-                generatedPassword, // Guardando la contraseña en texto plano (NO SEGURO)
+                generatedPassword,
                 role,
                 cargoString,
                 fecha_cumpleaños,
@@ -2581,8 +2597,8 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
                 foto
             ]);
 
-            // **Enviar correo con las credenciales**
-            enviarCorreoInvitacion(user_email, nombre, generatedPassword);
+            // Enviar correo con credenciales
+            await enviarCorreoInvitacion(user_email, nombre, generatedPassword);
 
             res.send('<script>alert("Usuario guardado y correo enviado."); window.location.href="/agregar_usuarios";</script>');
         }
@@ -2591,6 +2607,7 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
 
 // **Función para enviar el correo**
 async function enviarCorreoInvitacion(email, nombre, password) {
@@ -4926,9 +4943,29 @@ const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = 
 app.post('/bitacora_aseo/guardar', async (req, res) => {
   if (req.session.loggedin === true) {
     try {
+        
       // Extrae los datos del encabezado y del checklist
       const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist, firmaSupervisorData, firmaSupervisadoData  } = req.body;
       const data = JSON.parse(checklist);
+
+
+
+    // 🔁 Mapeo: corrige las claves que vienen bien escritas desde el frontend
+    const map = {
+        "pasillos de cada piso": "pasillos de las piso limpias",
+        "zona de los parqueadetros limpios": "zona de los parqueadetros limpios",
+    
+        "barandas limpias": "varandas limpias",
+        "shut de basura limpio": "shup de basura limpio",
+        "terraza limpia y en orden": "teraza limpia y en orden"
+      };
+
+      for (const [keyCorrecto, keyBaseMal] of Object.entries(map)) {
+        if (data[keyCorrecto]) {
+          data[keyBaseMal] = data[keyCorrecto];
+        }
+      }
+
 
       // Extraer para cada ítem (para este ejemplo, se muestran dos; debes extenderlo para todos)
       const paredes = data["Las paredes estan limpias y en buen estado"]?.answer || "";
