@@ -43,15 +43,14 @@
             </select>
           </div>
           <div>
+
+
             <p class="font-bold">Puesto de trabajo inspeccionado</p>
            
 
-         <select name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full">
-        <option value="">Seleccione un empleado</option>
-        {{#each admins}}
-            <option value="{{this.id}}">{{this.nombre}}</option>
-        {{/each}}
-    </select>
+<label for="puesto_inspeccionado">Empleado</label>
+<input type="text" name="puesto_inspeccionado" class="border border-gray-300 h-8 w-full" placeholder="Escriba el nombre del empleado">
+
            
         
         
@@ -237,8 +236,14 @@ function inicializarCanvas(idCanvas, idInput) {
   let dibujando = false;
 
   // Escalar canvas para móviles (opcional)
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+// Ajuste para pantallas con alta densidad de píxeles
+const dpr = window.devicePixelRatio || 1;
+canvas.width = canvas.offsetWidth * dpr;
+canvas.height = canvas.offsetHeight * dpr;
+canvas.style.width = canvas.offsetWidth + "px";
+canvas.style.height = canvas.offsetHeight + "px";
+ctx.scale(dpr, dpr);
+
 
   // Versión para mouse
   canvas.addEventListener("mousedown", (e) => {
