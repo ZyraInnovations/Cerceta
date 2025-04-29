@@ -6131,7 +6131,8 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
 FROM bitacora_aseo AS ba
 LEFT JOIN edificios AS e ON ba.edificio = e.id
 LEFT JOIN usuarios AS u ON ba.inspeccionado_por = u.id
-WHERE ba.fecha_creacion BETWEEN ? AND ?
+WHERE DATE(ba.fecha_creacion) BETWEEN ? AND ?
+
 ORDER BY ba.fecha_creacion DESC
         `, [desde, hasta]);
   
