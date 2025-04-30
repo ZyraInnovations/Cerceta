@@ -487,14 +487,28 @@ body.dark-mode h2 {
 {{/noIncluye}}
 
 </a>
+
+
 <a href="/menu_appresidentes" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-mobile-alt w-6 text-lg"></i>
     <span class="ml-3 menu-text">App residencial</span>
 </a>
 
+
+
+
+{{#noIncluye roles "4"}}
+<a href="/inicio_labores" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
+<i class="fas fa-briefcase w-6 text-lg"></i> <!-- Representa trabajo -->
+    <span class="ml-3 menu-text">INICIO DE LABORES</span>
+</a>
+{{/noIncluye}}
+
+
+
 {{#noIncluye roles "1"}}
 <a href="/ver_ubicaciones" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
-    <i class="fas fa-mobile-alt w-6 text-lg"></i>
+    <i class="fas fa-map-marker-alt w-6 text-lg"></i>
     <span class="ml-3 menu-text">GEOLOCALIZACION</span>
 </a>
 {{/noIncluye}}

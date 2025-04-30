@@ -652,11 +652,7 @@ app.get("/menu_documental", async (req, res) => {
             console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
             console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Bloquear acceso si solo tiene rol "1"
-            if (cargos.includes('1') && cargos.length === 1) {
-                console.log("⛔ Acceso denegado para el rol 1");
-                return res.redirect("/menuAdministrativo"); // o puedes hacer: res.status(403).send("Acceso denegado");
-            }
+       
 
             res.render("administrativo/informes/menu_documental.hbs", {
                 layout: 'layouts/nav_admin.hbs',
@@ -679,8 +675,6 @@ app.get("/menu_documental", async (req, res) => {
 
 
 
-
-
 app.get("/menu_Blog", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
@@ -693,12 +687,7 @@ app.get("/menu_Blog", async (req, res) => {
             console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
             console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Bloquear acceso si solo tiene el rol 1
-            if (cargos.includes('1') && cargos.length === 1) {
-                console.log("⛔ Acceso denegado para el rol 1");
-                return res.redirect("/menuAdministrativo");
-            }
-
+            // 🔔 Solo se pasan los roles, no se restringe acceso
             res.render("blog/menu_blog.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
@@ -731,11 +720,7 @@ app.get("/menu_alertas", async (req, res) => {
             console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
             console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Bloquear acceso si solo tiene rol "1"
-            if (cargos.includes('1') && cargos.length === 1) {
-                console.log("⛔ Acceso denegado para el rol 1");
-                return res.redirect("/menuAdministrativo");
-            }
+           
 
             res.render("administrativo/alertas/menu_alertas.hbs", {
                 layout: 'layouts/nav_admin.hbs',
@@ -6391,6 +6376,134 @@ ORDER BY bc.fecha DESC
   
   
   
+
+
+
+  app.get("/inicio_labores", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+            const nombreUsuario = req.session.name || req.session.user.name;
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Obtener roles como arreglo de strings numéricos
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+            res.render("operativa/inicio_labores.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                userId,
+                roles: cargos
+            });
+        } catch (error) {
+            console.error('❌ Error al cargar el menú de comunicados:', error);
+            res.status(500).send('Error al cargar el menú de comunicados');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+app.post("/iniciar_labores", async (req, res) => {
+    const userId = req.body.userId;
+    const nombreUsuario = req.session.name || req.session.user.name;
+    const fechaActual = new Date().toISOString().slice(0, 10);
+    const horaInicio = new Date();
+    const lat = req.body.lat;
+    const lon = req.body.lon;
+
+    try {
+        const [existing] = await pool.query(
+            "SELECT * FROM registro_labores WHERE user_id = ? AND fecha = ?",
+            [userId, fechaActual]
+        );
+
+        if (existing.length === 0) {
+            await pool.query(
+                `INSERT INTO registro_labores 
+                (user_id, nombre_usuario, fecha, hora_inicio, lat_inicio, lon_inicio)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [userId, nombreUsuario, fechaActual, horaInicio, lat, lon]
+            );
+            console.log(`✅ Inicio registrado con ubicación para usuario ${userId}`);
+        } else {
+            console.log(`⚠️ Ya hay un registro de inicio hoy para usuario ${userId}`);
+        }
+
+        res.redirect("/inicio_labores");
+    } catch (error) {
+        console.error("❌ Error registrando inicio:", error);
+        res.status(500).send("Error al iniciar labores");
+    }
+});
+app.post("/finalizar_labores", async (req, res) => {
+    const userId = req.body.userId;
+    const fechaActual = new Date().toISOString().slice(0, 10);
+    const horaFin = new Date();
+    const lat = req.body.lat;
+    const lon = req.body.lon;
+
+    try {
+        const [existing] = await pool.query(
+            "SELECT * FROM registro_labores WHERE user_id = ? AND fecha = ?",
+            [userId, fechaActual]
+        );
+
+        if (existing.length > 0) {
+            await pool.query(
+                `UPDATE registro_labores 
+                 SET hora_fin = ?, lat_fin = ?, lon_fin = ? 
+                 WHERE user_id = ? AND fecha = ?`,
+                [horaFin, lat, lon, userId, fechaActual]
+            );
+            console.log(`✅ Final registrado con ubicación para usuario ${userId}`);
+        } else {
+            console.log(`⚠️ No hay inicio registrado hoy para usuario ${userId}`);
+        }
+
+        res.redirect("/inicio_labores");
+    } catch (error) {
+        console.error("❌ Error registrando final:", error);
+        res.status(500).send("Error al finalizar labores");
+    }
+});
+
+
+
+
+
+
+
+
+
+
+app.get("/estado_turno", async (req, res) => {
+    if (!req.session.loggedin) return res.status(401).json({ error: "No autenticado" });
+
+    try {
+        const userId = req.session.userId;
+        const fechaActual = new Date().toISOString().slice(0, 10);
+
+        const [registros] = await pool.query(
+            "SELECT hora_inicio, hora_fin FROM registro_labores WHERE user_id = ? AND fecha = ?",
+            [userId, fechaActual]
+        );
+
+        const turno = registros[0] || {};
+        res.json({
+            iniciado: !!turno.hora_inicio,
+            finalizado: !!turno.hora_fin
+        });
+    } catch (err) {
+        console.error("❌ Error consultando estado de turno:", err);
+        res.status(500).json({ error: "Error consultando estado" });
+    }
+});
+
 
 
 app.get('/', (req, res) => {

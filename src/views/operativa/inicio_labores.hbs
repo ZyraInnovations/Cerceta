@@ -1,0 +1,83 @@
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-200">
+  <h2 class="text-2xl font-bold mb-4 text-center text-indigo-700">Inicio de Labores</h2>
+
+  <div class="mb-4">
+    <p><strong>👤 Usuario:</strong> {{name}}</p>
+    <p><strong>🆔 ID:</strong> {{userId}}</p>
+  </div>
+
+  <div id="botones-labores" class="flex justify-center gap-6 mt-6">
+    <p class="text-gray-500">Cargando estado...</p>
+  </div>
+</div>
+
+<script>
+  async function obtenerUbicacion() {
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn("⚠️ Geolocalización no permitida o falló:", error);
+          resolve({ lat: "", lon: "" }); // valores vacíos si falla
+        }
+      );
+    });
+  }
+
+  async function actualizarBotones() {
+    const container = document.getElementById("botones-labores");
+    container.innerHTML = "Cargando...";
+
+    try {
+      const res = await fetch("/estado_turno");
+      const data = await res.json();
+      const geo = await obtenerUbicacion();
+
+      if (data.error) {
+        container.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+        return;
+      }
+
+      let html = "";
+
+      if (!data.iniciado) {
+        html += `
+          <form action="/iniciar_labores" method="POST">
+            <input type="hidden" name="userId" value="{{userId}}">
+            <input type="hidden" name="lat" value="${geo.lat}">
+            <input type="hidden" name="lon" value="${geo.lon}">
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+              ▶️ Iniciar Labores
+            </button>
+          </form>
+        `;
+      } else if (!data.finalizado) {
+        html += `
+          <form action="/finalizar_labores" method="POST">
+            <input type="hidden" name="userId" value="{{userId}}">
+            <input type="hidden" name="lat" value="${geo.lat}">
+            <input type="hidden" name="lon" value="${geo.lon}">
+            <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+              ⏹️ Finalizar Labores
+            </button>
+          </form>
+        `;
+      } else {
+        html = `<p class="text-green-600 font-semibold">✔️ Turno finalizado</p>`;
+      }
+
+      container.innerHTML = html;
+
+    } catch (err) {
+      container.innerHTML = `<p class="text-red-500">Error consultando estado</p>`;
+      console.error(err);
+    }
+  }
+
+  actualizarBotones();
+</script>
