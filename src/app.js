@@ -3,7 +3,7 @@ const session = require('express-session');
 const hbs = require('hbs');
 const pool = require('./db'); // Importamos la configuración de la base de datos
 const path = require('path');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const fs = require('fs');
 const cron = require('node-cron');
 
@@ -4126,22 +4126,24 @@ cron.schedule('1 12 * * *', () => {
     verificarAlertasPendientes();
 });
 
-
-
 app.post('/guardarUbicacion', async (req, res) => {
     const { nombre, latitud, longitud } = req.body;
-  
-    try {
-      // Inserta la ubicación y el nombre en la base de datos
-      await pool.query('INSERT INTO ubicaciones (nombre, latitud, longitud, fecha) VALUES (?, ?, ?, NOW())', [nombre, latitud, longitud]);
-      res.status(200).send({ mensaje: 'Ubicación guardada con éxito' });
-    } catch (error) {
-      console.error("Error al guardar ubicación:", error);
-      res.status(500).send({ error: 'Error al guardar ubicación' });
-    }
-  });
-  
 
+    try {
+        // Obtener la hora exacta de Colombia
+        const fechaColombia = moment().tz("America/Bogota").format("YYYY-MM-DD HH:mm:ss");
+
+        await pool.query(
+            'INSERT INTO ubicaciones (nombre, latitud, longitud, fecha) VALUES (?, ?, ?, ?)',
+            [nombre, latitud, longitud, fechaColombia]
+        );
+
+        res.status(200).send({ mensaje: 'Ubicación guardada con éxito' });
+    } catch (error) {
+        console.error("Error al guardar ubicación:", error);
+        res.status(500).send({ error: 'Error al guardar ubicación' });
+    }
+});
 
 
   app.get('/ver_ubicaciones', async (req, res) => {

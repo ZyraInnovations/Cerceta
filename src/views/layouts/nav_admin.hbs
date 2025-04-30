@@ -492,6 +492,15 @@ body.dark-mode h2 {
     <span class="ml-3 menu-text">App residencial</span>
 </a>
 
+{{#noIncluye roles "1"}}
+<a href="/ver_ubicaciones" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
+    <i class="fas fa-mobile-alt w-6 text-lg"></i>
+    <span class="ml-3 menu-text">GEOLOCALIZACION</span>
+</a>
+{{/noIncluye}}
+
+
+
 
 
       </nav>
@@ -595,6 +604,47 @@ body.dark-mode h2 {
     });
   });
   </script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const nombre = "{{name}}"; // Nombre del usuario desde backend
+
+    function enviarUbicacion() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async position => {
+          try {
+            const latitud = position.coords.latitude;
+            const longitud = position.coords.longitude;
+
+            const response = await fetch('/guardarUbicacion', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ nombre, latitud, longitud })
+            });
+
+            const data = await response.json();
+            console.log("Ubicación enviada:", data);
+          } catch (error) {
+            console.error("Error al enviar ubicación:", error);
+          }
+        }, error => {
+          console.warn("Geolocalización denegada o falló:", error);
+        });
+      } else {
+        console.warn("El navegador no soporta geolocalización.");
+      }
+    }
+
+    // Enviar al cargar
+    enviarUbicacion();
+
+    // Enviar cada 2 minutos
+    setInterval(enviarUbicacion, 120000);
+  });
+</script>
+
+
 </body>
 </html>
 
