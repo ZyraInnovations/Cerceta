@@ -2545,29 +2545,12 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-
-
-
 app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
-    const { nombre, user_email, role, fecha_cumpleaños } = req.body;
+    const { nombre, user_email, role, fecha_cumpleaños, cargo } = req.body;
     const edificio = req.body.edificio || null;
     const apartamento = req.body.apartamento || null;
-    let cargos = req.body['cargo[]'];
 
-    // Procesar la imagen si existe
     const foto = req.file ? req.file.buffer : null;
-
-    // Normaliza el valor a un array
-    if (!Array.isArray(cargos)) {
-        cargos = cargos ? [cargos] : [];
-    }
-
-    console.log("Cargos procesados:", cargos);
-
-    // Validación segura para admins
-    if (role === "admin" && !cargos.includes("operativo")) {
-        cargos.push("operativo");
-    }
 
     try {
         const checkQuery = 'SELECT * FROM usuarios WHERE email = ?';
@@ -2576,9 +2559,7 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
         if (rows.length > 0) {
             res.send('<script>alert("El correo ya está en uso."); window.location.href="/agregar_usuarios";</script>');
         } else {
-            // Generar una contraseña aleatoria
             const generatedPassword = crypto.randomBytes(4).toString('hex');
-            const cargoString = cargos.length > 0 ? cargos.join(', ') : null;
 
             const insertQuery = `
                 INSERT INTO usuarios 
@@ -2590,14 +2571,13 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
                 user_email,
                 generatedPassword,
                 role,
-                cargoString,
+                cargo,
                 fecha_cumpleaños,
                 role === "residentes" ? edificio : null,
                 role === "residentes" ? apartamento : null,
                 foto
             ]);
 
-            // Enviar correo con credenciales
             await enviarCorreoInvitacion(user_email, nombre, generatedPassword);
 
             res.send('<script>alert("Usuario guardado y correo enviado."); window.location.href="/agregar_usuarios";</script>');
@@ -2607,6 +2587,9 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
+
+
 
 
 // **Función para enviar el correo**
