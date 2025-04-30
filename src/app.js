@@ -48,6 +48,16 @@ hbs.registerHelper('eq', (a, b) => {
     return a === b;
 });
 
+
+
+
+hbs.registerHelper('incluye', function (array, valor, options) {
+    return array && array.includes(valor) ? options.fn(this) : options.inverse(this);
+  });
+  hbs.registerHelper('noIncluye', function (array, valor, options) {
+    return !array.includes(valor) ? options.fn(this) : options.inverse(this);
+  });
+
 app.use(express.static('public', {
     etag: false,
     maxAge: 0
@@ -130,13 +140,22 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 
 
 
-// Ruta para el menú administrativo
-app.get('/geolocalizacion', (req, res) => {
+  app.get('/geolocalizacion', (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
+        const nombreUsuario = req.session.user.name;
 
-        const nombreUsuario = req.session.user.name; // Use user session data
-        res.render('administrativo/mapa/ver_mapa.hbs', { nombreUsuario ,userId });
+        // Procesar roles
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        console.log(`🔐 Usuario en geolocalización: ${nombreUsuario} (ID: ${userId})`);
+        console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+        res.render('administrativo/mapa/ver_mapa.hbs', {
+            nombreUsuario,
+            userId,
+            roles: cargos // <-- pasa roles como array a la vista
+        });
     } else {
         res.redirect('/login');
     }
@@ -333,11 +352,13 @@ app.get('/menu_residentes', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
 // En tu configuración de Handlebars
 hbs.registerHelper('ifCond', function (v1, v2, options) {
     return (v1 === v2) ? options.fn(this) : options.inverse(this);
 });
-
 
 
 
@@ -353,27 +374,34 @@ app.get('/subir_pago_residentes', async (req, res) => {
 
             if (rows.length > 0) {
                 const { edificio, apartamento } = rows[0];
-                console.log('Edificio:', edificio, 'Apartamento:', apartamento); // Verifica los valores obtenidos
-                
-                // Pasa solo el edificio y apartamento específicos
-                res.render('Residentes/pagos/subir_mi_pago.hbs', { 
-                    nombreUsuario: req.session.user.name, 
-                    userId, 
-                    edificioSeleccionado: edificio, 
-                    layout: 'layouts/nav_residentes.hbs',
-                    apartamentoSeleccionado: apartamento
+
+                // Procesar roles del usuario desde la sesión
+                const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+                console.log('📍 Usuario:', req.session.user.name);
+                console.log('🏢 Edificio:', edificio, '| 🏠 Apartamento:', apartamento);
+                console.log('🎯 Roles asignados:', cargos);
+
+                res.render('Residentes/pagos/subir_mi_pago.hbs', {
+                    nombreUsuario: req.session.user.name,
+                    userId,
+                    roles: cargos, // <- importante
+                    edificioSeleccionado: edificio,
+                    apartamentoSeleccionado: apartamento,
+                    layout: 'layouts/nav_residentes.hbs'
                 });
             } else {
-                res.redirect('/login'); // Redirige si no se encuentra el usuario
+                res.redirect('/login');
             }
         } catch (error) {
-            console.error('Error al obtener edificio y apartamento:', error);
+            console.error('❌ Error al obtener edificio y apartamento:', error);
             res.status(500).send('Error interno del servidor');
         }
     } else {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -439,105 +467,27 @@ hbs.registerHelper('json', function(context) {
 
 
 
-
-
-
-app.get("/menuAdministrativo", async (req, res) => {
+app.get("/menuAdministrativo", (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-
-            // Consulta para contar los residentes con rol "clientes"
-            const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM usuarios WHERE role = "clientes"');
-            const totalClientes = clientesRows[0].totalClientes;
-
-            // Consulta para contar la cantidad de apartamentos
-            const [apartamentosRows] = await pool.query('SELECT COUNT(*) AS totalApartamentos FROM apartamentos');
-            const totalApartamentos = apartamentosRows[0].totalApartamentos;
-
-            // Consulta para contar la cantidad de edificios
-            const [edificiosRows] = await pool.query('SELECT COUNT(*) AS totaledificios FROM edificios');
-            const totaledificios = edificiosRows[0].totaledificios;
-
-            // Consulta para contar la cantidad de empleados
-            const [empleadosRows] = await pool.query('SELECT COUNT(*) AS totalEmpleados FROM usuarios WHERE role = "admin"');
-            const totalEmpleados = empleadosRows[0].totalEmpleados;
-
-            // Consulta para contar la cantidad de residentes
-            const [residentesRows] = await pool.query('SELECT COUNT(*) AS totalResidentes FROM usuarios WHERE role = "residentes"');
-            const residentes = residentesRows[0].totalResidentes;
-
-            // Nueva consulta para obtener las últimas alertas con nombre_actividad y fecha_ejecucion
-            const [alertasRows] = await pool.query('SELECT nombre_actividad, fecha_ejecucion FROM alertas ORDER BY fecha_ejecucion DESC LIMIT 5');
-            const alertas = alertasRows;
-
-            // Consulta para obtener los pagos mensuales por edificio
-            const [pagosMensualesRows] = await pool.query(`
-                SELECT 
-                    nombre_edificio, 
-                    MONTH(fecha_pago) AS mes, 
-                    SUM(valor_pago) AS total_mensual 
-                FROM pagos_apartamentos 
-                GROUP BY nombre_edificio, MONTH(fecha_pago)
-                ORDER BY nombre_edificio, mes
-            `);
-
-            // Transformar los datos para el gráfico
-            const datosGrafico = {};
-            pagosMensualesRows.forEach(row => {
-                if (!datosGrafico[row.nombre_edificio]) {
-                    datosGrafico[row.nombre_edificio] = Array(12).fill(0);
-                }
-                datosGrafico[row.nombre_edificio][row.mes - 1] = row.total_mensual;
-            });
-// Nueva consulta para obtener los últimos cinco pagos
-const [ultimosPagosRows] = await pool.query(`
-    SELECT apartamento_id, fecha_pago, valor_pago 
-    FROM pagos_apartamentos 
-    ORDER BY fecha_pago DESC 
-    LIMIT 5
-`);
-const ultimosPagos = ultimosPagosRows;
-
-            // Renderiza la vista y pasa los datos necesarios
             res.render("administrativo/menuadministrativo.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
-                totalClientes,
-                totalApartamentos,
-                totaledificios,
-                totalEmpleados,  // Pasamos la variable totalEmpleados a la vista
-                residentes,       // Pasamos la variable totalResidentes como residentes a la vista
-                ultimosPagos,  // Pasamos los últimos pagos a la vista
-
-                alertas,          // Pasamos las últimas alertas a la vista
-                datosGrafico: JSON.stringify(datosGrafico)  // Convertir datosGrafico a JSON
+                roles: cargos // pasamos el array directamente
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('Error al cargar el menú administrativo:', error);
+            res.status(500).send('Error interno');
         }
     } else {
         res.redirect("/login");
@@ -545,57 +495,6 @@ const ultimosPagos = ultimosPagosRows;
 });
 
 
-
-
-
-
-app.get("/menu_usuarios", async (req, res) => {
-    if (req.session.loggedin === true) {
-        try {
-            const userId = req.session.userId;
-
-            const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
-            req.session.nombreGuardado = nombreUsuario;
-
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
-
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
-
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-
-         
-            // Consulta para contar la cantidad de empleados
-          
-      
-        
-
-
-            // Renderiza la vista y pasa los datos necesarios
-            res.render("administrativo/usuarios/menu_usuarios.hbs", {
-                layout: 'layouts/nav_admin.hbs',
-                name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
-                userId,
-            });
-        } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
-        }
-    } else {
-        res.redirect("/login");
-    }
-});
 
 
 
@@ -616,51 +515,29 @@ app.get("/menu_inmuebles", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            // Procesar roles como array de números en string
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-
-         
-            // Consulta para contar la cantidad de empleados
-          
-      
-        
-
-
-            // Renderiza la vista y pasa los datos necesarios
             res.render("administrativo/Operaciones/ClientesEdificios/menu_inmuebles.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos // <-- aquí se pasa a la vista
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú de inmuebles:', error);
+            res.status(500).send('Error al cargar el menú de inmuebles');
         }
     } else {
         res.redirect("/login");
     }
 });
-
-
 
 
 
@@ -670,51 +547,30 @@ app.get("/menu_contabilidad", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            // Procesar cargos como array de strings con números
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-
-         
-            // Consulta para contar la cantidad de empleados
-          
-      
-        
-
-
-            // Renderiza la vista y pasa los datos necesarios
+            // Renderizar la vista
             res.render("administrativo/CONTABILIDAD/validarPagos/menu_contablidad.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos // <- pasamos el array de roles a la vista
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú contabilidad:', error);
+            res.status(500).send('Error al cargar el menú contabilidad');
         }
     } else {
         res.redirect("/login");
     }
 });
-
-
 
 
 
@@ -725,37 +581,24 @@ app.get("/menu_appresidentes", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            // Obtener los roles como arreglo de strings
+            const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: ${roles}`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-            // Consulta para contar la cantidad de empleados
-            // Renderiza la vista y pasa los datos necesarios
             res.render("Aplicacione_residentes/menu.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('Error al cargar el menú administrativo:', error);
+            res.status(500).send('Error al cargar el menú');
         }
     } else {
         res.redirect("/login");
@@ -770,44 +613,24 @@ app.get("/menu_comunicados", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            // Obtener roles como arreglo de strings numéricos
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-
-         
-            // Consulta para contar la cantidad de empleados
-          
-      
-        
-
-
-            // Renderiza la vista y pasa los datos necesarios
             res.render("administrativo/Operaciones/comunicadoApartmamentos/menu_comunicados.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú de comunicados:', error);
+            res.status(500).send('Error al cargar el menú de comunicados');
         }
     } else {
         res.redirect("/login");
@@ -821,37 +644,29 @@ app.get("/menu_documental", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-            // Consulta para contar la cantidad de empleados
-            // Renderiza la vista y pasa los datos necesarios
+            // Bloquear acceso si solo tiene rol "1"
+            if (cargos.includes('1') && cargos.length === 1) {
+                console.log("⛔ Acceso denegado para el rol 1");
+                return res.redirect("/menuAdministrativo"); // o puedes hacer: res.status(403).send("Acceso denegado");
+            }
+
             res.render("administrativo/informes/menu_documental.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú documental:', error);
+            res.status(500).send('Error al cargar el menú documental');
         }
     } else {
         res.redirect("/login");
@@ -870,37 +685,29 @@ app.get("/menu_Blog", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-            // Consulta para contar la cantidad de empleados
-            // Renderiza la vista y pasa los datos necesarios
+            // Bloquear acceso si solo tiene el rol 1
+            if (cargos.includes('1') && cargos.length === 1) {
+                console.log("⛔ Acceso denegado para el rol 1");
+                return res.redirect("/menuAdministrativo");
+            }
+
             res.render("blog/menu_blog.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú del blog:', error);
+            res.status(500).send('Error al cargar el menú del blog');
         }
     } else {
         res.redirect("/login");
@@ -916,37 +723,29 @@ app.get("/menu_alertas", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const userId = req.session.userId;
-
             const nombreUsuario = req.session.name || req.session.user.name;
-            console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
 
-            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
-            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
-            console.log(`Cargos del usuario: ${cargos}`);
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            // Define las variables de cargo en función de si están en el array
-            const esGerente = cargos.includes('Gerente');
-            const esAdministracionOperativa = cargos.includes('administracion_operativa');
-            const esContabilidad = cargos.includes('contabilidad');
-            const esOperativo = cargos.includes('operativo');
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
 
-            // Muestra en consola para verificar que los valores son correctos
-            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
-            // Consulta para contar la cantidad de empleados
-            // Renderiza la vista y pasa los datos necesarios
+            // Bloquear acceso si solo tiene rol "1"
+            if (cargos.includes('1') && cargos.length === 1) {
+                console.log("⛔ Acceso denegado para el rol 1");
+                return res.redirect("/menuAdministrativo");
+            }
+
             res.render("administrativo/alertas/menu_alertas.hbs", {
                 layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                esGerente,
-                esAdministracionOperativa,
-                esContabilidad,
-                esOperativo,
                 userId,
+                roles: cargos
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de datos:', error);
-            res.status(500).send('Error al cargar el menú administrativo');
+            console.error('❌ Error al cargar el menú de alertas:', error);
+            res.status(500).send('Error al cargar el menú de alertas');
         }
     } else {
         res.redirect("/login");
@@ -958,26 +757,30 @@ app.get("/menu_alertas", async (req, res) => {
 
 
 
-
-
 app.get('/agregar_edificio', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
-        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
+        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { 
+            name, 
+            userId, 
+            roles, 
+            layout: 'layouts/nav_admin.hbs' 
+        });
     } else {
         res.redirect('/login');
     }
 });
 
 
-
-
 const multer = require('multer');
 // Configuración de multer para manejar la subida de archivos
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+
 app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
     const {
         fechaincio,
@@ -1077,18 +880,34 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
 
 
 
-
-// Ruta para agregar apartamentos
 app.get('/agregar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
 
+        // Procesar roles como array de strings numéricos
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        console.log(`🔐 Usuario autenticado: ${name} (ID: ${userId})`);
+        console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+        // Bloquear si solo tiene rol "1"
+        if (cargos.includes('1') && cargos.length === 1) {
+            console.log("⛔ Acceso denegado a agregar_apartamento para el rol 1");
+            return res.redirect("/menuAdministrativo");
+        }
+
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { name, edificios,userId  ,layout: 'layouts/nav_admin.hbs'});
+            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', {
+                name,
+                userId,
+                edificios,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error('Error al obtener edificios:', error);
+            console.error('❌ Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
         }
     } else {
@@ -1100,20 +919,28 @@ app.get('/agregar_apartamento', async (req, res) => {
 
 
 
-// Ruta para obtener edificios
 app.get('/api/edificios', async (req, res) => {
     if (req.session.loggedin === true) {
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        // Bloquear si solo tiene rol "1"
+        if (cargos.includes('1') && cargos.length === 1) {
+            console.log("⛔ Acceso denegado a /api/edificios para rol 1");
+            return res.status(403).json({ error: 'Acceso denegado' });
+        }
+
         try {
             const [rows] = await pool.query('SELECT id, nombre FROM edificios');
             res.json(rows);
         } catch (error) {
-            console.error('Error al obtener edificios:', error);
+            console.error('❌ Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
         }
     } else {
-        res.redirect('/login');
+        res.status(401).json({ error: 'No autenticado' });
     }
 });
+
 
 app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
     const {
@@ -1149,26 +976,40 @@ app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
 
 
 
-
-
 app.get('/consultar_edificios', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const nombreUsuario = req.session.name;
+
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+        console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+        console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+        // Bloquear si solo tiene el rol 1
+        if (cargos.includes('1') && cargos.length === 1) {
+            console.log("⛔ Acceso denegado a consultar_edificios para rol 1");
+            return res.redirect('/menuAdministrativo');
+        }
+
         try {
             const [edificios] = await pool.query('SELECT * FROM edificios');
 
-            // Convertir la foto BLOB a base64
+            // Convertir imagen a base64
             edificios.forEach(edificio => {
                 if (edificio.foto) {
                     edificio.foto = Buffer.from(edificio.foto).toString('base64');
                 }
             });
 
-            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios,userId ,layout: 'layouts/nav_admin.hbs' });
+            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', {
+                nombreUsuario,
+                edificios,
+                userId,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error('Error al obtener edificios:', error);
+            console.error('❌ Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
         }
     } else {
@@ -1179,20 +1020,45 @@ app.get('/consultar_edificios', async (req, res) => {
 
 
 app.get('/editar_miembros_comite', async (req, res) => {
+    if (req.session.loggedin !== true) {
+        return res.redirect('/login');
+    }
+
     const edificioId = req.query.edificioId;
+    const nombreUsuario = req.session.name;
+    const userId = req.session.userId;
+    const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+    console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+    console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+    // Bloquear acceso si solo tiene el rol 1
+    if (cargos.includes('1') && cargos.length === 1) {
+        console.log("⛔ Acceso denegado a editar_miembros_comite para rol 1");
+        return res.redirect("/menuAdministrativo");
+    }
 
     try {
         const [edificio] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
         if (edificio.length > 0) {
-            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_comite.hbs', { edificio: edificio[0],layout: 'layouts/nav_admin.hbs' });
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_comite.hbs', {
+                edificio: edificio[0],
+                layout: 'layouts/nav_admin.hbs',
+                nombreUsuario,
+                userId,
+                roles: cargos
+            });
         } else {
             res.status(404).send('Edificio no encontrado');
         }
     } catch (error) {
-        console.error('Error fetching building:', error);
+        console.error('❌ Error al obtener edificio:', error);
         res.status(500).send('Error al obtener los detalles del edificio');
     }
 });
+
+
+
 
 app.post('/guardar_miembros_comite', async (req, res) => {
     const {
@@ -1260,13 +1126,28 @@ app.post('/getApartamentos_envio', async (req, res) => {
 
 
 
-// Ruta para consultar apartamentos
 app.get('/Consulta_apartamentos', (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const name = req.session.name;
-        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { name ,userId ,layout: 'layouts/nav_admin.hbs'});
+
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        console.log(`🔐 Usuario autenticado: ${name} (ID: ${userId})`);
+        console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+        // Bloquear si solo tiene rol 1
+        if (cargos.includes('1') && cargos.length === 1) {
+            console.log("⛔ Acceso denegado a Consulta_apartamentos para rol 1");
+            return res.redirect('/menuAdministrativo');
+        }
+
+        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', {
+            name,
+            userId,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
@@ -1276,37 +1157,63 @@ app.get('/Consulta_apartamentos', (req, res) => {
 
 
 
-
-// Ruta para obtener los edificios
 app.get('/getEdificios', async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM edificios');
-        res.json({ edificios: rows });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: 'Error al obtener los edificios' });
+    if (req.session.loggedin === true) {
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        console.log(`🔐 API /getEdificios llamada por usuario ID ${req.session.userId}`);
+        console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+        // Bloquear si solo tiene rol 1
+        if (cargos.includes('1') && cargos.length === 1) {
+            console.log("⛔ Acceso denegado a /getEdificios para rol 1");
+            return res.status(403).json({ error: 'Acceso denegado' });
+        }
+
+        try {
+            const [rows] = await pool.query('SELECT * FROM edificios');
+            res.json({ edificios: rows });
+        } catch (error) {
+            console.error('❌ Error al obtener los edificios:', error);
+            res.status(500).json({ error: 'Error al obtener los edificios' });
+        }
+    } else {
+        res.status(401).json({ error: 'No autenticado' });
     }
 });
 
 
 
-
-// Ruta para obtener los apartamentos por edificio
 app.get('/getApartamentos', async (req, res) => {
+    if (!req.session.loggedin) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+    const userId = req.session.userId;
+
+    console.log(`🔐 API /getApartamentos llamada por usuario ID ${userId}`);
+    console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+    // Bloquear si solo tiene rol "1"
+    if (cargos.includes('1') && cargos.length === 1) {
+        console.log("⛔ Acceso denegado a /getApartamentos para rol 1");
+        return res.status(403).json({ error: 'Acceso denegado' });
+    }
+
     const edificioId = req.query.edificioId;
     if (!edificioId) {
-        return res.status(400).send({ error: 'El ID del edificio es requerido' });
+        return res.status(400).json({ error: 'El ID del edificio es requerido' });
     }
 
     try {
         const [rows] = await pool.query('SELECT * FROM apartamentos WHERE edificio_id = ?', [edificioId]);
         res.json({ apartamentos: rows });
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ error: 'Error al obtener los apartamentos' });
+        console.error('❌ Error al obtener los apartamentos:', error);
+        res.status(500).json({ error: 'Error al obtener los apartamentos' });
     }
 });
-
 
 
 
@@ -1343,8 +1250,10 @@ app.get('/getApartamentoDetalles', async (req, res) => {
 app.get('/editar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        const apartamentoId = req.query.apartamentoId;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
+        const apartamentoId = req.query.apartamentoId;
         if (!apartamentoId) {
             return res.status(400).send('El ID del apartamento es requerido');
         }
@@ -1357,9 +1266,15 @@ app.get('/editar_apartamento', async (req, res) => {
                 apartamento.foto = apartamento.foto.toString('base64');
             }
 
-            res.render('administrativo/Operaciones/apartementos/editar_apartamentos', { name, apartamento ,layout: 'layouts/nav_admin.hbs'});
+            res.render('administrativo/Operaciones/apartementos/editar_apartamentos', {
+                name,
+                userId,
+                apartamento,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error al obtener apartamento:', error);
             res.status(500).send('Error al obtener los detalles del apartamento');
         }
     } else {
@@ -1392,12 +1307,13 @@ app.post('/update_apartamento', async (req, res) => {
 
 
 
-
 app.get('/editar_edificio', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        const edificioId = req.query.edificioId;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
+        const edificioId = req.query.edificioId;
         if (!edificioId) {
             return res.status(400).send('El ID del edificio es requerido');
         }
@@ -1406,9 +1322,7 @@ app.get('/editar_edificio', async (req, res) => {
             const [rows] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
             const edificio = rows[0];
 
-            // Convertir la fecha a formato 'YYYY-MM-DD' si es necesario
             if (edificio && edificio.fechaincio) {
-                // Asegúrate de que la fecha esté en formato YYYY-MM-DD
                 edificio.fechaincio = new Date(edificio.fechaincio).toISOString().split('T')[0];
             }
 
@@ -1416,15 +1330,22 @@ app.get('/editar_edificio', async (req, res) => {
                 edificio.foto = edificio.foto.toString('base64');
             }
 
-            res.render('administrativo/Operaciones/ClientesEdificios/editar_edificios.hbs', { name, edificio, layout: 'layouts/nav_admin.hbs'});
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_edificios.hbs', {
+                name,
+                userId,
+                edificio,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error al obtener el edificio:', error);
             res.status(500).send('Error al obtener los detalles del edificio');
         }
     } else {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -1456,13 +1377,13 @@ app.post('/update_edificio', async (req, res) => {
 
 
 
-
-
 app.get('/editar_miembros_consejo', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        const edificioId = req.query.edificioId;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
+        const edificioId = req.query.edificioId;
         if (!edificioId) {
             return res.status(400).send('El ID del edificio es requerido');
         }
@@ -1471,15 +1392,23 @@ app.get('/editar_miembros_consejo', async (req, res) => {
             const [rows] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
             const edificio = rows[0];
 
-            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', { name, edificio ,layout: 'layouts/nav_admin.hbs'});
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', {
+                name,
+                userId,
+                edificio,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error al obtener los detalles del edificio:', error);
             res.status(500).send('Error al obtener los detalles del edificio');
         }
     } else {
         res.redirect('/login');
     }
 });
+
+
 
 
 app.post('/update_miembros_consejo', async (req, res) => {
@@ -1514,24 +1443,25 @@ app.post('/update_miembros_consejo', async (req, res) => {
 
 
 
-// Ruta para mostrar la lista de edificios
 app.get('/ComunicadosGeneral', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const nombreUsuario = req.session.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
         const query = 'SELECT * FROM edificios';
 
         try {
             const [results] = await pool.query(query);
-            res.render('administrativo/Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', { 
+            res.render('administrativo/Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', {
                 name: nombreUsuario,
-                userId , 
-                layout: 'layouts/nav_admin.hbs', 
-                edificios: results 
+                userId,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs',
+                edificios: results
             });
         } catch (err) {
-            console.error(err);
+            console.error('❌ Error al obtener los edificios:', err);
             res.status(500).send('Error al obtener los edificios');
         }
     } else {
@@ -1621,30 +1551,29 @@ user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aqu
 
 
 
-// Ruta para obtener los edificios y renderizar la vista
 app.get('/envio_apartamentos', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
-            res.render('administrativo/Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', { 
-                name: nombreUsuario, 
-                userId ,
-                layout: 'layouts/nav_admin.hbs', 
-                edificios: results 
+            res.render('administrativo/Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', {
+                name: nombreUsuario,
+                userId,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs',
+                edificios: results
             });
-         
         } catch (err) {
-            console.error(err);
+            console.error('❌ Error al obtener los edificios:', err);
             res.status(500).send('Error al obtener los edificios');
         }
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -1750,27 +1679,29 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
 
 
 
-// Ruta para obtener los edificios y renderizar la vista
 app.get('/validar_pagos', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
-            res.render('administrativo/CONTABILIDAD/validarPagos/validarpagos.hbs', { 
+            res.render('administrativo/CONTABILIDAD/validarPagos/validarpagos.hbs', {
                 name,
+                userId,
+                roles: cargos,
                 layout: 'layouts/nav_admin.hbs',
                 edificios: results
             });
         } catch (err) {
-            console.error(err);
+            console.error('❌ Error al obtener los edificios:', err);
             res.status(500).send('Error al obtener los edificios');
         }
     } else {
         res.redirect('/login');
     }
 });
-
-
 
 
 
@@ -1896,19 +1827,22 @@ Cerceta`
 
 
 
-
-
 app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const name = req.session.name;
-        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', {
+            name,
+            userId,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -2051,33 +1985,30 @@ app.get('/api/apartamentos-count', async (req, res) => {
 
 
 
-
 app.get('/agregar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
         const nombreUsuario = req.session.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Consulta para obtener la lista de edificios
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Ajusta la tabla si es necesario
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
 
-            // Renderizar la vista con la lista de edificios
-            res.render('administrativo/usuarios/crear_usuarios.hbs', { 
-                nombreUsuario, 
-                userId, 
-                edificios, // Pasar los edificios a la vista
-                layout: 'layouts/nav_admin.hbs' 
+            res.render('administrativo/usuarios/crear_usuarios.hbs', {
+                nombreUsuario,
+                userId,
+                edificios,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
             });
         } catch (error) {
-            console.error('Error al obtener edificios:', error);
+            console.error('❌ Error al obtener edificios:', error);
             res.status(500).send('Error al cargar los edificios');
         }
     } else {
         res.redirect('/login');
     }
 });
-
-
 
 
 
@@ -2108,32 +2039,46 @@ app.get('/api/apartamentosss/:edificioId', async (req, res) => {
 app.get('/plantilla_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const nombreUsuario = req.session.name;
-        res.render('blog/plantilla_simple.hbs', { nombreUsuario,userId ,layout: 'layouts/nav_admin.hbs' });
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        res.render('blog/plantilla_simple.hbs', {
+            nombreUsuario,
+            userId,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
 });
 
+
+
+
 app.get('/subir_publicacion', async (req, res) => {
     if (req.session.loggedin === true) {
         try {
-            
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             const userId = req.session.userId;
-
             const name = req.session.name;
-            res.render('blog/agregar_blog.hbs', { name, edificios ,userId ,layout: 'layouts/nav_admin.hbs'});
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+            res.render('blog/agregar_blog.hbs', {
+                name,
+                edificios,
+                userId,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error('Error al obtener los edificios:', error);
+            console.error('❌ Error al obtener los edificios:', error);
             res.status(500).send('Error interno del servidor');
         }
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -2251,12 +2196,19 @@ app.get('/estados_cuenta', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-        res.render('administrativo/CONTABILIDAD/validarPagos/estados_cuanta.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
+        res.render('administrativo/CONTABILIDAD/validarPagos/estados_cuanta.hbs', {
+            name,
+            userId,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
 });
+
 
 // Ruta para obtener todos los edificios con sus apartamentos
 app.get('/obtenerEdificiosConApartamentos', async (req, res) => {
@@ -2282,6 +2234,7 @@ app.get('/obtenerEdificiosConApartamentos', async (req, res) => {
         res.status(500).json({ error: "Error al obtener edificios con apartamentos" });
     }
 });
+
 
 
 app.get('/obtenerEdificiosConPagos', async (req, res) => {
@@ -2317,23 +2270,66 @@ app.get('/obtenerEdificiosConPagos', async (req, res) => {
 
 
 
+
+
+
 app.get('/seleccionar_edificio_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         pool.query('SELECT id, nombre FROM edificios')
             .then(([resultados]) => {
-                res.render('blog/seleccionar_edificio.hbs', { name,userId , edificios: resultados, layout: 'layouts/nav_admin.hbs' });
+                res.render('blog/seleccionar_edificio.hbs', {
+                    name,
+                    userId,
+                    roles: cargos,
+                    edificios: resultados,
+                    layout: 'layouts/nav_admin.hbs'
+                });
             })
             .catch(err => {
-                console.error(err);
+                console.error('❌ Error al obtener edificios:', err);
                 res.status(500).send('Error al obtener edificios');
             });
     } else {
         res.redirect('/login');
     }
 });
+
+
+app.get("/menu_usuarios", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+            const nombreUsuario = req.session.name || req.session.user.name;
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Convertir el campo cargo en array de strings numéricos
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles del usuario:`, cargos);
+
+            res.render("administrativo/usuarios/menu_usuarios.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                userId,
+                roles: cargos
+            });
+        } catch (error) {
+            console.error('❌ Error al cargar el menú de usuarios:', error);
+            res.status(500).send('Error interno');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
 
 
 
@@ -2378,7 +2374,13 @@ app.get('/ver_blog_admin', async (req, res) => {
 app.get('/informe_operativo', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/informes/crear_informe_operativo.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        res.render('administrativo/informes/crear_informe_operativo.hbs', {
+            name,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
@@ -2389,22 +2391,25 @@ app.get('/informe_operativo', (req, res) => {
 app.get('/crear_informe_mantenimiento', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Consulta a la base de datos para obtener la lista de edificios
             const [results] = await pool.query('SELECT id, nombre FROM edificios');
-            
-            // Renderiza la plantilla pasando la lista de edificios
-            res.render('administrativo/informes/crear/mantenimiento.hbs', { name, edificios: results, layout: 'layouts/nav_admin.hbs' });
+
+            res.render('administrativo/informes/crear/mantenimiento.hbs', {
+                name,
+                edificios: results,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error(error);
+            console.error('❌ Error al obtener edificios:', error);
             res.status(500).send("Error al obtener edificios");
         }
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -2622,27 +2627,24 @@ async function enviarCorreoInvitacion(email, nombre, password) {
 
 
 
-
 app.get('/crear_alerta', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Consulta para obtener los administradores
             const [administradores] = await pool.query(`SELECT id, nombre, email FROM usuarios WHERE role = 'admin'`);
-            
-            // Consulta para obtener los edificios
             const [edificios] = await pool.query(`SELECT id, nombre FROM edificios`);
 
-            // Renderiza la vista y pasa los datos
             res.render('administrativo/alertas/crear_alerta.hbs', { 
-                name, 
-                administradores, 
-                edificios, 
-                layout: 'layouts/nav_admin.hbs' 
+                name,
+                roles: cargos,
+                administradores,
+                edificios,
+                layout: 'layouts/nav_admin.hbs'
             });
         } catch (error) {
-            console.error("Error al obtener datos:", error);
+            console.error("❌ Error al obtener datos:", error);
             res.status(500).send("Hubo un problema al cargar los datos.");
         }
     } else {
@@ -2928,10 +2930,12 @@ app.post('/marcarNotificacionesComoLeidas/:user_id', async (req, res) => {
     }
 });
 
+
 app.get('/consultar_alertas', async (req, res) => { 
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
             const [alertas] = await pool.query(`
@@ -2945,9 +2949,15 @@ app.get('/consultar_alertas', async (req, res) => {
                 ORDER BY a.fecha_creacion DESC
             `);
 
-            res.render('administrativo/alertas/consultar_todas.hbs', { name, userId, alertas, layout: 'layouts/nav_admin.hbs' });
+            res.render('administrativo/alertas/consultar_todas.hbs', {
+                name,
+                userId,
+                roles: cargos,
+                alertas,
+                layout: 'layouts/nav_admin.hbs'
+            });
         } catch (error) {
-            console.error('Error al obtener alertas:', error);
+            console.error('❌ Error al obtener alertas:', error);
             res.status(500).send('Error al obtener alertas');
         }
     } else {
@@ -3005,6 +3015,11 @@ app.get('/editar_alerta/:id', async (req, res) => {
     }
 });
 
+
+
+
+
+
 app.post('/editar_alerta/:id', async (req, res) => {
     if (!req.session.loggedin) {
         return res.redirect('/login');
@@ -3047,6 +3062,9 @@ app.post('/editar_alerta/:id', async (req, res) => {
 
 
 
+
+
+
 // Ruta para eliminar alerta
 app.delete('/eliminar_alerta/:id', async (req, res) => {
     if (req.session.loggedin) {
@@ -3075,17 +3093,22 @@ const obtenerEdificios = async () => {
     return rows;
 };
 
-
-// Ruta para renderizar el formulario y cargar los edificios
 app.get('/Informe_supervisor', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
-        
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
         // Suponiendo que tienes una función para obtener los edificios
-        const edificios = await obtenerEdificios(); // Ajusta esta función según tu configuración de base de datos
-        
-        res.render('administrativo/informes/crear/supervisor.hbs', { name, userId, edificios, layout: 'layouts/nav_admin.hbs' });
+        const edificios = await obtenerEdificios();
+
+        res.render('administrativo/informes/crear/supervisor.hbs', {
+            name,
+            userId,
+            roles: cargos,
+            edificios,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
@@ -3824,19 +3847,24 @@ app.post('/enviar-png', upload.single('image'), async (req, res) => {
 });
 
 
+
+
+
+
 app.get('/consultar_informe_supervisor', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.user.name;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
         const fecha = req.query.fecha;
         const idInspeccion = req.query.id_inspeccion;
 
-        // Selecciona todos los campos de inspecciones_supervisor
         const query = 'SELECT * FROM inspecciones_supervisor WHERE DATE_FORMAT(created_at, "%Y-%m-%d") = ? AND id = ?';
-        
+
         try {
             const [results] = await pool.query(query, [fecha, idInspeccion]);
 
-            // Transforma las firmas a Base64
             results.forEach(result => {
                 if (result.firma_supervisor) {
                     result.firmaSupervisorBase64 = result.firma_supervisor.toString('base64');
@@ -3848,7 +3876,9 @@ app.get('/consultar_informe_supervisor', async (req, res) => {
 
             res.render('administrativo/informes/consultar/supervisor_consulta.hbs', {
                 name: nombreUsuario,
-                results: results,
+                userId,
+                roles: cargos,
+                results,
                 layout: 'layouts/nav_admin.hbs'
             });
         } catch (err) {
@@ -3884,21 +3914,25 @@ app.get('/obtener_ids_inspeccion', async (req, res) => {
 
 
 
-
-
 app.get('/FOTO', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/informes/crear_informe_operativo.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+        res.render('administrativo/informes/crear_informe_operativo.hbs', { 
+            name, 
+            layout: 'layouts/nav_admin.hbs',
+            roles 
+        });
     } else {
         res.redirect('/login');
     }
 });
 
-
 app.get('/consultar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
         try {
             // Obtener todos los usuarios
@@ -3924,6 +3958,7 @@ app.get('/consultar_usuarios', async (req, res) => {
                 name, 
                 usuarios,
                 edificios,
+                roles,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -3934,6 +3969,7 @@ app.get('/consultar_usuarios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -4108,43 +4144,38 @@ app.post('/guardarUbicacion', async (req, res) => {
 
 
 
-
-
   app.get('/ver_ubicaciones', async (req, res) => {
     if (req.session.loggedin === true) {
-      const name = req.session.name;
-      const userId = req.session.userId;
-  
-      try {
-        // Consulta para obtener la última ubicación de cada usuario
-        const [ubicaciones] = await pool.query(`
-          SELECT u1.nombre, u1.latitud, u1.longitud, u1.fecha
-          FROM ubicaciones u1
-          INNER JOIN (
-            SELECT nombre, MAX(fecha) AS ultima_fecha
-            FROM ubicaciones
-            GROUP BY nombre
-          ) u2 ON u1.nombre = u2.nombre AND u1.fecha = u2.ultima_fecha
-        `);
-  
-        // Renderiza la vista con las ubicaciones
-        res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', {
-          name,
-          userId,
-          ubicaciones,
-          layout: 'layouts/nav_admin.hbs'
-        });
-      } catch (error) {
-        console.error("Error al obtener ubicaciones:", error);
-        res.status(500).send("Error al obtener ubicaciones");
-      }
+        const name = req.session.name;
+        const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+        try {
+            const [ubicaciones] = await pool.query(`
+                SELECT u1.nombre, u1.latitud, u1.longitud, u1.fecha
+                FROM ubicaciones u1
+                INNER JOIN (
+                    SELECT nombre, MAX(fecha) AS ultima_fecha
+                    FROM ubicaciones
+                    GROUP BY nombre
+                ) u2 ON u1.nombre = u2.nombre AND u1.fecha = u2.ultima_fecha
+            `);
+
+            res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', {
+                name,
+                userId,
+                ubicaciones,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
+            });
+        } catch (error) {
+            console.error("Error al obtener ubicaciones:", error);
+            res.status(500).send("Error al obtener ubicaciones");
+        }
     } else {
-      res.redirect('/login');
+        res.redirect('/login');
     }
-  });
-  
-
-
+});
 
 
 
@@ -4154,25 +4185,26 @@ app.post('/guardarUbicacion', async (req, res) => {
 app.get('/Consulta_Comprobantes_de_Pago_residentes', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Consulta para obtener edificio y apartamento del usuario
             const query = 'SELECT edificio, apartamento FROM usuarios WHERE id = ?';
             const [rows] = await pool.query(query, [userId]);
 
             if (rows.length > 0) {
                 const { edificio, apartamento } = rows[0];
-                console.log('Edificio:', edificio, 'Apartamento:', apartamento); // Verifica los valores obtenidos
+                console.log('Edificio:', edificio, 'Apartamento:', apartamento);
 
                 res.render('Residentes/pagos/consultar_mispagos.hbs', { 
-                    name: req.session.name, 
-                    userId, 
-                    edificioSeleccionado: edificio, 
-                    apartamentoSeleccionado: apartamento, 
+                    name: req.session.name,
+                    userId,
+                    edificioSeleccionado: edificio,
+                    apartamentoSeleccionado: apartamento,
+                    roles: cargos,
                     layout: 'layouts/nav_residentes.hbs'
                 });
             } else {
-                res.redirect('/login'); // Redirige si no se encuentra el usuario
+                res.redirect('/login');
             }
         } catch (error) {
             console.error('Error al obtener edificio y apartamento:', error);
@@ -4248,18 +4280,18 @@ app.post('/buscarPagos_mispagos', async (req, res) => {
 });
 
   
-
 app.get('/crear_bitacora_administrativa', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
         try {
-            // Consultar edificios de la base de datos
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             
-            // Renderizar la vista con los datos de los edificios
             res.render('administrativo/Bitacora/crear_bitacora_administrativa.hbs', { 
                 name, 
-                edificios, 
+                edificios,
+                roles: cargos,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -4294,14 +4326,13 @@ app.post('/guardarBitacora', upload.single('contenidoPng'), async (req, res) => 
 
 
 
-
 app.get('/Crear_bitacora_completa', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Realizamos la consulta para obtener edificio_id y su respectivo nombre de la tabla edificios
             const query = `
                 SELECT DISTINCT b.edificio_id, e.nombre
                 FROM bitacora_mantenimientos b
@@ -4312,8 +4343,9 @@ app.get('/Crear_bitacora_completa', async (req, res) => {
             res.render('administrativo/Bitacora/biitacora_completa.hbs', {
                 name,
                 userId,
-                layout: 'layouts/nav_admin.hbs',
-                edificios // Enviamos los datos de edificios para que se usen en la vista
+                edificios,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
             });
         } catch (error) {
             console.error("Error al obtener datos:", error);
@@ -4323,6 +4355,7 @@ app.get('/Crear_bitacora_completa', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -4457,13 +4490,14 @@ app.get('/fechas', async (req, res) => {
 
   const sharp = require('sharp'); // Asegúrate de instalar sharp si no lo tienes
 
+
   app.get('/Blog_administrativo', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
         try {
-            // Consulta que obtiene las publicaciones y el nombre del usuario asociado
             const [resultados] = await pool.query(`
                 SELECT p.*, u.nombre AS usuario_nombre
                 FROM posts_admin p
@@ -4471,22 +4505,21 @@ app.get('/fechas', async (req, res) => {
                 ORDER BY p.fecha DESC
             `);
 
-            // Convertir cada imagen BLOB a Base64 (si tiene imagen)
             for (let post of resultados) {
-                if (post.imagen) { // Cambiado de imagen_data a imagen
-                    // Convertir el BLOB a PNG usando sharp y luego a Base64
-                    const buffer = post.imagen; // BLOB de la base de datos
+                if (post.imagen) {
+                    const buffer = post.imagen;
                     const imageBuffer = await sharp(buffer).png().toBuffer();
                     post.imagen_base64 = imageBuffer.toString('base64');
-                    console.log(`Imagen convertida para el post ${post.id}: ${post.imagen_base64.substring(0, 30)}...`); // Log para verificar
+                    console.log(`Imagen convertida para el post ${post.id}: ${post.imagen_base64.substring(0, 30)}...`);
                 }
             }
 
-            // Renderizamos la página, pasando los posts y el nombre del usuario
             res.render('blog_administrativo/blog_admin.hbs', { 
                 name, 
-                layout: 'layouts/nav_admin.hbs', 
-                posts: resultados 
+                userId,
+                posts: resultados,
+                roles: cargos,
+                layout: 'layouts/nav_admin.hbs'
             });
 
         } catch (err) {
@@ -4519,6 +4552,9 @@ app.post('/blog/crear', upload.single('imagen'), async (req, res) => {
         res.status(500).send('Error en el servidor');
     }
 });
+
+
+
 
 app.post('/like', (req, res) => {
     const { post_id, usuario_id } = req.body;
@@ -4630,14 +4666,16 @@ app.post('/login_app', async (req, res) => {
 
 
 
-
 app.get('/crear_domicilios', async (req, res) => {
     if (req.session.loggedin === true) {
         try {
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Obtener edificios
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+            const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
             res.render('Aplicacione_residentes/domicilios/crear.hbs', { 
                 name: req.session.name, 
                 edificios, 
+                roles,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -4888,25 +4926,24 @@ app.get("/domicilios/:userId", async (req, res) => {
 
 
 
-
   app.get('/bitacora_aseo', async (req, res) => {
     if (req.session.loggedin === true) {
       const name = req.session.name;
       const userId = req.session.userId;
+  
       try {
-        // Consulta a la tabla 'edificios' para obtener el nombre de cada edificio
-// Ejemplo en Express:
-const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-     
-
-const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
-
-// Renderiza la plantilla y pasa la lista de edificios
-        res.render('administrativo/Bitacora/Aseo/crear.hbs', { 
+        const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+        const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
+  
+        // Agregamos los roles desde sesión
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+  
+        res.render('administrativo/Bitacora/Aseo/crear.hbs', {
           name,
           userId,
           edificios,
-          admins, // Pasamos la lista de admins
+          admins,
+          roles,
           layout: 'layouts/nav_admin.hbs'
         });
       } catch (err) {
@@ -4918,8 +4955,6 @@ const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = 
     }
   });
   
-
-
 
 
 
@@ -5082,26 +5117,23 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
 
 
 
-
-
-
 app.get('/bitacora_conserje', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
-        try {
-            // Obtener edificios
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
 
-            // Obtener usuarios con rol "admin"
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
 
-            // Renderiza la plantilla y pasa los datos
+            const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
             res.render('administrativo/Bitacora/conserje/crear.hbs', { 
                 name,
                 userId,
                 edificios,
-                admins, // Pasamos la lista de admins
+                admins,
+                roles,
                 layout: 'layouts/nav_admin.hbs'
             });
         } catch (err) {
@@ -5186,9 +5218,16 @@ app.get('/crear_alerta_app', async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Obtener edificios
+
+            const name = req.session.name;
+            const userId = req.session.userId;
+            const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
             res.render('Aplicacione_residentes/alertas/crear.hbs', { 
-                name: req.session.name, 
-                edificios, 
+                name,
+                userId,
+                roles,
+                edificios,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -5199,6 +5238,7 @@ app.get('/crear_alerta_app', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -5385,8 +5425,10 @@ app.get('/api/apartamentos_app', async (req, res) => {
   app.get('/validar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
       const name = req.session.name;
+      const userId = req.session.userId;
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+  
       try {
-        // Consulta que incluye el id del edificio y el apartamento
         const [usuariosPendientes] = await pool.query(
           `SELECT 
              u.id, 
@@ -5403,11 +5445,12 @@ app.get('/api/apartamentos_app', async (req, res) => {
            WHERE u.estado = 'pendiente'`
         );
   
-        // Consulta para obtener la lista de edificios
         const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
   
         res.render('administrativo/usuarios/validar_usuarios.hbs', { 
           name, 
+          userId,
+          roles,
           usuarios: usuariosPendientes,
           edificios,
           layout: 'layouts/nav_admin.hbs' 
@@ -5420,8 +5463,7 @@ app.get('/api/apartamentos_app', async (req, res) => {
       res.redirect('/login');
     }
   });
-
-
+  
 
 
 
@@ -5716,24 +5758,22 @@ app.post('/enviar_pqrs', async (req, res) => {
   
 
 
-
   app.get('/acta_reunion', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
-        try {
-            // Obtener edificios
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
-            // Obtener usuarios con rol "admin"
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
 
-            // Renderiza la plantilla y pasa los datos
             res.render('administrativo/informes/crear/acta_reunion.hbs', { 
                 name,
                 userId,
+                roles,
                 edificios,
-                admins, // Pasamos la lista de admins
+                admins,
                 layout: 'layouts/nav_admin.hbs'
             });
         } catch (err) {
@@ -5744,7 +5784,6 @@ app.post('/enviar_pqrs', async (req, res) => {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -5752,19 +5791,18 @@ app.get('/acta_puestos', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
-        try {
-            // Obtener edificios
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
-            // Obtener usuarios con rol "admin"
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
 
-            // Renderiza la plantilla y pasa los datos
             res.render('administrativo/informes/crear/acta_puestos.hbs', { 
                 name,
                 userId,
+                roles,
                 edificios,
-                admins, // Pasamos la lista de admins
+                admins,
                 layout: 'layouts/nav_admin.hbs'
             });
         } catch (err) {
@@ -5775,7 +5813,6 @@ app.get('/acta_puestos', async (req, res) => {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -5966,16 +6003,20 @@ app.post('/acta_reunion', async (req, res) => {
 
 
 
-
   app.get('/Ver_acta_r', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/informes/consultar/consultar_acta.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+        res.render('administrativo/informes/consultar/consultar_acta.hbs', { 
+            name,
+            roles,
+            layout: 'layouts/nav_admin.hbs' 
+        });
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -6033,13 +6074,17 @@ app.post('/acta_reunion', async (req, res) => {
   app.get('/Consulta_aseo', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/Bitacora/Aseo/consultar.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+        res.render('administrativo/Bitacora/Aseo/consultar.hbs', { 
+            name,
+            roles,
+            layout: 'layouts/nav_admin.hbs' 
+        });
     } else {
         res.redirect('/login');
     }
 });
-
-
 
 
 
@@ -6141,17 +6186,20 @@ ORDER BY ba.fecha_creacion DESC
 
 
 
-
-  
   app.get('/Consulta_conserje', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/Bitacora/conserje/consulta.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+        res.render('administrativo/Bitacora/conserje/consulta.hbs', { 
+            name, 
+            roles, 
+            layout: 'layouts/nav_admin.hbs' 
+        });
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -6256,23 +6304,25 @@ ORDER BY bc.fecha DESC
 
 
 
-// Mostrar formulario (GET)
-app.get('/Consulta_acta_puestos', (req, res) => {
+  app.get('/Consulta_acta_puestos', (req, res) => {
     if (req.session.loggedin === true) {
-      const name = req.session.name;
-      const hoy = new Date().toISOString().split('T')[0];
-      res.render('administrativo/informes/consultar/acta_de_puestos.hbs', {
-        name,
-        desde: hoy,
-        hasta: hoy,
-        registros: [],
-        layout: 'layouts/nav_admin.hbs'
-      });
+        const name = req.session.name;
+        const hoy = new Date().toISOString().split('T')[0];
+        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+        res.render('administrativo/informes/consultar/acta_de_puestos.hbs', {
+            name,
+            desde: hoy,
+            hasta: hoy,
+            registros: [],
+            roles,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
-      res.redirect('/login');
+        res.redirect('/login');
     }
-  });
-  
+});
+
 
   app.post('/Consulta_acta_puestos', async (req, res) => {
     try {

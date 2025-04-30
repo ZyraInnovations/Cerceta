@@ -421,41 +421,71 @@ body.dark-mode h2 {
 
       <!-- Navigation menu -->
       <nav class="px-6 py-4">
+
+
+
+
         <a href="/menuAdministrativo" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
           <i class="fas fa-home w-6 text-lg"></i>
           <span class="ml-3 menu-text">inicio</span>
         </a>
+
+
+
+{{#noIncluye roles "1"}}
+
        <a href="/menu_usuarios" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-users w-6 text-lg"></i>
     <span class="ml-3 menu-text">Usuarios</span>
-</a>
+      </a>
+{{/noIncluye}}
+
+
+       {{#noIncluye roles "1"}}
 
        <a href="/menu_inmuebles" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-building w-6 text-lg"></i>
     <span class="ml-3 menu-text">Inmuebles</span>
-</a>
+      </a>
+{{/noIncluye}}
 
+
+{{#noIncluye roles "1"}}
       <a href="/menu_comunicados" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-bullhorn w-6 text-lg"></i>
     <span class="ml-3 menu-text">Comunicados</span>
-</a>
+{{/noIncluye}}
 
+   
    <a href="/menu_alertas" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-bell w-6 text-lg"></i>
     <span class="ml-3 menu-text">Alertas</span>
 </a>
+
+
+
+{{#noIncluye roles "1"}}
      <a href="/menu_documental" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-file-alt w-6 text-lg"></i>
     <span class="ml-3 menu-text">Documental</span>
 </a>
+{{/noIncluye}}
+
+
           <a href="/menu_Blog" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-blog w-6 text-lg"></i>
     <span class="ml-3 menu-text">Blog</span>
 </a>
+
+
+
+{{#noIncluye roles "1"}}
       <a href="/menu_contabilidad" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-dollar-sign w-6 text-lg"></i>
     <span class="ml-3 menu-text">Contabilidad</span>
 </a>
+{{/noIncluye}}
+
 </a>
 <a href="/menu_appresidentes" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-mobile-alt w-6 text-lg"></i>
