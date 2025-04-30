@@ -4146,40 +4146,51 @@ app.post('/guardarUbicacion', async (req, res) => {
 });
 
 
-  app.get('/ver_ubicaciones', async (req, res) => {
+
+
+// Ruta que renderiza la vista
+app.get('/ver_ubicaciones', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
         const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-        try {
-            const [ubicaciones] = await pool.query(`
-                SELECT u1.nombre, u1.latitud, u1.longitud, u1.fecha
-                FROM ubicaciones u1
-                INNER JOIN (
-                    SELECT nombre, MAX(fecha) AS ultima_fecha
-                    FROM ubicaciones
-                    GROUP BY nombre
-                ) u2 ON u1.nombre = u2.nombre AND u1.fecha = u2.ultima_fecha
-            `);
-
-            res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', {
-                name,
-                userId,
-                ubicaciones,
-                roles: cargos,
-                layout: 'layouts/nav_admin.hbs'
-            });
-        } catch (error) {
-            console.error("Error al obtener ubicaciones:", error);
-            res.status(500).send("Error al obtener ubicaciones");
-        }
+        res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', {
+            name,
+            userId,
+            roles: cargos,
+            layout: 'layouts/nav_admin.hbs'
+        });
     } else {
         res.redirect('/login');
     }
 });
 
+// Ruta API que entrega las ubicaciones actualizadas
+app.get('/api/ubicaciones', async (req, res) => {
+    try {
+        const [ubicaciones] = await pool.query(`
+            SELECT u.*
+            FROM ubicaciones u
+            INNER JOIN (
+                SELECT MAX(id) AS id
+                FROM ubicaciones
+                GROUP BY nombre
+            ) ultimas ON u.id = ultimas.id
+        `);
 
+        // Ajustar fecha a hora Colombia (UTC-5)
+        const ubicacionesConFecha = ubicaciones.map(u => ({
+            ...u,
+            fecha: moment(u.fecha).tz("America/Bogota").format("YYYY-MM-DD HH:mm:ss")
+        }));
+
+        res.json(ubicacionesConFecha);
+    } catch (error) {
+        console.error("Error al obtener ubicaciones:", error);
+        res.status(500).json({ error: 'Error al obtener ubicaciones' });
+    }
+});
 
 
 

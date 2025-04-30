@@ -2,38 +2,116 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mapa de Ubicaciones</title>
+  <title>Mapa de Ubicaciones - CERCETA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
     #map {
       width: 100%;
       height: 600px;
+      border-radius: 0.75rem;
+    }
+
+    .leaflet-popup-content {
+      font-size: 0.95rem;
+      line-height: 1.4;
     }
   </style>
 </head>
-<body>
-  <h1>Últimas Ubicaciones de Usuarios</h1>
-  <div id="map"></div>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-4 text-center text-indigo-700">🗺️ Últimas Ubicaciones de Usuarios</h1>
+
+    <!-- Filtro y selector -->
+    <div class="bg-white p-6 shadow-md rounded-xl mb-6">
+      <label for="filtroInput" class="block mb-2 font-semibold text-gray-700">Buscar usuario:</label>
+      <input type="text" id="filtroInput" placeholder="Escribe un nombre..."
+        class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring focus:border-indigo-300" />
+
+      <label for="usuarioSelect" class="block mb-2 font-semibold text-gray-700">Seleccionar usuario:</label>
+      <select id="usuarioSelect"
+        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-indigo-300">
+        <option value="">-- Ver todos --</option>
+      </select>
+    </div>
+
+    <!-- Mapa -->
+    <div id="map" class="shadow-lg"></div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([4.60971, -74.08175], 6);
+    const markers = {};
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+      attribution: 'Map data © OpenStreetMap contributors'
     }).addTo(map);
 
-    // Obtén las ubicaciones desde el servidor
-    const ubicaciones = {{{json ubicaciones}}};
+    const usuarioSelect = document.getElementById('usuarioSelect');
+    const filtroInput = document.getElementById('filtroInput');
+    let ubicacionesGlobal = [];
 
-    ubicaciones.forEach(ubicacion => {
-      // Verificar coordenadas antes de usarlas
-      console.log("Ubicación recibida:", ubicacion);
+    async function cargarUbicaciones() {
+      try {
+        const res = await fetch('/api/ubicaciones');
+        const ubicaciones = await res.json();
+        ubicacionesGlobal = ubicaciones;
 
-      const marker = L.marker([ubicacion.latitud, ubicacion.longitud]).addTo(map);
-      marker.bindPopup(`<b>${ubicacion.nombre}</b><br>Última actualización: ${new Date(ubicacion.fecha).toLocaleString()}`);
+        usuarioSelect.innerHTML = '<option value="">-- Ver todos --</option>';
+        Object.values(markers).forEach(m => map.removeLayer(m));
+        Object.keys(markers).forEach(k => delete markers[k]);
+
+        ubicaciones.forEach(u => {
+          const coords = [u.latitud, u.longitud];
+          const marker = L.marker(coords).bindPopup(
+            `<b>${u.nombre}</b><br>Última actualización: ${new Date(u.fecha).toLocaleString()}`
+          ).addTo(map);
+
+          markers[u.nombre] = marker;
+
+          const option = document.createElement("option");
+          option.value = u.nombre;
+          option.textContent = u.nombre;
+          usuarioSelect.appendChild(option);
+        });
+
+      } catch (error) {
+        console.error("Error al cargar ubicaciones:", error);
+      }
+    }
+
+    usuarioSelect.addEventListener("change", e => {
+      const seleccionado = e.target.value;
+      if (seleccionado && markers[seleccionado]) {
+        const marker = markers[seleccionado];
+        map.setView(marker.getLatLng(), 15);
+        marker.openPopup();
+      } else {
+        map.setView([4.60971, -74.08175], 6);
+      }
     });
+
+    // Filtro de opciones mientras escribes
+    filtroInput.addEventListener("input", () => {
+      const texto = filtroInput.value.toLowerCase();
+      usuarioSelect.innerHTML = '<option value="">-- Ver todos --</option>';
+
+      ubicacionesGlobal.forEach(u => {
+        if (u.nombre.toLowerCase().includes(texto)) {
+          const option = document.createElement("option");
+          option.value = u.nombre;
+          option.textContent = u.nombre;
+          usuarioSelect.appendChild(option);
+        }
+      });
+    });
+
+    cargarUbicaciones();
+    setInterval(cargarUbicaciones, 2 * 60 * 1000);
   </script>
+
 </body>
 </html>
