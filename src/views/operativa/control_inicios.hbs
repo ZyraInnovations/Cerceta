@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Control de Inicios de Labores</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    #mapaModal {
+      height: 400px;
+      width: 100%;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-200">
+  <h2 class="text-2xl font-bold mb-6 text-center text-indigo-700">Control de Inicios de Labores</h2>
+
+  <form action="/buscar_inicio_labores" method="POST" class="mb-6 flex items-center gap-4 justify-center">
+    <label for="fecha" class="font-semibold">Seleccionar Fecha:</label>
+    <input type="date" name="fecha" id="fecha" required class="border border-gray-300 rounded px-3 py-2"
+           value="{{fechaBuscada}}">
+    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+      Consultar
+    </button>
+  </form>
+
+  <!-- Modal para mostrar el mapa -->
+  <div id="modalMapa" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <div id="mapaModal"></div>
+    </div>
+  </div>
+
+  {{#if registros}}
+    <table class="w-full border border-gray-300 text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 border">Usuario</th>
+          <th class="p-2 border">Hora Inicio</th>
+          <th class="p-2 border">Ubicación Inicio</th>
+          <th class="p-2 border">Hora Fin</th>
+          <th class="p-2 border">Ubicación Fin</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each registros}}
+          <tr>
+            <td class="p-2 border">{{nombre_usuario}}</td>
+            <td class="p-2 border">{{formatoHora hora_inicio}}</td>
+
+            <td class="p-2 border text-center">
+              {{#if lat_inicio}}
+                <button onclick="mostrarMapa({{lat_inicio}}, {{lon_inicio}}, 'Inicio')" title="Ver ubicación inicio"
+                        class="text-indigo-600 hover:text-indigo-800">
+                  <i class="fas fa-map-marked-alt text-lg"></i>
+                </button>
+              {{else}}
+                <span class="text-gray-400">No disponible</span>
+              {{/if}}
+            </td>
+
+            <td class="p-2 border">{{formatoHora hora_fin}}</td>
+
+            <td class="p-2 border text-center">
+              {{#if lat_fin}}
+                <button onclick="mostrarMapa({{lat_fin}}, {{lon_fin}}, 'Fin')" title="Ver ubicación fin"
+                        class="text-red-600 hover:text-red-800">
+                  <i class="fas fa-map-marked-alt text-lg"></i>
+                </button>
+              {{else}}
+                <span class="text-gray-400">No disponible</span>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else if fechaBuscada}}
+    <p class="text-center text-gray-500">No hay registros para la fecha {{fechaBuscada}}</p>
+  {{/if}}
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  let mapa = null;
+
+  function mostrarMapa(lat, lon, tipo) {
+    const modal = document.getElementById("modalMapa");
+    modal.style.display = "flex";
+
+    if (mapa) {
+      mapa.remove();
+    }
+
+    // Inicializar mapa centrado
+    mapa = L.map('mapaModal').setView([lat, lon], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapa);
+
+    L.marker([lat, lon]).addTo(mapa)
+      .bindPopup(`Ubicación de ${tipo}`)
+      .openPopup();
+  }
+
+  function cerrarModal() {
+    document.getElementById("modalMapa").style.display = "none";
+  }
+
+  // Cierra si se hace clic fuera del contenido
+  window.onclick = function (event) {
+    const modal = document.getElementById("modalMapa");
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+</script>
+
+</body>
+</html>

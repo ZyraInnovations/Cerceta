@@ -48,7 +48,11 @@ hbs.registerHelper('eq', (a, b) => {
     return a === b;
 });
 
-
+hbs.registerHelper('formatoHora', function(datetime) {
+    if (!datetime) return '';
+    const date = new Date(datetime);
+    return date.toTimeString().split(' ')[0]; // Devuelve HH:MM:SS
+  });
 
 
 hbs.registerHelper('incluye', function (array, valor, options) {
@@ -6503,6 +6507,81 @@ app.get("/estado_turno", async (req, res) => {
         res.status(500).json({ error: "Error consultando estado" });
     }
 });
+
+
+
+
+
+
+
+
+
+app.get("/control_inicio_labores", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+            const nombreUsuario = req.session.name || req.session.user.name;
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Obtener roles como arreglo de strings numéricos
+            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
+            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+
+            res.render("operativa/control_inicios.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                userId,
+                roles: cargos
+            });
+        } catch (error) {
+            console.error('❌ Error al cargar el menú de comunicados:', error);
+            res.status(500).send('Error al cargar el menú de comunicados');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+app.post("/buscar_inicio_labores", async (req, res) => {
+    if (req.session.loggedin !== true) return res.status(401).send("No autorizado");
+
+    try {
+        const userId = req.session.userId;
+        const nombreUsuario = req.session.name || req.session.user.name;
+        const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+        const fecha = req.body.fecha;
+
+        const [registros] = await pool.query(
+            `SELECT nombre_usuario, hora_inicio, lat_inicio, lon_inicio,
+                    hora_fin, lat_fin, lon_fin
+             FROM registro_labores
+             WHERE fecha = ?
+             ORDER BY hora_inicio ASC`,
+            [fecha]
+        );
+
+        res.render("operativa/control_inicios.hbs", {
+            layout: 'layouts/nav_admin.hbs',
+            name: nombreUsuario,
+            userId,
+            roles: cargos,
+            registros,
+            fechaBuscada: fecha
+        });
+    } catch (error) {
+        console.error('❌ Error al buscar registros:', error);
+        res.status(500).send('Error al buscar registros');
+    }
+});
+
+
+
+
+
+
 
 
 

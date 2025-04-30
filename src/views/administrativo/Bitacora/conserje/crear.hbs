@@ -232,20 +232,26 @@
     let dibujando = false;
 
     // Ajuste para pantallas táctiles
-    const getPos = (e) => {
-      if (e.touches && e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: e.touches[0].clientX - rect.left,
-          y: e.touches[0].clientY - rect.top
-        };
-      } else {
-        return {
-          x: e.offsetX,
-          y: e.offsetY
-        };
-      }
-    };
+const getPos = (e) => {
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+};
 
     function comenzarDibujo(e) {
       dibujando = true;
