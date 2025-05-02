@@ -29,6 +29,22 @@ td[contenteditable="true"] {
   background: white;
   margin: auto;
 }
+#observacionesParaPDF {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+/* Evita que estos bloques se corten entre páginas */
+.avoid-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 
 
 </style>
@@ -214,15 +230,21 @@ td[contenteditable="true"] {
 
 
 <!-- Campo de observaciones -->
-<div class="p-4 border-t border-gray-300">
-  <label for="observaciones" class="block text-lg font-bold mb-2">Observaciones</label>
-  <textarea id="observaciones" name="observaciones" rows="4" class="w-full border border-gray-300 p-2 rounded-md" placeholder="Escriba aquí sus observaciones..."></textarea>
+<!-- Campo que se exporta al PDF -->
+<div id="observacionesParaPDF" class="avoid-break" style="white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;">
+  <strong>Observaciones:</strong>
+  <div id="textoObservaciones"></div>
 </div>
+
+<!-- Textarea visible en pantalla, oculto en el PDF -->
+<label for="observaciones" class="block text-lg font-bold mb-2 no-print">Observaciones</label>
+<textarea id="observaciones" name="observaciones" rows="4" class="w-full border border-gray-300 p-2 rounded-md no-print" placeholder="Escriba aquí sus observaciones..."></textarea>
+
 
 
 
       <!-- Sección de firmas -->
-<div class="p-4 border-t border-gray-300">
+<div class="p-4 border-t border-gray-300 .avoid-break"  >
   <h2 class="text-lg font-bold mb-4">Firmas</h2>
   <div class="grid grid-cols-2 gap-4">
     <div>
@@ -470,8 +492,9 @@ document.getElementById("bitacoraForm").addEventListener("submit", function(e) {
       orientation: 'portrait',
       compress: true
     },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+pagebreak: { mode: ['css', 'legacy'] }
   };
+document.getElementById("textoObservaciones").innerText = document.getElementById("observaciones").value;
 
 // Generar PDF, descargarlo y luego enviarlo por correo
 html2pdf().set(opt).from(element).save().then(() => {
