@@ -6564,6 +6564,13 @@ app.get("/control_inicio_labores", async (req, res) => {
     }
 });
 
+// Función para ajustar la hora a la zona horaria de Colombia (UTC-5)
+function convertirAHoraLocal(utcHora) {
+    const hora = new Date(utcHora);
+    hora.setHours(hora.getHours() - 5); // Ajustar a la hora de Colombia (UTC-5)
+    return hora.toISOString().slice(0, 19).replace("T", " "); // Formato YYYY-MM-DD HH:MM:SS
+}
+
 
 app.post("/buscar_inicio_labores", async (req, res) => {
     if (req.session.loggedin !== true) return res.status(401).send("No autorizado");
@@ -6582,6 +6589,12 @@ app.post("/buscar_inicio_labores", async (req, res) => {
              ORDER BY hora_inicio ASC`,
             [fecha]
         );
+
+        // Convertir la hora de UTC a la hora local de Colombia (UTC-5)
+        registros.forEach(registro => {
+            registro.hora_inicio = convertirAHoraLocal(registro.hora_inicio);
+            registro.hora_fin = convertirAHoraLocal(registro.hora_fin);
+        });
 
         res.render("operativa/control_inicios.hbs", {
             layout: 'layouts/nav_admin.hbs',
