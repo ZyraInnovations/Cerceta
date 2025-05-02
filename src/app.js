@@ -4965,7 +4965,7 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
     try {
         
       // Extrae los datos del encabezado y del checklist
-      const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist, firmaSupervisorData, firmaSupervisadoData  } = req.body;
+      const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist, firmaSupervisorData, firmaSupervisadoData,observaciones   } = req.body;
       const data = JSON.parse(checklist);
 
 
@@ -5070,7 +5070,8 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
           \`porteria (recepcion) limpia_Accion propuesta\`,
           \`porteria (recepcion) limpia_Observacion\`,
               firmaSupervisorData, 
-    firmaSupervisadoData 
+    firmaSupervisadoData,
+    observaciones 
         ) VALUES (?, ?, ?, ?, ?,
                   ?, ?, ?,
                   ?, ?, ?,
@@ -5083,7 +5084,7 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
                   ?, ?, ?,
                   ?, ?, ?,
                   ?, ?, ?,
-                  ?,?)`
+                  ?,?,?)`
         ,
         [
           edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha,
@@ -5099,7 +5100,8 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
           areas, areas_accion, areas_observacion,
           porteria, porteria_accion, porteria_observacion,
           firmaSupervisorData,  // Aquí se corrige
-          firmaSupervisadoData  // Aquí se corrige
+          firmaSupervisadoData,  // Aquí se corrige
+          observaciones
         ]
       );
       res.redirect('/bitacora_aseo');
@@ -6109,7 +6111,7 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
   ba.inspeccionado_por,
   u.nombre AS nombre_inspector,  -- Aquí se agrega el nombre del usuario
   ba.cargo,
-  ba.fecha_creacion AS fecha,
+          DATE_SUB(ba.fecha_creacion, INTERVAL 5 HOUR) AS fecha,  -- Restando 5 horas para ajustar a la hora de Colombia
 
   
             \`Las paredes estan limpias y en buen estado\` AS paredes,
@@ -6157,7 +6159,8 @@ app.post('/bitacora_aseo/consultar', async (req, res) => {
             \`porteria (recepcion) limpia_Observacion\` AS porteria_obs,
   
             firmaSupervisorData,
-            firmaSupervisadoData
+            firmaSupervisadoData,
+            observaciones
   
 FROM bitacora_aseo AS ba
 LEFT JOIN edificios AS e ON ba.edificio = e.id

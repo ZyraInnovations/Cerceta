@@ -8,7 +8,9 @@ const pool = mysql.createPool({
     database: 'cerceta',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    timezone: '-05:00', // ✅ Correcto para hora de Colombia
+
 }).promise();  // Esto convierte el pool en una versión que utiliza promesas
 
 // Exportar la conexión para usarla en otros módulos
