@@ -6430,7 +6430,9 @@ ORDER BY bc.fecha DESC
 app.post("/iniciar_labores", async (req, res) => {
     const userId = req.body.userId;
     const nombreUsuario = req.session.name || req.session.user.name;
-    const fechaActual = new Date().toISOString().slice(0, 10);
+    const fechaActual = new Date();
+    fechaActual.setHours(fechaActual.getHours() - 5); // Ajusta la hora a UTC-5 (hora de Colombia)
+    const fechaLocal = fechaActual.toISOString().slice(0, 10); // Obtén la fecha en formato YYYY-MM-DD
     const horaInicio = new Date();
     const lat = req.body.lat;
     const lon = req.body.lon;
@@ -6438,7 +6440,7 @@ app.post("/iniciar_labores", async (req, res) => {
     try {
         const [existing] = await pool.query(
             "SELECT * FROM registro_labores WHERE user_id = ? AND fecha = ?",
-            [userId, fechaActual]
+            [userId, fechaLocal] // Usa fechaLocal en lugar de fechaActual
         );
 
         if (existing.length === 0) {
@@ -6446,7 +6448,7 @@ app.post("/iniciar_labores", async (req, res) => {
                 `INSERT INTO registro_labores 
                 (user_id, nombre_usuario, fecha, hora_inicio, lat_inicio, lon_inicio)
                  VALUES (?, ?, ?, ?, ?, ?)`,
-                [userId, nombreUsuario, fechaActual, horaInicio, lat, lon]
+                [userId, nombreUsuario, fechaLocal, horaInicio, lat, lon] // Usa fechaLocal también en el insert
             );
             console.log(`✅ Inicio registrado con ubicación para usuario ${userId}`);
         } else {
@@ -6459,9 +6461,14 @@ app.post("/iniciar_labores", async (req, res) => {
         res.status(500).send("Error al iniciar labores");
     }
 });
+
+
+
 app.post("/finalizar_labores", async (req, res) => {
     const userId = req.body.userId;
-    const fechaActual = new Date().toISOString().slice(0, 10);
+    const fechaActual = new Date();
+    fechaActual.setHours(fechaActual.getHours() - 5); // Ajusta la hora a UTC-5 (hora de Colombia)
+    const fechaLocal = fechaActual.toISOString().slice(0, 10); // Obtén la fecha en formato YYYY-MM-DD
     const horaFin = new Date();
     const lat = req.body.lat;
     const lon = req.body.lon;
@@ -6469,7 +6476,7 @@ app.post("/finalizar_labores", async (req, res) => {
     try {
         const [existing] = await pool.query(
             "SELECT * FROM registro_labores WHERE user_id = ? AND fecha = ?",
-            [userId, fechaActual]
+            [userId, fechaLocal] // Usa fechaLocal en lugar de fechaActual
         );
 
         if (existing.length > 0) {
@@ -6477,7 +6484,7 @@ app.post("/finalizar_labores", async (req, res) => {
                 `UPDATE registro_labores 
                  SET hora_fin = ?, lat_fin = ?, lon_fin = ? 
                  WHERE user_id = ? AND fecha = ?`,
-                [horaFin, lat, lon, userId, fechaActual]
+                [horaFin, lat, lon, userId, fechaLocal] // Usa fechaLocal también en el update
             );
             console.log(`✅ Final registrado con ubicación para usuario ${userId}`);
         } else {
@@ -6495,21 +6502,20 @@ app.post("/finalizar_labores", async (req, res) => {
 
 
 
-
-
-
-
-
 app.get("/estado_turno", async (req, res) => {
     if (!req.session.loggedin) return res.status(401).json({ error: "No autenticado" });
 
     try {
         const userId = req.session.userId;
-        const fechaActual = new Date().toISOString().slice(0, 10);
+        
+        // Ajusta la fecha a la zona horaria de Colombia (UTC-5)
+        const fechaActual = new Date();
+        fechaActual.setHours(fechaActual.getHours() - 5); // Ajusta a UTC-5 (hora de Colombia)
+        const fechaLocal = fechaActual.toISOString().slice(0, 10); // Obtén la fecha en formato YYYY-MM-DD
 
         const [registros] = await pool.query(
             "SELECT hora_inicio, hora_fin FROM registro_labores WHERE user_id = ? AND fecha = ?",
-            [userId, fechaActual]
+            [userId, fechaLocal] // Usa fechaLocal en la consulta
         );
 
         const turno = registros[0] || {};
@@ -6522,7 +6528,6 @@ app.get("/estado_turno", async (req, res) => {
         res.status(500).json({ error: "Error consultando estado" });
     }
 });
-
 
 
 
