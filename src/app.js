@@ -3787,55 +3787,74 @@ app.get('/download-template', (req, res) => {
 
 
 
-
 app.post('/enviar-png', upload.single('image'), async (req, res) => {
     const { edificioId } = req.body;
     const image = req.file;
-
+  
     if (!image) {
-        return res.status(400).json({ success: false, message: 'Por favor, suba una imagen en formato PNG' });
+      return res.status(400).json({
+        success: false,
+        message: 'Por favor, suba una imagen en formato PNG'
+      });
     }
-
+  
     try {
-        // Obtener el correo del representante usando `edificioId`
-        const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
-        const email = rows[0]?.correorepresentante;
-        if (!email) return res.status(404).json({ success: false, message: 'No se encontró el correo del edificio seleccionado' });
-
-        // Configurar nodemailer para enviar el correo con la imagen adjunta
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
- user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aquí
-                pass: 'yuumpbszqtbxscsq'
-            }
+      // ✅ 1. Consultar correo desde la base de datos
+      const [rows] = await pool.query(
+        'SELECT correorepresentante FROM edificios WHERE id = ?',
+        [edificioId]
+      );
+  
+      const email = rows[0]?.correorepresentante;
+  
+      if (!email) {
+        return res.status(404).json({
+          success: false,
+          message: 'No se encontró el correo del edificio seleccionado'
         });
-
-        // Opciones de correo, incluyendo el archivo de imagen como adjunto
-        const mailOptions = {
-            from: 'cercetasolucionempresarial@gmail.com',
-            to: email,
-            subject: 'Supervisión - Informe en Imagen',
-            text: 'Adjuntamos el informe de supervisión en formato PNG.',
-            attachments: [
-                {
-                    filename: 'plantilla.png',
-                    content: image.buffer,
-                    contentType: 'image/png'
-                }
-            ]
-        };
-
-        // Enviar el correo
-        await transporter.sendMail(mailOptions);
-        res.json({ success: true, message: 'Correo enviado exitosamente con la plantilla en formato PNG adjunta' });
+      }
+  
+      // ✅ 2. Configurar el transporte de correo
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'cercetasolucionempresarial@gmail.com',
+          pass: 'yuumpbszqtbxscsq'
+        }
+      });
+  
+      // ✅ 3. Definir opciones del correo
+      const mailOptions = {
+        from: 'cercetasolucionempresarial@gmail.com',
+        to: email,
+        subject: 'Supervisión - Informe en Imagen',
+        text: 'Adjuntamos el informe de supervisión en formato PNG.',
+        attachments: [
+          {
+            filename: 'plantilla.png',
+            content: image.buffer,
+            contentType: 'image/png'
+          }
+        ]
+      };
+  
+      // ✅ 4. Enviar el correo
+      await transporter.sendMail(mailOptions);
+  
+      return res.json({
+        success: true,
+        message: 'Correo enviado exitosamente con la plantilla en formato PNG adjunta'
+      });
+  
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
+      console.error('❌ Error al enviar correo:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error al enviar el correo.'
+      });
     }
-});
-
-
+  });
+  
 
 
 
@@ -6613,7 +6632,58 @@ app.post("/buscar_inicio_labores", async (req, res) => {
 
 
 
-
+app.post('/enviar_pdf_email', upload.single('pdf'), async (req, res) => {
+    try {
+      const edificioId = req.body.edificio_id;
+      const pdfBuffer = req.file.buffer;
+  
+      // Obtener el correo desde la base de datos
+      const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
+      if (!rows.length) return res.status(404).send('Correo no encontrado');
+  
+      const correoDestino = rows[0].correorepresentante;
+  
+      // Configura tu transporte de correo
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail', // o tu proveedor SMTP
+        auth: {
+        user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aquí
+                pass: 'yuumpbszqtbxscsq'
+        }
+      });
+      const fecha = new Date();
+      const fechaFormateada = fecha.toLocaleDateString('es-CO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      
+      await transporter.sendMail({
+        from: 'cercetasolucionempresarial@gmail.com',
+        to: correoDestino,
+        subject: `Envío de Bitácora de Aseo - ${fechaFormateada} - Cerceta Solución Empresarial`,
+        text: `Estimado(a),
+      
+      Adjunto encontrará el documento PDF correspondiente a la bitácora de aseo registrada recientemente. Este documento contiene el detalle completo de las labores realizadas y observaciones relevantes del servicio prestado.
+      
+      Si requiere información adicional o desea reportar alguna novedad, no dude en contactarnos.
+      
+      Cordialmente,  
+      Equipo de Cerceta Solución Empresarial`,
+        attachments: [{
+          filename: 'bitacora_aseo.pdf',
+          content: pdfBuffer
+        }]
+      });
+      
+  
+      res.send('Correo enviado con éxito');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error al enviar el correo');
+    }
+  });
+  
 
 
 
