@@ -6,7 +6,34 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
  </head>
- <body class="p-8">
+ <style>
+  #contenidoParaPDF {
+    width: 100%;
+    padding: 20px;
+
+    background: white;
+ 
+  }
+
+td[contenteditable="true"] {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  max-width: 150px;     /* Limita el ancho visualmente */
+  overflow: hidden;
+}
+#contenidoParaPDF {
+  width: 750px; /* ✅ un poco más pequeño que A4 */
+  padding: 20px;
+  background: white;
+  margin: auto;
+}
+
+
+</style>
+
+<body class="p-8">
+<div id="contenidoParaPDF">
   <div class="max-w-4xl mx-auto border border-gray-300">
     <!-- Encabezado de la bitácora -->
     <div class="flex justify-between items-center p-4 border-b border-gray-300">
@@ -198,7 +225,7 @@
       <p class="font-bold">Firma del Supervisor</p>
    <canvas id="firmaSupervisor" class="border border-gray-300 w-full h-32"></canvas>
 <input type="hidden" name="firmaSupervisorData" id="firmaSupervisorData">
-<button type="button" onclick="limpiarFirma('firmaSupervisor')" class="mt-2 text-red-500">Limpiar</button>
+<button type="button" onclick="limpiarFirma('firmaSupervisor')" class="mt-2 text-red-500 no-print">Limpiar</button>
 
    
    
@@ -208,7 +235,7 @@
 
 <canvas id="firmaSupervisado" class="border border-gray-300 w-full h-32"></canvas>
 <input type="hidden" name="firmaSupervisadoData" id="firmaSupervisadoData">
-<button type="button" onclick="limpiarFirma('firmaSupervisado')" class="mt-2 text-red-500">Limpiar</button>
+<button type="button" onclick="limpiarFirma('firmaSupervisado')" class="mt-2 text-red-500 no-print">Limpiar</button>
     
     </div>
   </div>
@@ -218,12 +245,14 @@
       <input type="hidden" name="checklist" id="checklistInput" value="" />
       
       <div class="mt-4">
-        <input type="submit" class="bg-blue-500 text-white py-2 px-4 rounded" value="Guardar Bitácora">
+        <input type="submit" class="bg-blue-500 text-white py-2 px-4 rounded no-print" value="Guardar Bitácora">
       </div>
     </form>
   </div>
-  
+  </div> 
   <!-- Scripts: jQuery, Select2, y la lógica para recopilar el checklist -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
   <script>
@@ -376,5 +405,109 @@ document.getElementById("bitacoraForm").addEventListener("submit", function(e) {
 
 
   </script>
+    <script>
+
+document.getElementById("bitacoraForm").addEventListener("submit", function(e) {
+  e.preventDefault(); // Evita el envío inmediato del formulario
+
+  // Guardar firmas en base64
+  guardarFirma("firmaSupervisor", "firmaSupervisorData");
+  guardarFirma("firmaSupervisado", "firmaSupervisadoData");
+
+  // Generar JSON del checklist
+  const rows = document.querySelectorAll("#checklistTable tbody tr");
+  let checklistData = {};
+  rows.forEach(row => {
+    const itemText = row.querySelector("td:first-child").innerText.trim();
+    let answer = "";
+    const answerCells = row.querySelectorAll("td:nth-child(2), td:nth-child(3), td:nth-child(4)");
+    answerCells.forEach((cell, index) => {
+      if (cell.innerText.trim() === "x") {
+        if (index === 0) answer = "si";
+        else if (index === 1) answer = "no";
+        else if (index === 2) answer = "na";
+      }
+    });
+    const accion = row.querySelector("td:nth-child(5)").innerText.trim();
+    const observacion = row.querySelector("td:nth-child(6)").innerText.trim();
+    checklistData[itemText] = {
+      answer: answer,
+      accion: accion,
+      observacion: observacion
+    };
+  });
+  document.getElementById("checklistInput").value = JSON.stringify(checklistData);
+
+  // Reemplazar canvas con imágenes para que salgan en el PDF
+  reemplazarCanvasPorImagenes();
+
+  // 🔻 Ocultar elementos que no deben salir en el PDF
+  const botonesNoPrint = document.querySelectorAll('.no-print');
+  botonesNoPrint.forEach(btn => btn.style.display = 'none');
+
+  const element = document.getElementById("contenidoParaPDF");
+  const opt = {
+    margin: 10,
+    filename: 'bitacora_conserje.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: {
+      scale: 2,
+      scrollY: 0,
+      useCORS: true
+    },
+    jsPDF: {
+      unit: 'pt',
+      format: 'a4',
+      orientation: 'portrait',
+      compress: true
+    },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+// Generar PDF, descargarlo y luego enviarlo por correo
+html2pdf().set(opt).from(element).save().then(() => {
+  html2pdf().set(opt).from(element).outputPdf('blob').then(function (pdfBlob) {
+    const formData = new FormData();
+    formData.append('pdf', pdfBlob, 'bitacora_conserje.pdf');
+    formData.append('edificio_id', document.getElementById('edificioSelect').value);
+
+    fetch('/enviar_pdf_email_conserje', {
+      method: 'POST',
+      body: formData
+    }).then(res => res.text())
+      .then(res => {
+        console.log('📧 PDF enviado por correo:', res);
+
+        // ✅ Restaurar visibilidad
+        botonesNoPrint.forEach(btn => btn.style.display = '');
+
+        // ✅ Enviar el formulario real después de que todo haya terminado
+        setTimeout(() => {
+          document.getElementById("bitacoraForm").submit();
+        }, 500); // da un pequeño tiempo para asegurar todo
+      })
+      .catch(err => {
+        console.error('❌ Error al enviar PDF:', err);
+        alert('Error al enviar el PDF al correo. Intenta nuevamente.');
+        botonesNoPrint.forEach(btn => btn.style.display = '');
+      });
+  });
+});
+  });
+</script>
+<script>
+// 🔧 Esta es la función que faltaba
+function reemplazarCanvasPorImagenes() {
+  const canvasList = document.querySelectorAll("#contenidoParaPDF canvas");
+  canvasList.forEach(canvas => {
+    const img = document.createElement("img");
+    img.src = canvas.toDataURL("image/png");
+    img.style.width = canvas.style.width;
+    img.style.height = canvas.style.height;
+    canvas.parentNode.replaceChild(img, canvas);
+  });
+}
+</script>
+
  </body>
 </html>

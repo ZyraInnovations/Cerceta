@@ -6688,6 +6688,59 @@ app.post('/enviar_pdf_email', upload.single('pdf'), async (req, res) => {
 
 
 
+  app.post('/enviar_pdf_email_conserje', upload.single('pdf'), async (req, res) => {
+    try {
+      const edificioId = req.body.edificio_id;
+      const pdfBuffer = req.file.buffer;
+  
+      // Obtener el correo desde la base de datos
+      const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
+      if (!rows.length) return res.status(404).send('Correo no encontrado');
+  
+      const correoDestino = rows[0].correorepresentante;
+  
+      // Configura tu transporte de correo
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail', // o tu proveedor SMTP
+        auth: {
+        user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aquí
+                pass: 'yuumpbszqtbxscsq'
+        }
+      });
+      const fecha = new Date();
+      const fechaFormateada = fecha.toLocaleDateString('es-CO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      
+      await transporter.sendMail({
+        from: 'cercetasolucionempresarial@gmail.com',
+        to: correoDestino,
+        subject: `Envío de Bitácora de Conserje - ${fechaFormateada} - Cerceta Solución Empresarial`,
+        text: `Estimado(a),
+      
+      Adjunto encontrará el documento PDF correspondiente a la bitácora de conserje registrada en la fecha indicada. Este documento detalla las actividades realizadas, observaciones relevantes y novedades reportadas durante la jornada.
+      
+      Para cualquier información adicional o reporte de novedades, no dude en comunicarse con nuestro equipo.
+      
+      Cordialmente,  
+      Equipo de Cerceta Solución Empresarial`,
+        attachments: [{
+          filename: 'bitacora_conserje.pdf',
+          content: pdfBuffer
+        }]
+      });
+      
+  
+      res.send('Correo enviado con éxito');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error al enviar el correo');
+    }
+  });
+  
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
