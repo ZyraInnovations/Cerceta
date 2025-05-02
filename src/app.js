@@ -5157,7 +5157,7 @@ app.get('/bitacora_conserje', async (req, res) => {
         try {
             console.log("Datos recibidos en el body:", req.body);
             
-            const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist,firmaSupervisorData, firmaSupervisadoData } = req.body;
+            const { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha, checklist,firmaSupervisorData, firmaSupervisadoData,observaciones } = req.body;
             console.log("Encabezado extraído:", { edificio, puesto_inspeccionado, inspeccionado_por, cargo, fecha });
 
             const data = JSON.parse(checklist);
@@ -5177,7 +5177,7 @@ app.get('/bitacora_conserje', async (req, res) => {
                 data["Realizar la limpieza de los shup de basuras"]?.answer || "", data["Realizar la limpieza de los shup de basuras"]?.accion || "", data["Realizar la limpieza de los shup de basuras"]?.observacion || "",
                 data["Mantener las areas de los parqueaderos limpias"]?.answer || "", data["Mantener las areas de los parqueaderos limpias"]?.accion || "", data["Mantener las areas de los parqueaderos limpias"]?.observacion || "",
                 data["Informar las novedades que se presentan"]?.answer || "", data["Informar las novedades que se presentan"]?.accion || "", data["Informar las novedades que se presentan"]?.observacion || "",
-                firmaSupervisorData || "", firmaSupervisadoData || ""
+                firmaSupervisorData || "", firmaSupervisadoData || "" ,observaciones  || ""  
             ];
 
             console.log("Cantidad de elementos en el arreglo:", values.length);
@@ -5198,7 +5198,9 @@ app.get('/bitacora_conserje', async (req, res) => {
                     \`shup\`, \`shup_acc\`, \`shup_obs\`,
                     \`parqueaderos\`, \`parqueaderos_acc\`, \`parqueaderos_obs\`,
                     \`novedades\`, \`novedades_acc\`, \`novedades_obs\`,
-                    \`firmaSupervisorData\`, \`firmaSupervisadoData\`
+                    \`firmaSupervisorData\`, \`firmaSupervisadoData\`,
+                    \`observaciones\`
+                    
                 ) VALUES (${values.map(() => '?').join(', ')})`,
                 values
             );
@@ -6265,7 +6267,8 @@ app.post('/bitacora_conserje/consultar', async (req, res) => {
   bc.novedades_acc,
   bc.novedades_obs,
   bc.firmaSupervisorData,
-  bc.firmaSupervisadoData
+  bc.firmaSupervisadoData,
+    bc.observaciones
 FROM bitacora_conserje AS bc
 LEFT JOIN edificios AS e ON bc.edificio = e.id
 LEFT JOIN usuarios AS u ON bc.inspeccionado_por = u.id
