@@ -245,6 +245,22 @@ td[contenteditable="true"] {
   </div>
 </div>
 
+<div class="mt-6 no-print">
+  <label for="imagenesAdjuntas" class="block text-sm font-semibold text-gray-700 mb-2">
+    <i class="fas fa-image mr-2 text-blue-500"></i> Adjuntar imágenes (puede seleccionar varias)
+  </label>
+  <input 
+    type="file"
+    id="imagenesAdjuntas"
+    name="imagenesAdjuntas[]"
+    accept="image/*"
+    multiple
+    class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-white p-2"
+  />
+</div>
+
+
+
       <!-- Input hidden para enviar el JSON del checklist -->
       <input type="hidden" name="checklist" id="checklistInput" value="" />
       
@@ -461,8 +477,15 @@ document.getElementById("bitacoraForm").addEventListener("submit", function(e) {
 html2pdf().set(opt).from(element).save().then(() => {
   html2pdf().set(opt).from(element).outputPdf('blob').then(function (pdfBlob) {
     const formData = new FormData();
-    formData.append('pdf', pdfBlob, 'bitacora_aseo.pdf');
-    formData.append('edificio_id', document.getElementById('edificioSelect').value);
+ formData.append('pdf', pdfBlob, 'bitacora_aseo.pdf');
+formData.append('edificio_id', document.getElementById('edificioSelect').value);
+
+const inputImagenes = document.getElementById('imagenesAdjuntas');
+if (inputImagenes && inputImagenes.files.length > 0) {
+  for (let i = 0; i < inputImagenes.files.length; i++) {
+    formData.append('imagenes[]', inputImagenes.files[i]); // nombre clave: 'imagenes[]'
+  }
+}
 
     fetch('/enviar_pdf_email', {
       method: 'POST',

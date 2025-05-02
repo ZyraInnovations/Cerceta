@@ -6631,51 +6631,63 @@ app.post("/buscar_inicio_labores", async (req, res) => {
 
 
 
-
-app.post('/enviar_pdf_email', upload.single('pdf'), async (req, res) => {
+app.post('/enviar_pdf_email', upload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'imagenes[]' }
+  ]), async (req, res) => {
     try {
       const edificioId = req.body.edificio_id;
-      const pdfBuffer = req.file.buffer;
+      const pdfBuffer = req.files['pdf'][0].buffer;
+      const imagenes = req.files['imagenes[]'] || [];
   
-      // Obtener el correo desde la base de datos
       const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
       if (!rows.length) return res.status(404).send('Correo no encontrado');
   
       const correoDestino = rows[0].correorepresentante;
   
-      // Configura tu transporte de correo
       const transporter = nodemailer.createTransport({
-        service: 'Gmail', // o tu proveedor SMTP
+        service: 'Gmail',
         auth: {
-        user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aquí
-                pass: 'yuumpbszqtbxscsq'
+          user: 'cercetasolucionempresarial@gmail.com',
+          pass: 'yuumpbszqtbxscsq'
         }
       });
+  
       const fecha = new Date();
       const fechaFormateada = fecha.toLocaleDateString('es-CO', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
-      
+  
+      const attachments = [
+        {
+          filename: 'bitacora_aseo.pdf',
+          content: pdfBuffer
+        }
+      ];
+  
+      imagenes.forEach((img, index) => {
+        attachments.push({
+          filename: `imagen_${index + 1}.${img.originalname.split('.').pop()}`,
+          content: img.buffer
+        });
+      });
+  
       await transporter.sendMail({
         from: 'cercetasolucionempresarial@gmail.com',
         to: correoDestino,
         subject: `Envío de Bitácora de Aseo - ${fechaFormateada} - Cerceta Solución Empresarial`,
         text: `Estimado(a),
-      
-      Adjunto encontrará el documento PDF correspondiente a la bitácora de aseo registrada recientemente. Este documento contiene el detalle completo de las labores realizadas y observaciones relevantes del servicio prestado.
-      
-      Si requiere información adicional o desea reportar alguna novedad, no dude en contactarnos.
-      
-      Cordialmente,  
-      Equipo de Cerceta Solución Empresarial`,
-        attachments: [{
-          filename: 'bitacora_aseo.pdf',
-          content: pdfBuffer
-        }]
+  
+  Adjunto encontrará el documento PDF correspondiente a la bitácora de aseo registrada recientemente. Este documento contiene el detalle completo de las labores realizadas y observaciones relevantes del servicio prestado.
+  
+  Si requiere información adicional o desea reportar alguna novedad, no dude en contactarnos.
+  
+  Cordialmente,  
+  Equipo de Cerceta Solución Empresarial`,
+        attachments
       });
-      
   
       res.send('Correo enviado con éxito');
     } catch (err) {
@@ -6687,51 +6699,64 @@ app.post('/enviar_pdf_email', upload.single('pdf'), async (req, res) => {
 
 
 
-
-  app.post('/enviar_pdf_email_conserje', upload.single('pdf'), async (req, res) => {
+  app.post('/enviar_pdf_email_conserje', upload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'imagenes[]' }
+  ]), async (req, res) => {
     try {
       const edificioId = req.body.edificio_id;
-      const pdfBuffer = req.file.buffer;
+      const pdfBuffer = req.files['pdf'][0].buffer;
+      const imagenes = req.files['imagenes[]'] || [];
   
-      // Obtener el correo desde la base de datos
+      // Obtener correo
       const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
       if (!rows.length) return res.status(404).send('Correo no encontrado');
   
       const correoDestino = rows[0].correorepresentante;
   
-      // Configura tu transporte de correo
       const transporter = nodemailer.createTransport({
-        service: 'Gmail', // o tu proveedor SMTP
+        service: 'Gmail',
         auth: {
-        user: 'cercetasolucionempresarial@gmail.com', // ← Faltaba cerrar comillas aquí
-                pass: 'yuumpbszqtbxscsq'
+          user: 'cercetasolucionempresarial@gmail.com',
+          pass: 'yuumpbszqtbxscsq'
         }
       });
+  
       const fecha = new Date();
       const fechaFormateada = fecha.toLocaleDateString('es-CO', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
-      
+  
+      const attachments = [
+        {
+          filename: 'bitacora_conserje.pdf',
+          content: pdfBuffer
+        }
+      ];
+  
+      imagenes.forEach((img, index) => {
+        attachments.push({
+          filename: `imagen_${index + 1}.${img.originalname.split('.').pop()}`,
+          content: img.buffer
+        });
+      });
+  
       await transporter.sendMail({
         from: 'cercetasolucionempresarial@gmail.com',
         to: correoDestino,
         subject: `Envío de Bitácora de Conserje - ${fechaFormateada} - Cerceta Solución Empresarial`,
         text: `Estimado(a),
-      
-      Adjunto encontrará el documento PDF correspondiente a la bitácora de conserje registrada en la fecha indicada. Este documento detalla las actividades realizadas, observaciones relevantes y novedades reportadas durante la jornada.
-      
-      Para cualquier información adicional o reporte de novedades, no dude en comunicarse con nuestro equipo.
-      
-      Cordialmente,  
-      Equipo de Cerceta Solución Empresarial`,
-        attachments: [{
-          filename: 'bitacora_conserje.pdf',
-          content: pdfBuffer
-        }]
+  
+  Adjunto encontrará el documento PDF correspondiente a la bitácora de conserje registrada en la fecha indicada. Este documento detalla las actividades realizadas, observaciones relevantes y novedades reportadas durante la jornada.
+  
+  Para cualquier información adicional o reporte de novedades, no dude en comunicarse con nuestro equipo.
+  
+  Cordialmente,  
+  Equipo de Cerceta Solución Empresarial`,
+        attachments
       });
-      
   
       res.send('Correo enviado con éxito');
     } catch (err) {
@@ -6740,7 +6765,6 @@ app.post('/enviar_pdf_email', upload.single('pdf'), async (req, res) => {
     }
   });
   
-
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
