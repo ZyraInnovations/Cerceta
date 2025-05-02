@@ -6097,7 +6097,8 @@ app.post('/acta_reunion', async (req, res) => {
 app.post('/bitacora_aseo/consultar', async (req, res) => {
     if (req.session.loggedin === true) {
       const { desde, hasta } = req.body;
-  
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
       try {
         const [resultados] = await pool.query(`
      SELECT 
@@ -6171,7 +6172,9 @@ ORDER BY ba.fecha_creacion DESC
           desde,
           hasta,
           name: req.session.name,
-          layout: 'layouts/nav_admin.hbs'
+          layout: 'layouts/nav_admin.hbs',
+          roles, 
+
         });
   
       } catch (err) {
@@ -6212,7 +6215,8 @@ ORDER BY ba.fecha_creacion DESC
 app.post('/bitacora_conserje/consultar', async (req, res) => {
     if (req.session.loggedin === true) {
       const { desde, hasta } = req.body;
-  
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
       try {
         const [resultados] = await pool.query(`
          SELECT
@@ -6272,7 +6276,9 @@ ORDER BY bc.fecha DESC
           desde,
           hasta,
           name: req.session.name,
-          layout: 'layouts/nav_admin.hbs'
+          layout: 'layouts/nav_admin.hbs',
+          roles,
+
         });
   
       } catch (err) {
@@ -6329,7 +6335,8 @@ ORDER BY bc.fecha DESC
   app.post('/Consulta_acta_puestos', async (req, res) => {
     try {
       const { desde, hasta } = req.body;
-  
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
       // 1. Obtener actas
       const [actas] = await pool.query(`
         SELECT * FROM acta_puestos
@@ -6369,7 +6376,9 @@ ORDER BY bc.fecha DESC
         layout: 'layouts/nav_admin.hbs',
         registros,
         desde,
-        hasta
+        hasta,
+        roles,
+
       });
   
     } catch (error) {
