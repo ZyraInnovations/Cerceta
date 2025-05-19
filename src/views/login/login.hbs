@@ -1,38 +1,232 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma Suspendida</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .suspendida-card {
-            max-width: 600px;
-            margin: auto;
-        }
-    </style>
-</head>
-<body class="d-flex align-items-center justify-content-center min-vh-100">
-    <div class="card shadow suspendida-card">
-        <div class="card-body text-center">
-            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-            <h1 class="card-title mb-3">Plataforma Suspendida</h1>
-            <p class="card-text fs-5">La plataforma está suspendida por falta de pago.</p>
-            <p class="card-text">Llevas <strong>2 días</strong> de retraso en tu pago.</p>
-            <p class="card-text">Por favor, realiza el pago lo antes posible para reactivar el servicio.</p>
-            <a href="/pago" class="btn btn-warning btn-lg mt-3">
-            </a>
-        </div>
-    </div>
+<html>
+ <head>
+  <title>
+   CERCETA
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+   <link rel="icon" href="../../imagenes/Recurso 1hdpi.png" type="image/x-icon"/>
+     <link rel="manifest" href="/manifest.json">
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+
+  <style>
+   .video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1;
+   }
+  </style>
+  <style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+/* Fuerza el ancho completo en pantallas pequeñas */
+.form-container {
+  width: 100%;
+  max-width: none; /* Elimina el límite de ancho en móviles */
+  padding: 1rem; /* Agrega algo de padding para mejorar el aspecto */
+}
+
+/* Ajustes para pantallas medianas y grandes */
+@media (min-width: 640px) {
+  .form-container {
+    max-width: 24rem; /* Límite de ancho solo en pantallas mayores */
+  }
+}
+
+</style>
+
+ </head>
+ <body class="relative">
+  <video autoplay loop muted class="video-background">
+   <source src="videos/1477073_People_Business_1280x720.mp4" type="video/mp4">
+   Your browser does not support the video tag.
+  </video>
+  <header class="flex items-center justify-between p-4 bg-white bg-opacity-90">
+   <div class="flex items-center">
+    <img alt="CERCETA Logo" class="h-12" height="180" src="imagenes/LOGO_SIN_FONDO_Mesa_de_trabajo_1-removebg-preview.png" width="70"/>
+    <span class="ml-4 text-xl font-bold text-gray-800">
+     CERCETA SOLUCIONES EMPRESARIALES
+    </span>
+   </div>
+  </header>
+ <div class="flex items-center justify-center min-h-screen px-4">
+  <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg form-container">
+    <div class="flex justify-center mb-4">
+      <img alt="Alianza Priority Logo" height="50" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png" width="100"/>
+    </div>
+    <form action="/login" method="POST" class="form">
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="username">
+          CORREO
+        </label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="email" required/>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="password">
+          CONTRASEÑA
+        </label>
+        <div class="relative">
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password" required/>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+  <i class="fas fa-eye cursor-pointer"></i>
+</div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+          Entrar
+        </button>
+      </div>
+
+
+    <div class="text-center">
+          <a href="#" id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">¿Has olvidado la contraseña?</a>
+        </div>
+        <div id="reset-password-container" class="hidden mt-4">
+          <label class="block text-sm font-bold mb-2" for="reset-email">Correo Electrónico</label>
+<input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
+          <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">Enviar Enlace</button>
+          <p id="reset-message" class="text-center mt-4 text-green-500 hidden"></p>
+        </div>
+      </form>
+  </div>
+</div>
+
+  <div class="fixed bottom-4 right-4 flex space-x-4">
+   <a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="https://wa.me/573106993809" target="_blank">
+    <i class="fab fa-whatsapp">
+    </i>
+   </a>
+<a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="tel:+573106993809">
+    <i class="fas fa-phone">
+    </i>
+   </a>
+  </div>
+  <script async="" defer="" src="https://www.google.com/recaptcha/api.js">
+  </script>
+
+<script>
+self.addEventListener("fetch", function (event) {
+  event.respondWith(
+    caches.match(event.request).then(function (response) {
+      if (response) {
+        return response; // Responder desde la caché
+      }
+      return fetch(event.request).catch((error) => {
+        console.error("Error al hacer fetch:", error);
+      });
+    })
+  );
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(reg => console.log("Service Worker registrado:", reg.scope))
+      .catch(err => console.error("Error al registrar el Service Worker:", err));
+  });
+}
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const togglePassword = document.querySelector(".fa-eye");
+    const passwordField = document.getElementById("password");
+
+    togglePassword.addEventListener("click", function () {
+      // Alterna entre mostrar y ocultar la contraseña
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        this.classList.remove("fa-eye");
+        this.classList.add("fa-eye-slash");
+      } else {
+        passwordField.type = "password";
+        this.classList.remove("fa-eye-slash");
+        this.classList.add("fa-eye");
+      }
+    });
+  });
+</script>
+
+<script>
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const resetPasswordContainer = document.getElementById('reset-password-container');
+    const sendResetLinkBtn = document.getElementById('send-reset-link');
+    const resetMessage = document.getElementById('reset-message');
+
+    // Mostrar campo para ingresar el correo
+    forgotPasswordLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      resetPasswordContainer.classList.toggle('hidden');
+    });
+
+    // Enviar el correo de restablecimiento de contraseña
+    sendResetLinkBtn.addEventListener('click', async function() {
+      const email = document.getElementById('reset-email').value;
+      const response = await fetch('/request-password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      resetMessage.innerText = data.message;
+      resetMessage.classList.remove('hidden');
+    });
+  </script>
+<script>
+  let deferredPrompt;
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    // Evitar el banner automático
+    event.preventDefault();
+    // Guardar el evento para mostrarlo después
+    deferredPrompt = event;
+    // Mostrar el botón de instalación
+    document.getElementById("install-btn").style.display = "block";
+  });
+
+  document.getElementById("install-btn").addEventListener("click", async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    // Mostrar el banner de instalación
+    deferredPrompt.prompt();
+
+    // Esperar la respuesta del usuario
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log("Resultado de la instalación:", outcome);
+
+    // Ocultar el botón si el usuario acepta la instalación
+    if (outcome === "accepted") {
+      document.getElementById("install-btn").style.display = "none";
+    }
+
+    // Limpiar la variable
+    deferredPrompt = null;
+  });
+  document.querySelector('.form').addEventListener('submit', function(e) {
+  // Verifica si el campo de recuperación de contraseña está oculto antes de enviar el formulario
+  if (!resetPasswordContainer.classList.contains('hidden')) {
+    e.preventDefault();
+    alert("Cierra la sección de recuperación de contraseña antes de iniciar sesión.");
+  }
+});
+
+</script>
+
+ </body>
 </html>
