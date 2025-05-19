@@ -1,258 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CERCETA</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Internal CSS -->
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
+<html>
+ <head>
+  <title>
+   CERCETA
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+   <link rel="icon" href="../../imagenes/Recurso 1hdpi.png" type="image/x-icon"/>
+     <link rel="manifest" href="/manifest.json">
 
-        .background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 0.5s ease-in-out;
-        }
 
-        .login-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-top: 80px;
-            position: relative;
-        }
+  <style>
+   .video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -1;
+   }
+  </style>
+  <style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+  }
 
-        .login-box {
-            width: 420px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
-            border-radius: 20px;
-            background-color: rgba(255, 255, 255, 0.85);
-            position: absolute;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            right: 30%;
-            top: 70px;
-        }
+/* Fuerza el ancho completo en pantallas pequeñas */
+.form-container {
+  width: 100%;
+  max-width: none; /* Elimina el límite de ancho en móviles */
+  padding: 1rem; /* Agrega algo de padding para mejorar el aspecto */
+}
 
-        .login-box.active {
-            opacity: 1;
-            visibility: visible;
-        }
+/* Ajustes para pantallas medianas y grandes */
+@media (min-width: 640px) {
+  .form-container {
+    max-width: 24rem; /* Límite de ancho solo en pantallas mayores */
+  }
+}
 
-        .login-box h2 {
-            margin: 0 0 20px;
-            font-size: 30px;
-            font-weight: 700;
-            text-align: center;
-            color: #413d4b;
-            text-transform: uppercase;
-        }
+</style>
 
-        .login-box .textbox {
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        .login-box .textbox input {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: #f9f9f9;
-            outline: none;
-            font-size: 16px;
-            color: #333;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .login-box .textbox input:focus {
-            border-color: #90c9a7;
-            box-shadow: 0 0 10px rgba(144, 201, 167, 0.5);
-        }
-
-        .login-box .textbox span {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            right: 12px;
-            font-size: 20px;
-            color: #333;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .login-box .textbox span:hover {
-            color: #90c9a7;
-        }
-
-        .login-box .btn {
-            width: 100%;
-            background: #90c9a7;
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-            font-size: 18px;
-            color: #fff;
-            border-radius: 10px;
-            text-transform: uppercase;
-            transition: background 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .login-box .btn:hover {
-            background: #4082f5;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .login-box .forgot-password {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .login-box .forgot-password a {
-            color: #90c9a7;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .login-box .forgot-password a:hover {
-            color: #4082f5;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .role-button {
-            padding: 10px 20px;
-            background-color: #413d4b;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .role-button:hover {
-            background-color: #90c9a7;
-        }
-
-        @media (max-width: 768px) {
-            .login-box {
-                right: auto;
-                top: auto;
-                width: 90%;
-                padding: 20px;
-                box-sizing: border-box;
-                position: relative;
-            }
-
-            .login-box h2 {
-                font-size: 24px;
-            }
-
-            .role-button {
-                font-size: 14px;
-                padding: 8px 15px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="background-image" id="backgroundImage"></div>
-
-    <div class="login-container">
-        <div id="conductores" class="login-box active">
-            <h2>Inicia sesión</h2>
-            <div class="button-container">
-                <button class="role-button" onclick="changeBackground('administrativo')">Administrativo</button>
-                <button class="role-button" onclick="changeBackground('clientes')">Residentes</button>
-            </div>
-            <form action="/login" method="POST" class="form">
-                <div class="textbox">
-                    <input type="text" placeholder="Correo electrónico" name="email" required>
-                </div>
-                <div class="textbox password-container">
-                    <input type="password" placeholder="Contraseña" name="password" id="password-conductores" required>
-                    <span class="toggle-password" onclick="togglePasswordVisibility('password-conductores')"><i class="fas fa-eye"></i></span>
-                </div>
-                <button type="submit" class="btn">Entrar</button>
-                <div class="forgot-password">
-                    <a href="#" id="forgotPasswordLinkConductores">¿Olvidaste tu contraseña?</a>
-                </div>
-            </form>
-        </div>
+ </head>
+ <body class="relative">
+  <video autoplay loop muted class="video-background">
+   <source src="videos/1477073_People_Business_1280x720.mp4" type="video/mp4">
+   Your browser does not support the video tag.
+  </video>
+  <header class="flex items-center justify-between p-4 bg-white bg-opacity-90">
+   <div class="flex items-center">
+    <img alt="CERCETA Logo" class="h-12" height="180" src="imagenes/LOGO_SIN_FONDO_Mesa_de_trabajo_1-removebg-preview.png" width="70"/>
+    <span class="ml-4 text-xl font-bold text-gray-800">
+     CERCETA SOLUCIONES EMPRESARIALES
+    </span>
+   </div>
+  </header>
+ <div class="flex items-center justify-center min-h-screen px-4">
+  <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg form-container">
+    <div class="flex justify-center mb-4">
+      <img alt="Alianza Priority Logo" height="50" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png" width="100"/>
     </div>
+    <form action="/login" method="POST" class="form">
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="username">
+          CORREO
+        </label>
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="email" required/>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="password">
+          CONTRASEÑA
+        </label>
+        <div class="relative">
+<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password" required/>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+  <i class="fas fa-eye cursor-pointer"></i>
+</div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+          Entrar
+        </button>
+      </div>
 
-    <script>
-        function changeBackground(role) {
-            const backgroundImage = document.getElementById('backgroundImage');
-            let imageUrl = '';
 
-            switch (role) {
-                case 'administrativo':
-                    imageUrl = 'imagenes/FONDOADMINISTATIVO.png';
-                    break;
-                case 'clientes':
-                    imageUrl = 'imagenes/FONDORESIDENTES.png';
-                    break;
-                default:
-                    console.error("Role not recognized");
-                    return;
-            }
+    <div class="text-center">
+          <a href="#" id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">¿Has olvidado la contraseña?</a>
+        </div>
+        <div id="reset-password-container" class="hidden mt-4">
+          <label class="block text-sm font-bold mb-2" for="reset-email">Correo Electrónico</label>
+<input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
+          <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">Enviar Enlace</button>
+          <p id="reset-message" class="text-center mt-4 text-green-500 hidden"></p>
+        </div>
+      </form>
+  </div>
+</div>
 
-            backgroundImage.style.backgroundImage = `url(${imageUrl})`;
-        }
+  <div class="fixed bottom-4 right-4 flex space-x-4">
+   <a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="https://wa.me/573106993809" target="_blank">
+    <i class="fab fa-whatsapp">
+    </i>
+   </a>
+<a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="tel:+573106993809">
+    <i class="fas fa-phone">
+    </i>
+   </a>
+  </div>
+  <script async="" defer="" src="https://www.google.com/recaptcha/api.js">
+  </script>
 
-        window.onload = function() {
-            changeBackground('administrativo');
-        };
+<script>
+self.addEventListener("fetch", function (event) {
+  event.respondWith(
+    caches.match(event.request).then(function (response) {
+      if (response) {
+        return response; // Responder desde la caché
+      }
+      return fetch(event.request).catch((error) => {
+        console.error("Error al hacer fetch:", error);
+      });
+    })
+  );
+});
 
-        function togglePasswordVisibility(id) {
-            const passwordInput = document.getElementById(id);
-            const passwordEyeIcon = passwordInput.nextElementSibling;
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordEyeIcon.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                passwordInput.type = 'password';
-                passwordEyeIcon.innerHTML = '<i class="fas fa-eye"></i>';
-            }
-        }
-    </script>
-</body>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(reg => console.log("Service Worker registrado:", reg.scope))
+      .catch(err => console.error("Error al registrar el Service Worker:", err));
+  });
+}
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const togglePassword = document.querySelector(".fa-eye");
+    const passwordField = document.getElementById("password");
+
+    togglePassword.addEventListener("click", function () {
+      // Alterna entre mostrar y ocultar la contraseña
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        this.classList.remove("fa-eye");
+        this.classList.add("fa-eye-slash");
+      } else {
+        passwordField.type = "password";
+        this.classList.remove("fa-eye-slash");
+        this.classList.add("fa-eye");
+      }
+    });
+  });
+</script>
+
+<script>
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const resetPasswordContainer = document.getElementById('reset-password-container');
+    const sendResetLinkBtn = document.getElementById('send-reset-link');
+    const resetMessage = document.getElementById('reset-message');
+
+    // Mostrar campo para ingresar el correo
+    forgotPasswordLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      resetPasswordContainer.classList.toggle('hidden');
+    });
+
+    // Enviar el correo de restablecimiento de contraseña
+    sendResetLinkBtn.addEventListener('click', async function() {
+      const email = document.getElementById('reset-email').value;
+      const response = await fetch('/request-password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      resetMessage.innerText = data.message;
+      resetMessage.classList.remove('hidden');
+    });
+  </script>
+<script>
+  let deferredPrompt;
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    // Evitar el banner automático
+    event.preventDefault();
+    // Guardar el evento para mostrarlo después
+    deferredPrompt = event;
+    // Mostrar el botón de instalación
+    document.getElementById("install-btn").style.display = "block";
+  });
+
+  document.getElementById("install-btn").addEventListener("click", async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    // Mostrar el banner de instalación
+    deferredPrompt.prompt();
+
+    // Esperar la respuesta del usuario
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log("Resultado de la instalación:", outcome);
+
+    // Ocultar el botón si el usuario acepta la instalación
+    if (outcome === "accepted") {
+      document.getElementById("install-btn").style.display = "none";
+    }
+
+    // Limpiar la variable
+    deferredPrompt = null;
+  });
+  document.querySelector('.form').addEventListener('submit', function(e) {
+  // Verifica si el campo de recuperación de contraseña está oculto antes de enviar el formulario
+  if (!resetPasswordContainer.classList.contains('hidden')) {
+    e.preventDefault();
+    alert("Cierra la sección de recuperación de contraseña antes de iniciar sesión.");
+  }
+});
+
+</script>
+
+ </body>
 </html>
