@@ -319,77 +319,94 @@ app.post('/update-password', async (req, res) => {
 });
 
 
+hbs.registerHelper('add', (a, b) => a + b);
+hbs.registerHelper('subtract', (a, b) => a - b);
+hbs.registerHelper('gt', (a, b) => a > b);
+hbs.registerHelper('lt', (a, b) => a < b);
+
 app.get('/menu_residentes', async (req, res) => {
-    if (req.session.loggedin === true) {
-        const name = req.session.name;
-        const userId = req.session.userId;
+    if (req.session.loggedin !== true) {
+        return res.redirect('/login');
+    }
 
-        try {
-            // Consulta para obtener el edificio_id del usuario
-            const [userResult] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
-            if (userResult.length === 0) {
-                return res.status(404).send('Usuario no encontrado');
-            }
-            
-            const edificioId = userResult[0].edificio;
-            console.log("Edificio ID del usuario:", edificioId);
+    const name = req.session.name;
+    const userId = req.session.userId;
 
-            // Consulta para obtener las publicaciones del edificio
-            const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
-            console.log("Resultados de publicaciones:", resultados);
+    // Parámetros de paginación (por defecto: página 1, 5 publicaciones por página)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const offset = (page - 1) * limit;
 
-            // Obtener estadísticas para cada publicación
-            const blogPosts = await Promise.all(resultados.map(async (post) => {
-                // Obtener estadísticas de la publicación
-                const [reacciones] = await pool.query(
-                    'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
-                    [post.id]
-                );
-                
-                const [comentariosCount] = await pool.query(
-                    'SELECT COUNT(*) as count FROM comentarios WHERE publicacion_id = ?',
-                    [post.id]
-                );
-                
-                // Obtener si el usuario actual ha reaccionado
-                let userReaccion = null;
-                if (userId) {
-                    const [userReaccionData] = await pool.query(
-                        'SELECT tipo FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
-                        [post.id, userId]
-                    );
-                    userReaccion = userReaccionData[0]?.tipo || null;
-                }
-                
-                return {
-                    ...post,
-                    imagen: post.imagen ? post.imagen.toString('base64') : null,
-                    pdf: post.pdf ? post.pdf.toString('base64') : null,
-                    word: post.word ? post.word.toString('base64') : null,
-                    excel: post.excel ? post.excel.toString('base64') : null,
-                    estadisticas: {
-                        reacciones,
-                        totalComentarios: comentariosCount[0].count,
-                        userReaccion
-                    }
-                };
-            }));
-
-            res.render('Residentes/home_residentes.hbs', { 
-                name, 
-                userId, 
-                blogPosts, 
-                layout: 'layouts/nav_residentes.hbs' 
-            });
-        } catch (err) {
-            console.error(err);
-            res.status(500).send('Error al obtener las entradas del blog');
+    try {
+        const [userResult] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
+        if (userResult.length === 0) {
+            return res.status(404).send('Usuario no encontrado');
         }
-    } else {
-        res.redirect('/login');
+
+        const edificioId = userResult[0].edificio;
+
+        // Total de publicaciones (para calcular páginas)
+        const [totalResult] = await pool.query(
+            'SELECT COUNT(*) as total FROM publicaciones WHERE edificio_id = ?',
+            [edificioId]
+        );
+        const totalPosts = totalResult[0].total;
+        const totalPages = Math.ceil(totalPosts / limit);
+
+        // Obtener publicaciones con paginación
+        const [resultados] = await pool.query(
+            'SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC LIMIT ? OFFSET ?',
+            [edificioId, limit, offset]
+        );
+
+        const blogPosts = await Promise.all(resultados.map(async (post) => {
+            const [reacciones] = await pool.query(
+                'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
+                [post.id]
+            );
+
+            const [comentariosCount] = await pool.query(
+                'SELECT COUNT(*) as count FROM comentarios WHERE publicacion_id = ?',
+                [post.id]
+            );
+
+            let userReaccion = null;
+            if (userId) {
+                const [userReaccionData] = await pool.query(
+                    'SELECT tipo FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
+                    [post.id, userId]
+                );
+                userReaccion = userReaccionData[0]?.tipo || null;
+            }
+
+            return {
+                ...post,
+                imagen: post.imagen ? post.imagen.toString('base64') : null,
+                pdf: post.pdf ? post.pdf.toString('base64') : null,
+                word: post.word ? post.word.toString('base64') : null,
+                excel: post.excel ? post.excel.toString('base64') : null,
+                estadisticas: {
+                    reacciones,
+                    totalComentarios: comentariosCount[0].count,
+                    userReaccion
+                }
+            };
+        }));
+
+        res.render('Residentes/home_residentes.hbs', {
+            name,
+            userId,
+            blogPosts,
+            currentPage: page,
+            totalPages,
+            layout: 'layouts/nav_residentes.hbs'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error al obtener las entradas del blog');
     }
 });
-
 
 
 // En tu configuración de Handlebars
