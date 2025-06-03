@@ -332,7 +332,6 @@ app.get('/menu_residentes', async (req, res) => {
     const name = req.session.name;
     const userId = req.session.userId;
 
-    // Parámetros de paginación (por defecto: página 1, 5 publicaciones por página)
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const offset = (page - 1) * limit;
@@ -345,7 +344,6 @@ app.get('/menu_residentes', async (req, res) => {
 
         const edificioId = userResult[0].edificio;
 
-        // Total de publicaciones (para calcular páginas)
         const [totalResult] = await pool.query(
             'SELECT COUNT(*) as total FROM publicaciones WHERE edificio_id = ?',
             [edificioId]
@@ -353,31 +351,51 @@ app.get('/menu_residentes', async (req, res) => {
         const totalPosts = totalResult[0].total;
         const totalPages = Math.ceil(totalPosts / limit);
 
-        // Obtener publicaciones con paginación
         const [resultados] = await pool.query(
             'SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC LIMIT ? OFFSET ?',
             [edificioId, limit, offset]
         );
 
-        const blogPosts = await Promise.all(resultados.map(async (post) => {
-            const [reacciones] = await pool.query(
-                'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
-                [post.id]
-            );
+        const postIds = resultados.map(post => post.id);
+        if (postIds.length === 0) {
+            return res.render('Residentes/home_residentes.hbs', {
+                name,
+                userId,
+                blogPosts: [],
+                currentPage: page,
+                totalPages,
+                layout: 'layouts/nav_residentes.hbs'
+            });
+        }
 
-            const [comentariosCount] = await pool.query(
-                'SELECT COUNT(*) as count FROM comentarios WHERE publicacion_id = ?',
-                [post.id]
-            );
+        // Reacciones agrupadas
+        const [reaccionesTotales] = await pool.query(`
+            SELECT publicacion_id, tipo, COUNT(*) as count 
+            FROM reacciones 
+            WHERE publicacion_id IN (?) 
+            GROUP BY publicacion_id, tipo
+        `, [postIds]);
 
-            let userReaccion = null;
-            if (userId) {
-                const [userReaccionData] = await pool.query(
-                    'SELECT tipo FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
-                    [post.id, userId]
-                );
-                userReaccion = userReaccionData[0]?.tipo || null;
-            }
+        // Comentarios agrupados
+        const [comentariosTotales] = await pool.query(`
+            SELECT publicacion_id, COUNT(*) as count 
+            FROM comentarios 
+            WHERE publicacion_id IN (?) 
+            GROUP BY publicacion_id
+        `, [postIds]);
+
+        // Reacción del usuario actual
+        const [reaccionesUsuario] = await pool.query(`
+            SELECT publicacion_id, tipo 
+            FROM reacciones 
+            WHERE publicacion_id IN (?) AND usuario_id = ?
+        `, [postIds, userId]);
+
+        // Mapear resultados por publicación
+        const blogPosts = resultados.map(post => {
+            const reacciones = reaccionesTotales.filter(r => r.publicacion_id === post.id);
+            const comentario = comentariosTotales.find(c => c.publicacion_id === post.id);
+            const reaccionUsuario = reaccionesUsuario.find(r => r.publicacion_id === post.id);
 
             return {
                 ...post,
@@ -387,11 +405,11 @@ app.get('/menu_residentes', async (req, res) => {
                 excel: post.excel ? post.excel.toString('base64') : null,
                 estadisticas: {
                     reacciones,
-                    totalComentarios: comentariosCount[0].count,
-                    userReaccion
+                    totalComentarios: comentario?.count || 0,
+                    userReaccion: reaccionUsuario?.tipo || null
                 }
             };
-        }));
+        });
 
         res.render('Residentes/home_residentes.hbs', {
             name,
