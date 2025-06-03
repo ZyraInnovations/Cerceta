@@ -1,520 +1,488 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="es" class="light">
 <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>CERCETA</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>CERCETA Mobile</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <link rel="manifest" href="/manifest.json">
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
-    /* Sidebar Styling */
+    :root {
+      --primary-color: #2b6cb0;
+      --accent-color: #4299e1;
+      --text-color: #2d3748;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-color);
+      background-color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Mobile-first sidebar */
     .sidebar {
-      width: 16rem;
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: -280px;
+      background: linear-gradient(180deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      transition: transform 0.3s ease;
+      z-index: 100;
+      overflow-y: auto;
       padding: 1rem;
-      background-color: #ffffff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar.open {
+      transform: translateX(280px);
+    }
+    
+    /* Profile section */
+    .profile-section {
+      text-align: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 1rem;
+    }
+    
+    #perfil {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      margin: 0 auto;
+    }
+    
+    .profile-name {
+      color: white;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    /* Navigation items */
+    .nav-item {
       display: flex;
-      flex-direction: column;
-      justify-between: space-between;
-      transition: transform 0.3s ease-in-out;
-      max-height: 100vh;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .nav-item i {
+      width: 24px;
+      text-align: center;
+      margin-right: 12px;
+      font-size: 1rem;
+    }
+    
+    .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Submenu items */
+    .submenu {
+      margin-left: 2rem;
+      border-left: 2px solid rgba(255, 255, 255, 0.1);
+      padding-left: 0.5rem;
+    }
+    
+    .submenu .nav-item {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    /* Mobile header */
+    .mobile-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      z-index: 90;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .menu-button {
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    .app-title {
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .notification-bell {
+      position: relative;
+      color: white;
+      font-size: 1.2rem;
+    }
+    
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #f56565;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Main content */
+    .main-content {
+      margin-top: 60px;
+      padding: 1rem;
+      min-height: calc(100vh - 60px);
+    }
+    
+    /* Notification popup */
+    #notificationPopup {
+      position: fixed;
+      top: 70px;
+      right: 15px;
+      width: 90%;
+      max-width: 300px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      z-index: 95;
+      transform: translateY(-20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    #notificationPopup.show {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .notification-header {
+      padding: 0.8rem 1rem;
+      background: var(--primary-color);
+      color: white;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    #notificationList {
+      max-height: 300px;
       overflow-y: auto;
     }
-
-    .sidebar ul li a {
-      font-size: 0.875rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.375rem;
-      display: flex;
-      align-items: center;
-      transition: background-color 0.3s, color 0.3s;
-      color: #4a5568;
+    
+    .notification-item {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #eee;
     }
-
-    .sidebar ul li a:hover {
-      background-color: #e0f7fa;
-      color: #00796b;
-      transform: translateX(5px);
+    
+    .notification-item.unread {
+      background-color: #f0f9ff;
     }
-
-    .sidebar ul li a.active {
-      background-color: #00796b;
-      color: white;
-    }
-
-    .sidebar img {
-      width: 40px;
-      height: 40px;
-    }
-
-    /* Badge Styling */
-    .badge {
-      background-color: #ef4444;
-      color: white;
-      padding: 0.25rem 0.5rem;
+    
+    .notification-time {
       font-size: 0.75rem;
-      border-radius: 50%;
-      margin-left: auto;
+      color: #718096;
+      margin-top: 0.2rem;
     }
-
-    /* Search Bar */
-    .search-bar {
-      margin-bottom: 1rem;
+    
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 80;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Theme toggle */
+    .theme-toggle {
       display: flex;
       align-items: center;
-      background-color: #f1f5f9;
-      border-radius: 0.375rem;
-      padding: 0.5rem;
-    }
-
-    .search-bar input {
+      justify-content: center;
+      padding: 0.8rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-radius: 8px;
+      margin-top: 1rem;
       border: none;
-      background: none;
-      outline: none;
       width: 100%;
-      padding: 0.5rem;
-      font-size: 0.875rem;
-      color: #4a5568;
     }
-
-    .search-bar i {
-      color: #4a5568;
-    }
-
-    /* Profile Dropdown */
-    .profile-section {
-      margin-bottom: 2rem;
-    }
-
-    .profile-section .profile-info {
-      display: flex;
-      align-items: center;
-    }
-
-    .profile-section .profile-info img {
-      border-radius: 50%;
+    
+    .theme-toggle i {
       margin-right: 0.5rem;
     }
-
-    .profile-section .profile-info span {
-      font-weight: 700;
-      color: #00796b;
+    
+    /* Dark mode */
+    .dark body {
+      background-color: #1a202c;
     }
-
-    /* Section Titles */
+    
+    .dark .main-content {
+      background-color: #1a202c;
+      color: #e2e8f0;
+    }
+    
+    /* Section titles */
     .section-title {
+      color: rgba(255, 255, 255, 0.7);
       font-size: 0.75rem;
-      font-weight: 600;
-      color: #9ca3af;
       text-transform: uppercase;
-      margin-top: 2rem;
-      padding-left: 1rem;
+      letter-spacing: 0.5px;
+      margin: 1.5rem 0 0.5rem 1rem;
     }
-
-    /* Hamburger Menu */
-    .hamburger {
-      display: none;
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 50;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      background-color: #00796b;
-    }
-
-    .hamburger span {
-      display: block;
-      width: 25px;
-      height: 3px;
-      background-color: white;
-      margin-bottom: 5px;
-    }
-
-    @media (max-width: 768px) {
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
       .sidebar {
-        position: fixed;
-        top: 0;
-        height: 100%;
-        transform: translateX(-100%);
-        z-index: 40;
-      }
-
-      .sidebar.open {
+        left: 0;
         transform: translateX(0);
       }
-
-      .hamburger {
-        display: block;
+      
+      .main-content {
+        margin-left: 280px;
+        margin-top: 0;
+      }
+      
+      .mobile-header {
+        display: none;
       }
     }
-
-    /* Dark mode styling */
-    .dark .sidebar {
-      background-color: #1a202c;
-      color: #cbd5e0;
-    }
-
-    .dark .sidebar ul li a {
-      color: #cbd5e0;
-    }
-
-    .dark .sidebar ul li a:hover {
-      background-color: #2d3748;
-      color: #81e6d9;
-    }
-
-    .dark .section-title {
-      color: #718096;
-    }
-
-    .dark .search-bar {
-      background-color: #2d3748;
-    }
-
-    .dark .search-bar input {
-      color: #cbd5e0;
-    }
-
-    .dark .hamburger {
-      background-color: #2d3748;
-    }
-    #perfil{
-width: 120px;
-height: 120px;
-
-    }   /* Popup de Notificaciones */
-#notificationPopup {
-    position: fixed;
-    top: 80px;
-    right: 20%;
-    background-color: rgba(255, 255, 255, 0.98); /* Fondo semitransparente */
-    padding: 1.2rem 1.5rem;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 0.75rem;
-    z-index: 9999;
-    border: 1px solid #00796b; /* Borde más delgado */
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
   </style>
 </head>
-<div class="overlay" id="overlay"></div>
-
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-  <div class="flex h-screen">
-    <!-- Hamburger Icon -->
-    <div class="hamburger" id="hamburger-menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <!-- Profile Section -->
-      <div class="profile-section">
-        <div class="profile-info">
-          <img  id="perfil" src="imagenes/2022cercetafinal-impresion_Mesa de trabajo 1.png" alt="Profile Picture" />
-          <span>{{name}}</span>
-        </div>
-      </div>
-
-
-
-
-<div class="flex items-center justify-end p-4">
-    <div class="relative">
-      <i class="fas fa-bell text-xl cursor-pointer" id="notificationBell" onclick="toggleNotificationPopup()"></i>
-          <span id="notificationCount" class="badge hidden">0</span>
-    </div>
-</div>
-
-
-
-      <!-- Search Bar -->
-      <div class="search-bar">
-        <input type="text" placeholder="Buscar...">
-        <i class="fas fa-search"></i>
-      </div>
-
-      <!-- Navigation Links -->
-      <nav>
-        <ul>
-          <!-- General Section -->
-          <div class="section-title">General</div>
-          <li class="mb-2">
-  <a class="flex items-center" href="/menu_residentes" data-link="/menu_residentes" title="Vista General">
-              <i class="fas fa-home mr-2"></i> Blog residencial
-            </a>
-          </li>
-
-
-<!-- Property Management Section -->
-<div class="section-title">--Contabilidad--</div>
-
-
-<!-- Pagos Section -->
-<li class="mb-2">
-  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Contabilidad')"   data-links="/validar_pagos,/Consulta_Comprobantes_de_Pago">
-    <i class="fas fa-money-check-alt mr-2"></i> Pagos
-    <i class="fas fa-chevron-down"></i>
-  </a>
-  <ul id="submenu-Contabilidad" class="hidden ml-4">
-    <li class="mb-2">
-      <a class="flex items-center" href="/subir_pago_residentes" title="Agregar Pago">
-        <i class="fas fa-plus-circle mr-2"></i> Subir pago
-      </a>
-    </li>
-    <li class="mb-2">
-      <a class="flex items-center" href="/Consulta_Comprobantes_de_Pago_residentes" title="Consultar Pagos">
-        <i class="fas fa-search-dollar mr-2"></i> Consultar
-      </a>
-    </li>
-
-
-
-
-    
-  </ul>
-</li>
-
-
-
-
-
-         
-    
-<li class="mb-2">
-  <a class="flex items-center" href="/logout" title="Cerrar sesión">
-    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión 
-  </a>
-</li>
-
-        </ul>
-      </nav>
-<br>
-
-      <!-- Theme Toggle Button -->
-      <div class="mt-auto">
-        <button id="theme-toggle" class="w-full py-2 px-4 text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
-          Cambiar Tema
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="flex-1 p-6 bg-gray-50 dark:bg-gray-800 overflow-auto transition-colors duration-300">
-      <!-- Placeholder for dynamic body content -->
-
-   <div class="main-content">
-    
-<div id="notificationPopup" class="hidden fixed top-16 right-16 bg-white p-4 shadow-lg rounded-lg z-50 w-80">
-    <h3 class="text-lg font-bold mb-2">Notificaciones</h3>
-    <ul id="notificationList" class="text-gray-700 space-y-2"></ul>
-    <button onclick="markNotificationsAsRead({{userId}})" class="mt-3 text-blue-500 w-full text-center py-2 rounded-lg bg-blue-100 hover:bg-blue-200">
-        Marcar todas como leídas
+<body class="bg-gray-50 dark:bg-gray-900">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="menu-button" id="menuButton">
+      <i class="fas fa-bars"></i>
     </button>
-</div>
-
-
-
-    {{{body}}}
-</div>
-
+    <div class="app-title">CERCETA</div>
+    <div class="notification-bell" id="notificationBell">
+      <i class="fas fa-bell"></i>
+      <span class="badge hidden" id="notificationCount">0</span>
     </div>
   </div>
 
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <!-- Profile Section -->
+    <div class="profile-section">
+      <img id="perfil" src="imagenes/2022cercetafinal-impresion_Mesa de trabajo 1.png" alt="Perfil"/>
+      <div class="profile-name">{{name}}</div>
+    </div>
 
+    <!-- Navigation -->
+    <nav>
+      <div class="section-title">General</div>
+      <a href="/menu_residentes" class="nav-item" data-link="/menu_residentes">
+        <i class="fas fa-home"></i>
+        <span>Blog residencial</span>
+      </a>
 
+      <div class="section-title">Contabilidad</div>
+      <div class="nav-item" onclick="toggleSubmenu('pagosSubmenu')">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Pagos</span>
+        <i class="fas fa-chevron-down ml-auto" style="font-size: 0.8rem;"></i>
+      </div>
+      
+      <div class="submenu hidden" id="pagosSubmenu">
+        <a href="/subir_pago_residentes" class="nav-item">
+          <i class="fas fa-plus-circle"></i>
+          <span>Subir pago</span>
+        </a>
+        <a href="/Consulta_Comprobantes_de_Pago_residentes" class="nav-item">
+          <i class="fas fa-search-dollar"></i>
+          <span>Consultar</span>
+        </a>
+      </div>
 
+      <a href="/logout" class="nav-item">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar sesión</span>
+      </a>
+    </nav>
 
-<script>
-// Function to toggle the notification popup
-function toggleNotificationPopup() {
-    const popup = document.getElementById('notificationPopup');
-    popup.classList.toggle('hidden'); // Solo mostrar o esconder el popup al hacer clic
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+      <i class="fas fa-moon"></i>
+      <span>Cambiar tema</span>
+    </button>
+  </div>
 
-    // Si el popup está visible, agregamos un event listener para hacer clic fuera de él
-    if (!popup.classList.contains('hidden')) {
-        document.addEventListener('click', closePopupOnClickOutside);
-    } else {
-        document.removeEventListener('click', closePopupOnClickOutside);
-    }
-}
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Notification Popup -->
+    <div id="notificationPopup">
+      <div class="notification-header">
+        <h3>Notificaciones</h3>
+        <button onclick="markNotificationsAsRead({{userId}})">Marcar como leídas</button>
+      </div>
+      <ul id="notificationList">
+        <li class="notification-item">No hay notificaciones</li>
+      </ul>
+    </div>
 
-// Function to close the popup when clicking outside
-function closePopupOnClickOutside(event) {
-    const popup = document.getElementById('notificationPopup');
-    const bell = document.getElementById('notificationBell');
+    <!-- Dynamic Content -->
+    {{{body}}}
+  </div>
+
+  <script>
+    // DOM Elements
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationPopup = document.getElementById('notificationPopup');
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
     
-    // Verificar si el clic ocurrió fuera del popup y de la campana de notificaciones
-    if (!popup.contains(event.target) && event.target !== bell) {
-        popup.classList.add('hidden'); // Ocultar el popup
-        document.removeEventListener('click', closePopupOnClickOutside); // Remover el listener
+    // Toggle sidebar
+    menuButton.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    
+    // Close sidebar when clicking overlay
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+    
+    // Toggle notifications
+    notificationBell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notificationPopup.classList.toggle('show');
+    });
+    
+    // Close notifications when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!notificationPopup.contains(e.target) && e.target !== notificationBell) {
+        notificationPopup.classList.remove('show');
+      }
+    });
+    
+    // Theme toggle
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+    });
+    
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+      html.classList.add('dark');
     }
-}
-
-
-// Variable to control notification sound interval
-let notificationSoundInterval;
-let isUserInteracted = false;
-
-// Detect user interaction to allow sound playback
-window.addEventListener('click', () => {
-    isUserInteracted = true;
-});
-
-// Function to play the notification sound
-function playNotificationSound() {
-    const audio = new Audio('sonidos/level-up-2-199574.mp3');
-    audio.play().catch(error => console.error("Error al reproducir sonido:", error));
-}
-
-// Function to start sound at 5-second intervals
-function startNotificationSound() {
-    if (isUserInteracted) {
-        playNotificationSound();
-        notificationSoundInterval = setInterval(playNotificationSound, 5000);
+    
+    // Toggle submenus
+    function toggleSubmenu(id) {
+      const submenu = document.getElementById(id);
+      const icon = submenu.previousElementSibling.querySelector('.fa-chevron-down');
+      
+      submenu.classList.toggle('hidden');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
     }
-}
-
-// Function to stop sound when notifications are marked as read
-// Function to stop sound when notifications are marked as read
-function stopNotificationSound() {
-    if (notificationSoundInterval) {
-        clearInterval(notificationSoundInterval);
-        notificationSoundInterval = null; // Reiniciar el intervalo
-    }
-}
-
-async function loadNotifications() {
-    try {
+    
+    // Mark active link
+    document.querySelectorAll('.nav-item').forEach(item => {
+      if (item.getAttribute('href') === window.location.pathname) {
+        item.classList.add('active');
+      }
+    });
+    
+    // Load notifications
+    async function loadNotifications() {
+      try {
         const response = await fetch('/notificaciones');
         const data = await response.json();
         
-        const notificationCount = data.notificaciones.length;
-        const notificationBadge = document.getElementById('notificationCount');
+        const notifications = data.notificaciones || [];
         const notificationList = document.getElementById('notificationList');
-
-        // Actualiza el conteo de notificaciones
-        if (notificationCount > 0) {
-            notificationBadge.classList.remove('hidden');
-            notificationBadge.textContent = notificationCount;
-            notificationList.innerHTML = '';
-
-            // Llena la lista de notificaciones
-            data.notificaciones.forEach(notificacion => {
-                const listItem = document.createElement('li');
-                listItem.className = notificacion.leido ? 'bg-gray-200 p-2 rounded-lg' : 'bg-blue-100 p-2 rounded-lg font-bold';
-                
-                listItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span>${notificacion.actividad}</span>
-                        <span class="text-xs text-gray-500">${new Date(notificacion.fecha).toLocaleString()}</span>
-                    </div>
-                `;
-                notificationList.appendChild(listItem);
-            });
-
-        } else {
-            notificationBadge.classList.add('hidden');
-            notificationList.innerHTML = '<li class="text-center text-gray-500">No hay notificaciones nuevas</li>';
+        
+        if (notifications.length > 0) {
+          document.getElementById('notificationCount').classList.remove('hidden');
+          document.getElementById('notificationCount').textContent = notifications.length;
+          
+          notificationList.innerHTML = '';
+          
+          notifications.forEach(notif => {
+            const li = document.createElement('li');
+            li.className = notif.leido ? 'notification-item' : 'notification-item unread';
+            li.innerHTML = `
+              <div>${notif.actividad}</div>
+              <div class="notification-time">${new Date(notif.fecha).toLocaleString()}</div>
+            `;
+            notificationList.appendChild(li);
+          });
         }
-    } catch (error) {
-        console.error("Error al cargar notificaciones:", error);
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+      }
     }
-}
-
-
-function markNotificationsAsRead(userId) {
-    const notificationBadge = document.getElementById('notificationCount');
-    const notificationList = document.getElementById('notificationList');
-    const popup = document.getElementById('notificationPopup');
-
-    // Ocultar la notificación visualmente
-    notificationBadge.classList.add('hidden');
-    notificationBadge.textContent = '0';
-    notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
-    popup.classList.add('hidden'); // Ocultar el popup después de marcar como leídas
-
-    // Verificar si el userId está definidotoggleNotificationPopup
-    if (!userId) {
-        console.error('El user_id no está definido.');
-        return;
-    }
-
-    // Llamar a la API para marcar como leídas
-    fetch(`/marcarNotificacionesComoLeidas/${userId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log("Notificaciones marcadas como leídas:", data);
-            } else {
-                console.error("No se pudo marcar como leído:", data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error al marcar notificaciones como leídas:", error);
+    
+    // Mark notifications as read
+    async function markNotificationsAsRead(userId) {
+      if (!userId) return;
+      
+      try {
+        const response = await fetch(`/marcarNotificacionesComoLeidas/${userId}`, {
+          method: 'POST'
         });
-}
-
-
-
-// Hamburger menu toggle
-const hamburger = document.getElementById('hamburger-menu');
-const sidebar = document.getElementById('sidebar');
-
-hamburger.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-});
-
-// Theme toggle logic
-const themeToggle = document.getElementById('theme-toggle');
-const htmlElement = document.documentElement;
-
-themeToggle.addEventListener('click', () => {
-    htmlElement.classList.toggle('dark');
-    if (htmlElement.classList.contains('dark')) {
-        localStorage.setItem('theme', 'dark');
-    } else {
-        localStorage.setItem('theme', 'light');
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('notificationCount').classList.add('hidden');
+          document.querySelectorAll('.notification-item').forEach(item => {
+            item.classList.remove('unread');
+          });
+          notificationPopup.classList.remove('show');
+        }
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+      }
     }
-});
-
-// Load theme from localStorage
-const storedTheme = localStorage.getItem('theme');
-if (storedTheme === 'dark') {
-    htmlElement.classList.add('dark');
-}
-
-// Mark the active link in the sidebar
-const currentPath = window.location.pathname;
-const menuLinks = document.querySelectorAll('.sidebar ul li a');
-
-menuLinks.forEach(link => {
-    if (link.dataset.link === currentPath) {
-        link.classList.add('active');
-    }
-});
-
-// Submenu toggle
-function toggleSubmenu(id) {
-    const submenu = document.getElementById(id);
-    submenu.classList.toggle('hidden');
-}
-
-
-</script>
-
-<script>
-
-</script>
-
-<script>
-
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadNotifications();
+      setInterval(loadNotifications, 30000); // Check every 30 seconds
+    });
+  </script>
+</body>
+</html>
