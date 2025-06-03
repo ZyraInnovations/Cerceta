@@ -6,6 +6,7 @@ const path = require('path');
 const moment = require('moment-timezone');
 const fs = require('fs');
 const cron = require('node-cron');
+const handlebars = require('handlebars');
 
 const app = express();
 const fileUpload = require('express-fileupload');
@@ -318,7 +319,6 @@ app.post('/update-password', async (req, res) => {
 });
 
 
-
 app.get('/menu_residentes', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -338,16 +338,49 @@ app.get('/menu_residentes', async (req, res) => {
             const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
             console.log("Resultados de publicaciones:", resultados);
 
-            // Convertir los datos binarios a base64
-            const blogPosts = resultados.map((post) => ({
-                ...post,
-                imagen: post.imagen ? post.imagen.toString('base64') : null,
-                pdf: post.pdf ? post.pdf.toString('base64') : null,
-                word: post.word ? post.word.toString('base64') : null,
-                excel: post.excel ? post.excel.toString('base64') : null
+            // Obtener estadísticas para cada publicación
+            const blogPosts = await Promise.all(resultados.map(async (post) => {
+                // Obtener estadísticas de la publicación
+                const [reacciones] = await pool.query(
+                    'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
+                    [post.id]
+                );
+                
+                const [comentariosCount] = await pool.query(
+                    'SELECT COUNT(*) as count FROM comentarios WHERE publicacion_id = ?',
+                    [post.id]
+                );
+                
+                // Obtener si el usuario actual ha reaccionado
+                let userReaccion = null;
+                if (userId) {
+                    const [userReaccionData] = await pool.query(
+                        'SELECT tipo FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
+                        [post.id, userId]
+                    );
+                    userReaccion = userReaccionData[0]?.tipo || null;
+                }
+                
+                return {
+                    ...post,
+                    imagen: post.imagen ? post.imagen.toString('base64') : null,
+                    pdf: post.pdf ? post.pdf.toString('base64') : null,
+                    word: post.word ? post.word.toString('base64') : null,
+                    excel: post.excel ? post.excel.toString('base64') : null,
+                    estadisticas: {
+                        reacciones,
+                        totalComentarios: comentariosCount[0].count,
+                        userReaccion
+                    }
+                };
             }));
 
-            res.render('Residentes/home_residentes.hbs', { name, userId, blogPosts, layout: 'layouts/nav_residentes.hbs' });
+            res.render('Residentes/home_residentes.hbs', { 
+                name, 
+                userId, 
+                blogPosts, 
+                layout: 'layouts/nav_residentes.hbs' 
+            });
         } catch (err) {
             console.error(err);
             res.status(500).send('Error al obtener las entradas del blog');
@@ -6764,6 +6797,267 @@ app.post('/enviar_pdf_email', upload.fields([
       res.status(500).send('Error al enviar el correo');
     }
   });
+
+
+
+
+
+
+// Obtener userId de la sesión
+const getUserId = (req) => {
+    return req.session.userId; 
+};
+
+// Obtener estadísticas de publicaciones
+app.get('/api/publicaciones/:id/estadisticas', async (req, res) => {
+    try {
+        const publicacionId = req.params.id;
+        
+        // Obtener reacciones
+        const [reacciones] = await pool.query(
+            'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
+            [publicacionId]
+        );
+        
+        // Obtener conteo de comentarios
+        const [comentariosCount] = await pool.query(
+            'SELECT COUNT(*) as count FROM comentarios WHERE publicacion_id = ?',
+            [publicacionId]
+        );
+        
+        // Obtener si el usuario actual ha reaccionado
+        let userReaccion = null;
+        if (req.session.userId) {
+            const [userReaccionData] = await pool.query(
+                'SELECT tipo FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
+                [publicacionId, req.session.userId]
+            );
+            userReaccion = userReaccionData[0]?.tipo || null;
+        }
+        
+        res.json({
+            reacciones,
+            totalComentarios: comentariosCount[0].count,
+            userReaccion
+        });
+    } catch (error) {
+        console.error('Error al obtener estadísticas:', error);
+        res.status(500).json({ error: 'Error al obtener estadísticas' });
+    }
+});
+// Endpoint para reaccionar
+app.post('/api/publicaciones/:id/reaccionar', async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) return res.status(401).json({ error: 'No autenticado' });
+
+        const { tipo } = req.body;
+        const publicacionId = req.params.id;
+
+        // Verificar si la publicación existe
+        const [publicacion] = await pool.query(
+            'SELECT id FROM publicaciones WHERE id = ?',
+            [publicacionId]
+        );
+        if (!publicacion.length) return res.status(404).json({ error: 'Publicación no encontrada' });
+
+        // Verificar si ya existe una reacción del usuario
+        const [existing] = await pool.query(
+            'SELECT * FROM reacciones WHERE publicacion_id = ? AND usuario_id = ?',
+            [publicacionId, userId]
+        );
+        
+        if (existing.length > 0) {
+            if (existing[0].tipo === tipo) {
+                // Eliminar reacción si es la misma
+                await pool.query(
+                    'DELETE FROM reacciones WHERE id = ?',
+                    [existing[0].id]
+                );
+            } else {
+                // Actualizar reacción existente
+                await pool.query(
+                    'UPDATE reacciones SET tipo = ? WHERE id = ?',
+                    [tipo, existing[0].id]
+                );
+            }
+        } else {
+            // Crear nueva reacción
+            await pool.query(
+                'INSERT INTO reacciones (publicacion_id, usuario_id, tipo) VALUES (?, ?, ?)',
+                [publicacionId, userId, tipo]
+            );
+        }
+        
+        // Obtener estadísticas actualizadas
+        const [estadisticas] = await pool.query(
+            'SELECT tipo, COUNT(*) as count FROM reacciones WHERE publicacion_id = ? GROUP BY tipo',
+            [publicacionId]
+        );
+        
+        res.json({ reacciones: estadisticas });
+    } catch (error) {
+        console.error('Error en reaccionar:', error);
+        res.status(500).json({ error: 'Error al registrar la reacción' });
+    }
+});
+
+// Endpoint para comentarios
+app.post('/api/publicaciones/:id/comentarios', async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) return res.status(401).json({ error: 'No autenticado' });
+
+        const { contenido, comentario_padre_id } = req.body;
+        const publicacionId = req.params.id;
+        
+        // Verificar si la publicación existe
+        const [publicacion] = await pool.query(
+            'SELECT id FROM publicaciones WHERE id = ?',
+            [publicacionId]
+        );
+        if (!publicacion.length) return res.status(404).json({ error: 'Publicación no encontrada' });
+
+        // Insertar comentario
+        const [result] = await pool.query(
+            'INSERT INTO comentarios (publicacion_id, usuario_id, comentario_padre_id, contenido) VALUES (?, ?, ?, ?)',
+            [publicacionId, userId, comentario_padre_id || null, contenido]
+        );
+        
+        // Obtener el comentario recién creado con info del usuario
+        const [comentario] = await pool.query(`
+            SELECT c.*, u.nombre as usuario_nombre, u.avatar as usuario_avatar
+            FROM comentarios c 
+            JOIN usuarios u ON c.usuario_id = u.id 
+            WHERE c.id = ?`,
+            [result.insertId]
+        );
+        
+        res.status(201).json(comentario[0]);
+    } catch (error) {
+        console.error('Error en comentar:', error);
+        res.status(500).json({ error: 'Error al agregar comentario' });
+    }
+});
+
+// Endpoint para likes a comentarios
+app.post('/api/comentarios/:id/like', async (req, res) => {
+    try {
+        const userId = getUserId(req);
+        if (!userId) return res.status(401).json({ error: 'No autenticado' });
+
+        const comentarioId = req.params.id;
+        
+        // Verificar si el comentario existe
+        const [comentario] = await pool.query(
+            'SELECT id FROM comentarios WHERE id = ?',
+            [comentarioId]
+        );
+        if (!comentario.length) return res.status(404).json({ error: 'Comentario no encontrado' });
+
+        // Verificar si ya dio like
+        const [existing] = await pool.query(
+            'SELECT * FROM comentario_likes WHERE comentario_id = ? AND usuario_id = ?',
+            [comentarioId, userId]
+        );
+        
+        if (existing.length > 0) {
+            // Eliminar like
+            await pool.query(
+                'DELETE FROM comentario_likes WHERE id = ?',
+                [existing[0].id]
+            );
+        } else {
+            // Agregar like
+            await pool.query(
+                'INSERT INTO comentario_likes (comentario_id, usuario_id) VALUES (?, ?)',
+                [comentarioId, userId]
+            );
+        }
+        
+        // Obtener conteo actualizado de likes
+        const [likes] = await pool.query(
+            'SELECT COUNT(*) as count FROM comentario_likes WHERE comentario_id = ?',
+            [comentarioId]
+        );
+        
+        res.json({ likes: likes[0].count });
+    } catch (error) {
+        console.error('Error en like a comentario:', error);
+        res.status(500).json({ error: 'Error al registrar like' });
+    }
+});
+
+// Obtener comentarios de una publicación
+app.get('/api/publicaciones/:id/comentarios', async (req, res) => {
+    try {
+        const publicacionId = req.params.id;
+        const userId = req.session.userId || 0;
+        
+        // Verificar si la publicación existe
+        const [publicacion] = await pool.query(
+            'SELECT id FROM publicaciones WHERE id = ?',
+            [publicacionId]
+        );
+        if (!publicacion.length) return res.status(404).json({ error: 'Publicación no encontrada' });
+
+        // Obtener comentarios principales (sin padre)
+        const [comentarios] = await pool.query(`
+            SELECT c.*, 
+                   u.nombre as usuario_nombre, 
+                   u.avatar as usuario_avatar,
+                   (SELECT COUNT(*) FROM comentario_likes WHERE comentario_id = c.id) as likes_count,
+                   EXISTS(SELECT 1 FROM comentario_likes WHERE comentario_id = c.id AND usuario_id = ?) as liked_by_me
+            FROM comentarios c
+            JOIN usuarios u ON c.usuario_id = u.id
+            WHERE c.publicacion_id = ? AND c.comentario_padre_id IS NULL
+            ORDER BY c.created_at DESC`,
+            [userId, publicacionId]
+        );
+        
+        // Obtener respuestas para cada comentario principal
+        for (let comentario of comentarios) {
+            const [respuestas] = await pool.query(`
+                SELECT c.*, 
+                       u.nombre as usuario_nombre,
+                       u.avatar as usuario_avatar,
+                       (SELECT COUNT(*) FROM comentario_likes WHERE comentario_id = c.id) as likes_count,
+                       EXISTS(SELECT 1 FROM comentario_likes WHERE comentario_id = c.id AND usuario_id = ?) as liked_by_me
+                FROM comentarios c
+                JOIN usuarios u ON c.usuario_id = u.id
+                WHERE c.comentario_padre_id = ?
+                ORDER BY c.created_at ASC`,
+                [userId, comentario.id]
+            );
+            comentario.respuestas = respuestas;
+        }
+        
+        res.json(comentarios);
+    } catch (error) {
+        console.error('Error al obtener comentarios:', error);
+        res.status(500).json({ error: 'Error al obtener comentarios' });
+    }
+});
+
+
+
+hbs.registerHelper('obtenerEmoji', function (tipo) {
+  const emojis = {
+    like: '👍',
+    love: '❤️',
+    haha: '😂',
+    wow: '😮',
+    sad: '😢',
+    angry: '😡'
+  };
+  return emojis[tipo] || '👍';
+});
+
+hbs.registerHelper('gt', function (a, b) {
+  return a > b;
+});
+
+
   
 app.get('/', (req, res) => {
     res.redirect('/login');
