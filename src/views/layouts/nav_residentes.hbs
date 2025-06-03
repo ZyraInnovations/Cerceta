@@ -280,6 +280,29 @@
         display: none;
       }
     }
+    .profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-container {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white; /* Círculo blanco */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra opcional */
+  overflow: hidden; /* Para recortar el logo si se sale del círculo */
+}
+
+.logo-container img#perfil {
+  width: 80%;
+  height: auto;
+}
+
   </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
@@ -300,11 +323,16 @@
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <!-- Profile Section -->
-    <div class="profile-section">
-      <img id="perfil" src="imagenes/2022cercetafinal-impresion_Mesa de trabajo 1.png" alt="Perfil"/>
-      <div class="profile-name">{{name}}</div>
-    </div>
+<!-- Profile Section -->
+<div class="profile-section">
+  <div class="logo-container">
+    <img id="perfil" src="imagenes/Recurso 1hdpi.png" alt="Logo CERCETA"/>
+  </div>
+  <div class="profile-info">
+    <div class="profile-name">{{name}}</div>
+    <div class="profile-role">Residente</div>
+  </div>
+</div>
 
     <!-- Navigation -->
     <nav>
