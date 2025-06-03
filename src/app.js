@@ -5503,22 +5503,22 @@ app.get('/api/apartamentos_app', async (req, res) => {
       const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
   
       try {
-        const [usuariosPendientes] = await pool.query(
-          `SELECT 
-             u.id, 
-             u.nombre, 
-             u.email, 
-             u.fecha_cumpleaños, 
-             e.id AS edificio_id,
-             e.nombre AS edificio, 
-             a.numero AS apartamento,
-             a.id AS apartamento_id
-           FROM usuarios u
-           JOIN edificios e ON u.edificio = e.id
-           JOIN apartamentos a ON u.apartamento = a.id
-           WHERE u.estado = 'pendiente'`
-        );
-  
+const [usuariosPendientes] = await pool.query(
+  `SELECT 
+     u.id, 
+     u.nombre, 
+     u.email, 
+     u.fecha_cumpleaños, 
+     e.id AS edificio_id,
+     e.nombre AS edificio, 
+     a.numero AS apartamento,
+     a.id AS apartamento_id
+   FROM usuarios u
+   LEFT JOIN edificios e ON u.edificio = e.id
+   LEFT JOIN apartamentos a ON u.apartamento = a.id
+   WHERE u.estado = 'pendiente'`
+);
+
         const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
   
         res.render('administrativo/usuarios/validar_usuarios.hbs', { 
@@ -5611,11 +5611,19 @@ app.get('/api/apartamentos_app', async (req, res) => {
           from: 'cercetasolucionempresarial@gmail.com',             // Remitente
           to: user.email,                           // Destinatario (email del usuario)
           subject: 'Cuenta verificada - App cercerta',
-          text: `Su cuenta de la App cercerta ha sido verificada correctamente, ya puedes ingresar a la aplicación.
-  
-  Recuerda tus credenciales son:
-  Email: ${user.email}
-  Password: ${user.password}`
+text: `¡Bienvenido a la App Cerceta! 🎉
+
+Tu cuenta ha sido verificada exitosamente y ya puedes acceder a la plataforma.
+
+🔐 Tus credenciales de acceso son:
+Email: ${user.email}
+Password: ${user.password}
+
+Puedes ingresar a la aplicación desde el siguiente enlace:
+👉 https://sistemacerceta.com
+
+¡Gracias por ser parte de nuestra comunidad!`
+
         };
   
         // Envía el correo
@@ -7122,6 +7130,87 @@ app.post('/marcar-recibido/:id', async (req, res) => {
         console.error('Error al actualizar domicilio:', err);
         res.status(500).json({ success: false });
     }
+});
+
+
+// Ruta para mostrar la página de restablecimiento de contraseña
+app.get('/registrarme', (req, res) => {
+    res.render('Residentes/registro.hbs');
+});
+
+
+
+
+
+
+  app.get('/api/edificioss', async function (req, res) {
+    try {
+      const [rows] = await pool.query('SELECT id, nombre FROM edificios');
+      res.json(rows);
+    } catch (error) {
+      console.error('❌ Error al obtener edificios:', error);
+      res.status(500).json({ message: 'Error al obtener edificios' });
+    }
+  });
+
+
+// Endpoint para obtener apartamentos filtrados por edificio_id
+app.get('/api/apartamentoss', async (req, res) => {
+    try {
+      const { edificio_id } = req.query;
+      if (!edificio_id) {
+        return res.status(400).json({ error: 'El parámetro edificio_id es requerido' });
+      }
+  
+      // Consulta a la base de datos filtrando por el edificio_id recibido
+      const [rows] = await pool.query(
+        'SELECT id, numero FROM apartamentos WHERE edificio_id = ?',
+        [edificio_id]
+      );
+  
+      res.json(rows);
+    } catch (error) {
+      console.error('Error en la consulta de apartamentos: ', error);
+      res.status(500).json({ error: 'Error interno en el servidor' });
+    }
+  });
+
+
+
+
+app.post('/api/register_plataforma', async (req, res) => {
+  try {
+    // Extraemos los datos enviados en el cuerpo de la petición
+    const {
+      nombre,
+      email,
+      password,
+      role,
+      cargo = null, // <--- Forzamos a null si no se envía
+      fecha_cumpleaños,
+      edificio,
+      apartamento
+    } = req.body;
+
+    // Validación de campos requeridos
+    if (!nombre || !email || !password || !fecha_cumpleaños || !edificio || !apartamento) {
+      return res.status(400).json({ error: 'Faltan campos requeridos' });
+    }
+
+    const estado = "pendiente";
+
+    const [result] = await pool.query(
+      `INSERT INTO usuarios (nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento, estado)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento, estado]
+    );
+
+    res.status(201).json({ message: 'Usuario registrado correctamente', userId: result.insertId });
+
+  } catch (error) {
+    console.error('Error al registrar usuario: ', error);
+    res.status(500).json({ error: 'Error interno en el servidor' });
+  }
 });
 
 
