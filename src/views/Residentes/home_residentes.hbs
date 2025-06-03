@@ -225,23 +225,23 @@
 }
   </style>
 </head>
-<body class="min-h-screen bg-gray-50">
-
+<body class="min-h-screen bg-white">  <!-- Cambiado de bg-gray-50 a bg-white -->
   <!-- Barra de navegación premium -->
-  <nav class="glass-card fixed top-4 left-4 right-4 mx-auto max-w-6xl z-50 flex items-center justify-between px-6 py-3">
-    <div class="flex items-center">
-      <i class="fas fa-home text-2xl text-[var(--luxe-accent)] mr-3"></i>
-      <h1 class="title-font text-xl font-semibold">LUXE RESIDENCIAL</h1>
+<nav class="glass-card fixed top-4 left-4 right-4 mx-auto max-w-6xl z-10 flex items-center justify-between px-6 py-3">
+  <div class="flex items-center">
+    <i class="fas fa-home text-2xl text-[var(--luxe-accent)] mr-3"></i>
+    <h1 class="title-font text-xl font-semibold">LUXE RESIDENCIAL</h1>
+  </div>
+  <div class="flex items-center space-x-4">
+    <button class="w-10 h-10 rounded-full bg-[var(--luxe-light)] flex items-center justify-center hover:scale-110 transition-transform">
+      <i class="fas fa-bell text-[var(--luxe-secondary)]"></i>
+    </button>
+    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-[var(--luxe-accent)] to-amber-200 flex items-center justify-center hover:scale-110 transition-transform">
+      <i class="fas fa-user text-white"></i>
     </div>
-    <div class="flex items-center space-x-4">
-      <button class="w-10 h-10 rounded-full bg-[var(--luxe-light)] flex items-center justify-center hover:scale-110 transition-transform">
-        <i class="fas fa-bell text-[var(--luxe-secondary)]"></i>
-      </button>
-      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-[var(--luxe-accent)] to-amber-200 flex items-center justify-center hover:scale-110 transition-transform">
-        <i class="fas fa-user text-white"></i>
-      </div>
-    </div>
-  </nav>
+  </div>
+</nav>
+
 
   <!-- Hero Section -->
   <section class="relative h-96 flex items-center justify-center overflow-hidden mt-16">
