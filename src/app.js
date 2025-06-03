@@ -7304,6 +7304,50 @@ app.get('/pqrs', async (req, res) => {
 });
 
 
+
+
+
+app.get('/autorizaciones', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
+        try {
+            // Consulta para obtener edificio y apartamento del usuario
+            const query = 'SELECT edificio, apartamento FROM usuarios WHERE id = ?';
+            const [rows] = await pool.query(query, [userId]);
+
+            if (rows.length > 0) {
+                const { edificio, apartamento } = rows[0];
+
+                // Procesar roles del usuario desde la sesión
+                const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+                console.log('📍 Usuario:', req.session.user.name);
+                console.log('🏢 Edificio:', edificio, '| 🏠 Apartamento:', apartamento);
+                console.log('🎯 Roles asignados:', cargos);
+
+                res.render('Aplicacione_residentes/crea_autorizacion.hbs', {
+                    nombreUsuario: req.session.user.name,
+                    userId,
+                    roles: cargos, // <- importante
+                    edificioSeleccionado: edificio,
+                    apartamentoSeleccionado: apartamento,
+                    layout: 'layouts/nav_residentes.hbs'
+                });
+            } else {
+                res.redirect('/login');
+            }
+        } catch (error) {
+            console.error('❌ Error al obtener edificio y apartamento:', error);
+            res.status(500).send('Error interno del servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
