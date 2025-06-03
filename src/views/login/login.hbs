@@ -133,19 +133,26 @@
             Entrar
           </button>
         </div>
+      </form>
+       <div class="text-center">
+<a id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+  ¿Has olvidado la contraseña?
+</a>
 
-        <div class="text-center">
-          <a href="#" id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
-            ¿Has olvidado la contraseña?
-          </a>
-        </div>
-        <div id="reset-password-container" class="hidden mt-4">
+        <br/>
+        <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+          ¿Necesitas ayuda?
+        </a>
+      </div>
+
+
+<div id="reset-password-container" class="hidden mt-4">
           <label class="block text-sm font-bold mb-2" for="reset-email">Correo Electrónico</label>
           <input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
           <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">Enviar Enlace</button>
           <p id="reset-message" class="text-center mt-4 text-green-500 hidden"></p>
         </div>
-      </form>
+
     </div>
   </div>
 
@@ -158,136 +165,103 @@
     </a>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // Toggle password visibility
-      const passwordToggle = document.querySelector(".password-toggle");
-      const passwordField = document.getElementById("password");
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Toggle de contraseña
+    const passwordToggle = document.querySelector(".password-toggle");
+    const passwordField = document.getElementById("password");
 
-      if (passwordToggle && passwordField) {
-        passwordToggle.addEventListener("click", function () {
-          if (passwordField.type === "password") {
-            passwordField.type = "text";
-            this.classList.remove("fa-eye");
-            this.classList.add("fa-eye-slash");
-          } else {
-            passwordField.type = "password";
-            this.classList.remove("fa-eye-slash");
-            this.classList.add("fa-eye");
-          }
-        });
-      }
+    // Crear e insertar el contenedor de reset password
+    const resetPasswordHTML = `
+    <div id="reset-password-container" class="hidden mt-4">
+      <label class="block text-sm font-bold mb-2" for="reset-email">Correo Electrónico</label>
+      <input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
+      <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">Enviar Enlace</button>
+      <button id="back-to-login" type="button" class="w-full bg-gray-500 text-white p-2 mt-2 rounded">Volver al Login</button>
+      <p id="reset-message" class="text-center mt-4 text-green-500 hidden"></p>
+    </div>`;
+    document.querySelector('body').insertAdjacentHTML('beforeend', resetPasswordHTML);
 
-      // Autofill functionality
-      const autofillEmailBtn = document.getElementById("autofill-email");
-      const autofillPasswordBtn = document.getElementById("autofill-password");
-      const emailField = document.getElementById("username");
-      const passwordField = document.getElementById("password");
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const resetPasswordContainer = document.getElementById('reset-password-container');
 
-      // Function to get saved credentials
-      function getSavedCredentials() {
-        return new Promise((resolve) => {
-          if (!window.PasswordCredential) {
-            return resolve(null);
-          }
-          
-          navigator.credentials.get({
-            password: true,
-            mediation: 'silent'
-          }).then(cred => {
-            resolve(cred);
-          }).catch(() => {
-            resolve(null);
-          });
-        });
-      }
+    if (forgotPasswordLink && resetPasswordContainer) {
+      forgotPasswordLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector('.form').classList.add('hidden');
+        resetPasswordContainer.classList.remove('hidden');
+        document.getElementById('reset-email').focus();
+      });
+    }
 
-      // Autofill email
-      if (autofillEmailBtn && emailField) {
-        autofillEmailBtn.addEventListener("click", async function() {
-          const cred = await getSavedCredentials();
-          if (cred && cred.id) {
-            emailField.value = cred.id;
-          } else {
-            // Fallback: check browser autofill
-            emailField.focus();
-            setTimeout(() => {
-              if (!emailField.value) {
-                alert("No se encontraron credenciales guardadas en el navegador.");
-              }
-            }, 100);
-          }
-        });
-      }
-
-      // Autofill password
-      if (autofillPasswordBtn && passwordField) {
-        autofillPasswordBtn.addEventListener("click", async function() {
-          const cred = await getSavedCredentials();
-          if (cred && cred.password) {
-            passwordField.value = cred.password;
-          } else {
-            // Fallback: check browser autofill
-            passwordField.focus();
-            setTimeout(() => {
-              if (!passwordField.value) {
-                alert("No se encontraron contraseñas guardadas en el navegador.");
-              }
-            }, 100);
-          }
-        });
-      }
-
-      // Forgot password functionality
-      const forgotPasswordLink = document.getElementById('forgot-password-link');
-      const resetPasswordContainer = document.getElementById('reset-password-container');
-      const sendResetLinkBtn = document.getElementById('send-reset-link');
-      const resetMessage = document.getElementById('reset-message');
-
-      if (forgotPasswordLink && resetPasswordContainer) {
-        forgotPasswordLink.addEventListener('click', function(e) {
-          e.preventDefault();
-          resetPasswordContainer.classList.toggle('hidden');
-        });
-      }
-
-      if (sendResetLinkBtn) {
-        sendResetLinkBtn.addEventListener('click', async function() {
-          const email = document.getElementById('reset-email').value;
-          if (!email) {
-            alert("Por favor ingresa tu correo electrónico");
-            return;
-          }
-          
-          // Simular envío (reemplazar con tu lógica real)
-          resetMessage.innerText = "Se ha enviado un enlace de restablecimiento a tu correo electrónico.";
-          resetMessage.classList.remove('hidden');
-          
-          // Ocultar después de 5 segundos
-          setTimeout(() => {
-            resetPasswordContainer.classList.add('hidden');
-            resetMessage.classList.add('hidden');
-          }, 5000);
-        });
-      }
-
-      // Service Worker registration
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("service-worker.js")
-            .then(reg => console.log("Service Worker registrado:", reg.scope))
-            .catch(err => console.error("Error al registrar el Service Worker:", err));
-        });
-      }
+    document.getElementById('back-to-login').addEventListener('click', function () {
+      resetPasswordContainer.classList.add('hidden');
+      document.querySelector('.form').classList.remove('hidden');
     });
+  });
 
-    // PWA installation
-    let deferredPrompt;
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      // Puedes mostrar un botón de instalación aquí si lo deseas
-    });
-  </script>
+
+    document.getElementById('send-reset-link').addEventListener('click', async function() {
+    const email = document.getElementById('reset-email').value;
+    const resetMessage = document.getElementById('reset-message');
+    
+    if (!email) {
+      resetMessage.textContent = "Por favor ingresa tu correo electrónico";
+      resetMessage.classList.remove('hidden');
+      resetMessage.classList.add('text-red-500');
+      resetMessage.classList.remove('text-green-500');
+      return;
+    }
+
+    try {
+      // Mostrar mensaje de carga
+      resetMessage.textContent = "Enviando enlace...";
+      resetMessage.classList.remove('hidden');
+      resetMessage.classList.remove('text-red-500');
+      resetMessage.classList.add('text-blue-500');
+      
+      // Deshabilitar el botón para evitar múltiples clics
+      this.disabled = true;
+      this.textContent = "Enviando...";
+      
+      // Enviar la solicitud al servidor
+      const response = await fetch('/request-password-reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        resetMessage.textContent = "✔️ Se ha enviado un enlace a tu correo electrónico. Revisa tu bandeja de entrada.";
+        resetMessage.classList.remove('text-blue-500');
+        resetMessage.classList.add('text-green-500');
+      } else {
+        resetMessage.textContent = data.message || "❌ Error al enviar el enlace. Intenta nuevamente.";
+        resetMessage.classList.remove('text-blue-500');
+        resetMessage.classList.add('text-red-500');
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      resetMessage.textContent = "❌ Error de conexión. Intenta nuevamente.";
+      resetMessage.classList.remove('text-blue-500');
+      resetMessage.classList.add('text-red-500');
+    } finally {
+      // Restaurar el botón
+      this.disabled = false;
+      this.textContent = "Enviar Enlace";
+      
+      // Ocultar el mensaje después de 5 segundos
+      setTimeout(() => {
+        resetMessage.classList.add('hidden');
+      }, 5000);
+    }
+  });
+
+</script>
+
 </body>
 </html>
