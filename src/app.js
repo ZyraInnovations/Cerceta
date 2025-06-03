@@ -168,7 +168,6 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
 
 
 
-// Ruta para mostrar la página de restablecimiento de contraseña
 app.get('/reset-password', (req, res) => {
     res.render('login/reset-password');
 });
@@ -250,6 +249,10 @@ app.post('/request-password-reset', async (req, res) => {
         res.status(500).json({ message: 'Error en el servidor' });
     }
 });
+
+
+
+
 
 // ✅ Ruta para validar el token y mostrar el formulario de restablecimiento
 app.get('/reset-password/:token', async (req, res) => {
