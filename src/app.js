@@ -1918,7 +1918,6 @@ app.post('/buscarPagos', async (req, res) => {
             res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', {
                 name: req.session.name,
                 pagos: results,
-                layout: 'layouts/nav_admin.hbs'
             });
         } catch (error) {
             console.error("Error al consultar los pagos:", error);
@@ -7075,7 +7074,57 @@ hbs.registerHelper('gt', function (a, b) {
 });
 
 
-  
+app.get('/mis-domicilios', async (req, res) => {
+    const userId = req.session.userId;
+
+    const sql = `
+        SELECT d.*
+        FROM domicilios d
+        JOIN usuarios u 
+          ON d.edificio_id = u.edificio 
+         AND d.apartamento_id = u.apartamento
+        WHERE u.id = ?
+    `;
+
+    try {
+        const [domicilios] = await pool.query(sql, [userId]);
+
+        // Convertir fotos LONGBLOB a base64 si existen
+        domicilios.forEach(d => {
+            if (d.foto) {
+                d.foto = Buffer.from(d.foto).toString('base64');
+            }
+        });
+
+        const pendientes = domicilios.filter(d => Number(d.estado) === 1);
+        const completados = domicilios.filter(d => Number(d.estado) === 2);
+
+        res.render('Aplicacione_residentes/domicilios/consulta.hbs', {
+            pendientes,
+            completados,
+            layout: 'layouts/nav_residentes.hbs'
+        });
+    } catch (err) {
+        console.error('Error al obtener domicilios:', err);
+        res.status(500).send('Error interno');
+    }
+});
+
+
+app.post('/marcar-recibido/:id', async (req, res) => {
+    const domicilioId = req.params.id;
+    const sql = 'UPDATE domicilios SET estado = 2 WHERE id = ?';
+
+    try {
+        await pool.query(sql, [domicilioId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error al actualizar domicilio:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });

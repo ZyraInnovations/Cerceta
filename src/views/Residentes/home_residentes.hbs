@@ -245,44 +245,31 @@
       </button>
     </div>
   </section>
+<main class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex flex-wrap justify-center gap-6">
 
-  <!-- Contenido principal -->
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <!-- Sección destacada -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <div class="glass-card p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 hover:shadow-lg">
-        <div class="w-12 h-12 rounded-full bg-[var(--luxe-accent)] bg-opacity-20 flex items-center justify-center mb-4">
-          <i class="fas fa-calendar-check text-[var(--luxe-accent)]"></i>
-        </div>
-        <h3 class="title-font text-xl font-semibold mb-2">Eventos Exclusivos</h3>
-        <p class="text-[var(--luxe-secondary)] mb-4">Descubre los próximos eventos en tu comunidad residencial</p>
-        <button class="mt-4 text-[var(--luxe-accent)] font-medium flex items-center group">
-          Ver calendario <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-        </button>
-      </div>
-      
-      <div class="glass-card p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 hover:shadow-lg">
-        <div class="w-12 h-12 rounded-full bg-[var(--luxe-accent)] bg-opacity-20 flex items-center justify-center mb-4">
-          <i class="fas fa-images text-[var(--luxe-accent)]"></i>
-        </div>
-        <h3 class="title-font text-xl font-semibold mb-2">Galería Premium</h3>
-        <p class="text-[var(--luxe-secondary)] mb-4">Las mejores fotos de nuestras instalaciones y eventos</p>
-        <button class="mt-4 text-[var(--luxe-accent)] font-medium flex items-center group">
-          Ver galería <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-        </button>
-      </div>
-      
-      <div class="glass-card p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 hover:shadow-lg">
-        <div class="w-12 h-12 rounded-full bg-[var(--luxe-accent)] bg-opacity-20 flex items-center justify-center mb-4">
-          <i class="fas fa-comments text-[var(--luxe-accent)]"></i>
-        </div>
-        <h3 class="title-font text-xl font-semibold mb-2">Encuestas</h3>
-        <p class="text-[var(--luxe-secondary)] mb-4">Participa en las decisiones de la comunidad</p>
-        <button class="mt-4 text-[var(--luxe-accent)] font-medium flex items-center group">
-          Votar ahora <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-        </button>
-      </div>
-    </div>
+    <!-- Evento -->
+    <a href="/eventos" class="glass-card w-24 h-24 flex flex-col items-center justify-center rounded-2xl transition hover:shadow-xl group">
+      <i class="fas fa-calendar-check text-[var(--luxe-accent)] text-2xl mb-1"></i>
+      <span class="text-sm text-gray-800 group-hover:text-[var(--luxe-accent)]">Eventos</span>
+    </a>
+
+    <!-- Galería -->
+    <a href="/galeria" class="glass-card w-24 h-24 flex flex-col items-center justify-center rounded-2xl transition hover:shadow-xl group">
+      <i class="fas fa-images text-[var(--luxe-accent)] text-2xl mb-1"></i>
+      <span class="text-sm text-gray-800 group-hover:text-[var(--luxe-accent)]">Galería</span>
+    </a>
+
+    <!-- Encuestas -->
+    <a href="/encuestas" class="glass-card w-24 h-24 flex flex-col items-center justify-center rounded-2xl transition hover:shadow-xl group">
+      <i class="fas fa-comments text-[var(--luxe-accent)] text-2xl mb-1"></i>
+      <span class="text-sm text-gray-800 group-hover:text-[var(--luxe-accent)]">Encuestas</span>
+    </a>
+
+  </div>
+</main>
+
+
 
     <!-- Publicaciones -->
     <h2 class="title-font text-2xl font-semibold mb-6 flex items-center">
