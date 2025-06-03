@@ -277,6 +277,7 @@
     </h2>
     
     <div id="blogPostsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+     
       {{#each blogPosts}}
       <article class="glass-card overflow-hidden transition-all duration-300 hover:shadow-lg" data-post-id="{{@index}}">
         <!-- Encabezado -->
@@ -384,10 +385,11 @@
     </div>
   </main>
 
-  <!-- Botón flotante para crear publicación -->
-  <button class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[var(--luxe-accent)] to-amber-300 text-white text-2xl flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all z-40" onclick="openCreateModal()">
-    <i class="fas fa-plus"></i>
-  </button>
+<!-- Botón flotante para recargar página -->
+<button class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[var(--luxe-accent)] to-amber-300 text-white text-2xl flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all z-40" onclick="location.reload()">
+  <i class="fas fa-sync-alt"></i>
+</button>
+
 
   <!-- Modal de Galería -->
   <div id="galleryModal" class="fixed inset-0 bg-black bg-opacity-90 hidden justify-center items-center z-50">
@@ -1053,6 +1055,66 @@ document.querySelectorAll('.reaction-option').forEach(option => {
     }
   });
 </script>
+<script>
+  async function cargarPublicaciones() {
+    try {
+      const res = await fetch('/api/publicaciones');
+      const nuevas = await res.json();
+
+      const contenedor = document.getElementById('contenedorPublicaciones');
+      const idsActuales = Array.from(contenedor.children).map(el => +el.dataset.id);
+
+      nuevas.forEach(pub => {
+        if (!idsActuales.includes(pub.id)) {
+          const div = document.createElement('div');
+          div.classList.add('publicacion');
+          div.dataset.id = pub.id;
+          div.innerHTML = `
+            <h3>${pub.titulo}</h3>
+            <p>${pub.contenido}</p>
+          `;
+          contenedor.prepend(div); // Agrega al inicio
+        }
+      });
+
+    } catch (err) {
+      console.error('Error al actualizar publicaciones:', err);
+    }
+  }
+
+  setInterval(cargarPublicaciones, 30000); // cada 30 segundos
+</script>
+<script>
+  async function actualizarPublicaciones() {
+    try {
+      const res = await fetch('/api/publicacioness');
+      const nuevas = await res.json();
+
+      const contenedor = document.getElementById('contenedorPublicaciones');
+      const idsActuales = Array.from(contenedor.children).map(el => +el.dataset.id);
+
+      nuevas.forEach(pub => {
+        if (!idsActuales.includes(pub.id)) {
+          const div = document.createElement('div');
+          div.classList.add('publicacion');
+          div.dataset.id = pub.id;
+          div.innerHTML = `
+            <h3>${pub.titulo}</h3>
+            <p>${pub.contenido}</p>
+            <small>${pub.fecha}</small>
+          `;
+          contenedor.prepend(div);
+        }
+      });
+    } catch (err) {
+      console.error('Error al actualizar publicaciones:', err);
+    }
+  }
+
+  // Ejecutar cada 30 segundos
+  setInterval(actualizarPublicaciones, 30000);
+</script>
+
 
 </body>
 </html>

@@ -354,10 +354,11 @@ app.get('/menu_residentes', async (req, res) => {
         const totalPosts = totalResult[0].total;
         const totalPages = Math.ceil(totalPosts / limit);
 
-        const [resultados] = await pool.query(
-            'SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC LIMIT ? OFFSET ?',
-            [edificioId, limit, offset]
-        );
+       const [resultados] = await pool.query(
+    'SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
+    [edificioId, limit, offset]
+);
+
 
         const postIds = resultados.map(post => post.id);
         if (postIds.length === 0) {
@@ -426,6 +427,29 @@ app.get('/menu_residentes', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Error al obtener las entradas del blog');
+    }
+});
+
+
+app.get('/api/publicacioness', async (req, res) => {
+    if (!req.session.loggedin) return res.status(403).send('No autorizado');
+
+    try {
+        const userId = req.session.userId;
+        const [userResult] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
+        if (userResult.length === 0) return res.status(404).send('Usuario no encontrado');
+
+        const edificioId = userResult[0].edificio;
+
+        const [resultados] = await pool.query(
+            'SELECT id, titulo, contenido, fecha FROM publicaciones WHERE edificio_id = ? ORDER BY id DESC LIMIT 5',
+            [edificioId]
+        );
+
+        res.json(resultados);
+    } catch (err) {
+        console.error('Error al cargar publicaciones:', err.message);
+        res.json([]); // enviar lista vacía para evitar que se rompa
     }
 });
 
@@ -7232,6 +7256,51 @@ app.post('/api/register_plataforma', async (req, res) => {
     console.error('Error al registrar usuario: ', error);
     res.status(500).json({ error: 'Error interno en el servidor' });
   }
+});
+
+
+
+
+
+
+
+app.get('/pqrs', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
+        try {
+            // Consulta para obtener edificio y apartamento del usuario
+            const query = 'SELECT edificio, apartamento FROM usuarios WHERE id = ?';
+            const [rows] = await pool.query(query, [userId]);
+
+            if (rows.length > 0) {
+                const { edificio, apartamento } = rows[0];
+
+                // Procesar roles del usuario desde la sesión
+                const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+
+                console.log('📍 Usuario:', req.session.user.name);
+                console.log('🏢 Edificio:', edificio, '| 🏠 Apartamento:', apartamento);
+                console.log('🎯 Roles asignados:', cargos);
+
+                res.render('Aplicacione_residentes/pqrs.hbs', {
+                    nombreUsuario: req.session.user.name,
+                    userId,
+                    roles: cargos, // <- importante
+                    edificioSeleccionado: edificio,
+                    apartamentoSeleccionado: apartamento,
+                    layout: 'layouts/nav_residentes.hbs'
+                });
+            } else {
+                res.redirect('/login');
+            }
+        } catch (error) {
+            console.error('❌ Error al obtener edificio y apartamento:', error);
+            res.status(500).send('Error interno del servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
 });
 
 
