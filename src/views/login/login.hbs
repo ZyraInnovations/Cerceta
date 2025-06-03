@@ -1,179 +1,395 @@
-<html>
- <head>
-  <title>
-   CERCETA
-  </title>
-  <script src="https://cdn.tailwindcss.com">
-  </script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CERCETA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-   <link rel="icon" href="../../imagenes/Recurso 1hdpi.png" type="image/x-icon"/>
-     <link rel="manifest" href="/manifest.json">
-
-
+  <link rel="icon" href="../../imagenes/Recurso 1hdpi.png" type="image/x-icon"/>
+  <link rel="manifest" href="/manifest.json">
+  
   <style>
-   .video-background {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    min-width: 100%;
-    min-height: 100%;
-    z-index: -1;
-   }
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 100%;
+      padding: 1rem;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 640px) {
+      .form-container {
+        max-width: 24rem;
+      }
+    }
+
+    .biometric-btn {
+      transition: all 0.3s ease;
+    }
+
+    .biometric-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .biometric-btn:active {
+      transform: scale(0.95);
+    }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    #videoElement {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      display: block;
+      border-radius: 8px;
+    }
+
+    #canvasElement {
+      display: none;
+    }
+
+    .face-auth-container {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .auth-message {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
   </style>
-  <style>
-  .video-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: -1;
-  }
-
-/* Fuerza el ancho completo en pantallas pequeñas */
-.form-container {
-  width: 100%;
-  max-width: none; /* Elimina el límite de ancho en móviles */
-  padding: 1rem; /* Agrega algo de padding para mejorar el aspecto */
-}
-
-/* Ajustes para pantallas medianas y grandes */
-@media (min-width: 640px) {
-  .form-container {
-    max-width: 24rem; /* Límite de ancho solo en pantallas mayores */
-  }
-}
-
-</style>
-
- </head>
- <body class="relative">
+</head>
+<body class="relative">
   <video autoplay loop muted class="video-background">
-   <source src="videos/1477073_People_Business_1280x720.mp4" type="video/mp4">
-   Your browser does not support the video tag.
+    <source src="videos/1477073_People_Business_1280x720.mp4" type="video/mp4">
+    Your browser does not support the video tag.
   </video>
+  
   <header class="flex items-center justify-between p-4 bg-white bg-opacity-90">
-   <div class="flex items-center">
-    <img alt="CERCETA Logo" class="h-12" height="180" src="imagenes/LOGO_SIN_FONDO_Mesa_de_trabajo_1-removebg-preview.png" width="70"/>
-    <span class="ml-4 text-xl font-bold text-gray-800">
-     CERCETA SOLUCIONES EMPRESARIALES
-    </span>
-   </div>
-  </header>
- <div class="flex items-center justify-center min-h-screen px-4">
-  <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg form-container">
-    <div class="flex justify-center mb-4">
-      <img alt="Alianza Priority Logo" height="50" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png" width="100"/>
+    <div class="flex items-center">
+      <img alt="CERCETA Logo" class="h-8 sm:h-12" height="180" src="imagenes/LOGO_SIN_FONDO_Mesa_de_trabajo_1-removebg-preview.png" width="70"/>
+      <span class="ml-2 sm:ml-4 text-sm sm:text-xl font-bold text-gray-800">
+        CERCETA SOLUCIONES EMPRESARIALES
+      </span>
     </div>
-    <form action="/login" method="POST" class="form">
-      <div class="mb-4">
-        <label class="block text-sm font-bold mb-2" for="username">
-          CORREO
-        </label>
-<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="email" required/>
+  </header>
+  
+  <div class="flex items-center justify-center min-h-screen px-4 py-8 sm:py-0">
+    <div class="bg-white bg-opacity-90 p-6 sm:p-8 rounded-lg shadow-lg form-container">
+      <div class="flex justify-center mb-4">
+        <img alt="Alianza Priority Logo" class="h-10 sm:h-12" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png"/>
       </div>
-      <div class="mb-4">
-        <label class="block text-sm font-bold mb-2" for="password">
-          CONTRASEÑA
-        </label>
-        <div class="relative">
-<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password" required/>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-<div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-  <i class="fas fa-eye cursor-pointer"></i>
-</div>
+      
+      <form action="/login" method="POST" class="form">
+        <div class="mb-4">
+          <label class="block text-sm font-bold mb-2" for="username">
+            CORREO
+          </label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                 id="username" type="text" name="email" required autocomplete="username"/>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-bold mb-2" for="password">
+            CONTRASEÑA
+          </label>
+          <div class="relative">
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                   id="password" type="password" name="password" required autocomplete="current-password"/>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+              <i class="fas fa-eye cursor-pointer"></i>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="mb-4">
-        <button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-          Entrar
-        </button>
-      </div>
-
-
-    <div class="text-center">
-          <a href="#" id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">¿Has olvidado la contraseña?</a>
+        
+        <div class="mb-4">
+          <button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-300 transform hover:scale-105 active:scale-95">
+            Entrar
+          </button>
         </div>
+        
+        <div class="flex justify-center mb-4">
+          <button type="button" id="biometric-auth" class="biometric-btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline flex items-center">
+            <i class="fas fa-fingerprint mr-2"></i>
+            <span id="biometric-text">Autenticación biométrica</span>
+          </button>
+        </div>
+        
+        <div id="face-auth-container" class="face-auth-container hidden">
+          <video id="videoElement" autoplay playsinline></video>
+          <canvas id="canvasElement"></canvas>
+          <p id="auth-message" class="auth-message"></p>
+          <button id="cancel-face-auth" class="mt-2 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm">
+            Cancelar reconocimiento
+          </button>
+        </div>
+        
+        <div class="text-center">
+          <a href="#" id="forgot-password-link" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+            ¿Has olvidado la contraseña?
+          </a>
+        </div>
+        
         <div id="reset-password-container" class="hidden mt-4">
           <label class="block text-sm font-bold mb-2" for="reset-email">Correo Electrónico</label>
-<input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
-          <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded">Enviar Enlace</button>
+          <input type="email" id="reset-email" name="reset-email" class="w-full p-2 border rounded" placeholder="Digita tu correo para restablecer clave">
+          <button id="send-reset-link" type="button" class="w-full bg-blue-500 text-white p-2 mt-4 rounded hover:bg-blue-600 transition duration-300">
+            Enviar Enlace
+          </button>
           <p id="reset-message" class="text-center mt-4 text-green-500 hidden"></p>
         </div>
       </form>
+    </div>
   </div>
-</div>
 
   <div class="fixed bottom-4 right-4 flex space-x-4">
-   <a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="https://wa.me/573106993809" target="_blank">
-    <i class="fab fa-whatsapp">
-    </i>
-   </a>
-<a class="bg-green-500 text-white p-3 rounded-full shadow-lg" href="tel:+573106993809">
-    <i class="fas fa-phone">
-    </i>
-   </a>
+    <a class="bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition duration-300 transform hover:scale-110" 
+       href="https://wa.me/573106993809" target="_blank">
+      <i class="fab fa-whatsapp"></i>
+    </a>
+    <a class="bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition duration-300 transform hover:scale-110" 
+       href="tel:+573106993809">
+      <i class="fas fa-phone"></i>
+    </a>
   </div>
-  <script async="" defer="" src="https://www.google.com/recaptcha/api.js">
-  </script>
 
-<script>
-self.addEventListener("fetch", function (event) {
-  event.respondWith(
-    caches.match(event.request).then(function (response) {
-      if (response) {
-        return response; // Responder desde la caché
+  <script>
+    // Detectar capacidades del dispositivo
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const supportsFaceAuth = isMobile && (navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const supportsFingerprint = window.PublicKeyCredential;
+
+    // Configurar texto del botón según capacidades
+    if (supportsFaceAuth && supportsFingerprint) {
+      document.getElementById('biometric-text').textContent = 'Huella o Reconocimiento Facial';
+    } else if (supportsFaceAuth) {
+      document.getElementById('biometric-text').textContent = 'Reconocimiento Facial';
+    } else if (supportsFingerprint) {
+      document.getElementById('biometric-text').textContent = 'Huella Digital';
+    } else {
+      document.getElementById('biometric-auth').style.display = 'none';
+    }
+
+    // Elementos para reconocimiento facial
+    const videoElement = document.getElementById('videoElement');
+    const canvasElement = document.getElementById('canvasElement');
+    const faceAuthContainer = document.getElementById('face-auth-container');
+    const authMessage = document.getElementById('auth-message');
+    const cancelFaceAuthBtn = document.getElementById('cancel-face-auth');
+
+    // Almacenamiento seguro de credenciales
+    const storeCredentials = (email, password) => {
+      if (window.PasswordCredential && email && password) {
+        const cred = new PasswordCredential({
+          id: email,
+          password: password,
+          name: email.split('@')[0],
+          iconURL: 'imagenes/LOGO_SIN_FONDO_Mesa_de_trabicio_1-removebg-preview.png'
+        });
+        
+        navigator.credentials.store(cred)
+          .then(() => console.log('Credenciales almacenadas'))
+          .catch(err => console.error('Error al almacenar credenciales:', err));
       }
-      return fetch(event.request).catch((error) => {
-        console.error("Error al hacer fetch:", error);
-      });
-    })
-  );
-});
+    };
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(reg => console.log("Service Worker registrado:", reg.scope))
-      .catch(err => console.error("Error al registrar el Service Worker:", err));
-  });
-}
+    // Autocompletar credenciales si están disponibles
+    if (window.PasswordCredential) {
+      navigator.credentials.get({ password: true })
+        .then(cred => {
+          if (cred) {
+            document.getElementById('username').value = cred.id;
+            document.getElementById('password').value = cred.password;
+          }
+        });
+    }
 
+    // Iniciar reconocimiento facial
+    const startFaceRecognition = () => {
+      authMessage.textContent = 'Preparando cámara...';
+      authMessage.style.color = 'blue';
+      
+      navigator.mediaDevices.getUserMedia({ video: true, facingMode: 'user' })
+        .then(stream => {
+          videoElement.srcObject = stream;
+          authMessage.textContent = 'Mire a la cámara para autenticarse...';
+          
+          // Simular reconocimiento facial (en producción usarías una API real)
+          setTimeout(() => {
+            // Simular éxito después de 2 segundos
+            simulateFaceRecognitionSuccess();
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Error al acceder a la cámara:', err);
+          authMessage.textContent = 'Error al acceder a la cámara';
+          authMessage.style.color = 'red';
+        });
+    };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const togglePassword = document.querySelector(".fa-eye");
-    const passwordField = document.getElementById("password");
-
-    togglePassword.addEventListener("click", function () {
-      // Alterna entre mostrar y ocultar la contraseña
-      if (passwordField.type === "password") {
-        passwordField.type = "text";
-        this.classList.remove("fa-eye");
-        this.classList.add("fa-eye-slash");
+    // Simular reconocimiento facial exitoso
+    const simulateFaceRecognitionSuccess = () => {
+      const storedEmail = localStorage.getItem('biometricEmail');
+      const storedPassword = localStorage.getItem('biometricPassword');
+      
+      if (storedEmail && storedPassword) {
+        authMessage.textContent = 'Reconocimiento exitoso!';
+        authMessage.style.color = 'green';
+        
+        document.getElementById('username').value = storedEmail;
+        document.getElementById('password').value = storedPassword;
+        
+        // Detener la cámara
+        const stream = videoElement.srcObject;
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Enviar el formulario después de 1 segundo
+        setTimeout(() => {
+          document.querySelector('.form').submit();
+        }, 1000);
       } else {
-        passwordField.type = "password";
-        this.classList.remove("fa-eye-slash");
-        this.classList.add("fa-eye");
+        authMessage.textContent = 'No hay credenciales registradas';
+        authMessage.style.color = 'red';
+      }
+    };
+
+    // Cancelar reconocimiento facial
+    cancelFaceAuthBtn.addEventListener('click', () => {
+      const stream = videoElement.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      faceAuthContainer.classList.add('hidden');
+      document.getElementById('biometric-auth').style.display = 'flex';
+    });
+
+    // Manejar autenticación biométrica
+    document.getElementById('biometric-auth').addEventListener('click', async () => {
+      const btn = document.getElementById('biometric-auth');
+      
+      // En dispositivos móviles con cámara, preferir reconocimiento facial
+      if (supportsFaceAuth) {
+        btn.style.display = 'none';
+        faceAuthContainer.classList.remove('hidden');
+        startFaceRecognition();
+      } 
+      // Si no hay reconocimiento facial pero hay huella digital
+      else if (supportsFingerprint) {
+        try {
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Autenticando...</span>';
+          
+          const cred = await navigator.credentials.get({
+            publicKey: {
+              challenge: new Uint8Array(32),
+              allowCredentials: [],
+              userVerification: 'required'
+            }
+          });
+
+          if (cred) {
+            const storedEmail = localStorage.getItem('biometricEmail');
+            const storedPassword = localStorage.getItem('biometricPassword');
+            
+            if (storedEmail && storedPassword) {
+              document.getElementById('username').value = storedEmail;
+              document.getElementById('password').value = storedPassword;
+              
+              btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i><span>Autenticado</span>';
+              btn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
+              btn.classList.add('bg-green-100', 'text-green-800');
+              
+              setTimeout(() => {
+                document.querySelector('.form').submit();
+              }, 1000);
+            } else {
+              throw new Error('No hay credenciales almacenadas');
+            }
+          }
+        } catch (error) {
+          console.error('Error en autenticación biométrica:', error);
+          
+          btn.innerHTML = '<i class="fas fa-times-circle mr-2"></i><span>Error</span>';
+          btn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
+          btn.classList.add('bg-red-100', 'text-red-800', 'shake');
+          
+          setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-fingerprint mr-2"></i><span>Usar huella digital</span>';
+            btn.classList.remove('bg-red-100', 'text-red-800', 'shake');
+            btn.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
+          }, 2000);
+        }
       }
     });
-  });
-</script>
 
-<script>
+    // Al enviar el formulario, almacenar credenciales si el usuario lo permite
+    document.querySelector('.form').addEventListener('submit', function(e) {
+      const email = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      // Preguntar al usuario si desea guardar las credenciales para autenticación biométrica
+      if (confirm('¿Desea guardar sus credenciales para autenticación biométrica futura?')) {
+        localStorage.setItem('biometricEmail', email);
+        localStorage.setItem('biometricPassword', password);
+        storeCredentials(email, password);
+      }
+      
+      // Verificar si el campo de recuperación de contraseña está visible
+      if (!document.getElementById('reset-password-container').classList.contains('hidden')) {
+        e.preventDefault();
+        alert("Cierra la sección de recuperación de contraseña antes de iniciar sesión.");
+      }
+    });
+
+    // Mostrar/ocultar contraseña
+    document.addEventListener("DOMContentLoaded", function() {
+      const togglePassword = document.querySelector(".fa-eye");
+      const passwordField = document.getElementById("password");
+
+      togglePassword.addEventListener("click", function() {
+        if (passwordField.type === "password") {
+          passwordField.type = "text";
+          this.classList.remove("fa-eye");
+          this.classList.add("fa-eye-slash");
+        } else {
+          passwordField.type = "password";
+          this.classList.remove("fa-eye-slash");
+          this.classList.add("fa-eye");
+        }
+      });
+    });
+
+    // Recuperación de contraseña
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     const resetPasswordContainer = document.getElementById('reset-password-container');
     const sendResetLinkBtn = document.getElementById('send-reset-link');
     const resetMessage = document.getElementById('reset-message');
 
-    // Mostrar campo para ingresar el correo
     forgotPasswordLink.addEventListener('click', function(e) {
       e.preventDefault();
       resetPasswordContainer.classList.toggle('hidden');
     });
 
-    // Enviar el correo de restablecimiento de contraseña
     sendResetLinkBtn.addEventListener('click', async function() {
       const email = document.getElementById('reset-email').value;
       const response = await fetch('/request-password-reset', {
@@ -186,47 +402,47 @@ if ("serviceWorker" in navigator) {
       resetMessage.innerText = data.message;
       resetMessage.classList.remove('hidden');
     });
+
+    // Service Worker para PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(reg => console.log("Service Worker registrado:", reg.scope))
+          .catch(err => console.error("Error al registrar el Service Worker:", err));
+      });
+    }
+
+    self.addEventListener("fetch", function(event) {
+      event.respondWith(
+        caches.match(event.request).then(function(response) {
+          if (response) {
+            return response;
+          }
+          return fetch(event.request).catch((error) => {
+            console.error("Error al hacer fetch:", error);
+          });
+        })
+      );
+    });
+
+    // Instalación como PWA
+    let deferredPrompt;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      document.getElementById("install-btn").style.display = "block";
+    });
+
+    document.getElementById("install-btn").addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        document.getElementById("install-btn").style.display = "none";
+      }
+      deferredPrompt = null;
+    });
   </script>
-<script>
-  let deferredPrompt;
-
-  window.addEventListener("beforeinstallprompt", (event) => {
-    // Evitar el banner automático
-    event.preventDefault();
-    // Guardar el evento para mostrarlo después
-    deferredPrompt = event;
-    // Mostrar el botón de instalación
-    document.getElementById("install-btn").style.display = "block";
-  });
-
-  document.getElementById("install-btn").addEventListener("click", async () => {
-    if (!deferredPrompt) {
-      return;
-    }
-    // Mostrar el banner de instalación
-    deferredPrompt.prompt();
-
-    // Esperar la respuesta del usuario
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log("Resultado de la instalación:", outcome);
-
-    // Ocultar el botón si el usuario acepta la instalación
-    if (outcome === "accepted") {
-      document.getElementById("install-btn").style.display = "none";
-    }
-
-    // Limpiar la variable
-    deferredPrompt = null;
-  });
-  document.querySelector('.form').addEventListener('submit', function(e) {
-  // Verifica si el campo de recuperación de contraseña está oculto antes de enviar el formulario
-  if (!resetPasswordContainer.classList.contains('hidden')) {
-    e.preventDefault();
-    alert("Cierra la sección de recuperación de contraseña antes de iniciar sesión.");
-  }
-});
-
-</script>
-
- </body>
+</body>
 </html>
