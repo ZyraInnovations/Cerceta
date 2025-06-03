@@ -2366,7 +2366,7 @@ app.get('/ver_blog_admin', async (req, res) => {
         const edificioId = req.query.edificio_id;
 
         try {
-            const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
+const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY id DESC', [edificioId]);
             
             // Convertir los datos binarios a base64
             const blogPosts = resultados.map((post) => {
