@@ -11,6 +11,7 @@ import 'login_screen.dart';
 import 'informes_screen.dart';
 import 'pqrs_screen.dart';
 import 'vista_general_page.dart';
+import 'autorizaciones.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -48,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   "name": "autorizaciones",
   "icon": Icons.assignment_turned_in,  // Icono de documento con check
   "color": Colors.greenAccent,
-  "screen": InformesScreen(userId: '')
+    "screen": (String userId) => AutorizacionesScreen(userId: userId),
 },
     {
       "name": "PQRS",
@@ -179,31 +180,39 @@ SliverAppBar(
     ),
   ],
 ),
-
-            // Contenido principal
-        SliverToBoxAdapter(
+// Contenido principal
+SliverToBoxAdapter(
   child: Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
     child: Column(
       children: [
-        // Añade esta condición al inicio de tu Column
         if (_showUserInfo)
           _buildUserInfoCard(isDarkMode).animate().fadeIn().slideY(begin: 0.1, end: 0),
-        
-        // Resto de tu contenido existente (tarjeta de pagos, features, etc.)
+
         _buildPaymentCard(isDarkMode, primaryColor),
         const SizedBox(height: 25),
+
+        // 👉 SECCIÓN DEL BLOG después de Gestión de Pagos
+        _buildBlogSection(),
+        const SizedBox(height: 25),
+
         _buildFeaturesSection(isDarkMode),
         const SizedBox(height: 25),
+
         const SizedBox(height: 80),
       ],
     ),
   ),
 ),
+
+
           ],
         ),
         bottomNavigationBar: _buildBottomNav(context, isDarkMode),
       ),
+
+
+      
       // Aquí añadimos el ícono flotante sin modificar nada más
       Positioned(
         bottom: 100,
@@ -612,6 +621,95 @@ Widget _buildFloatingBlogAccess() {
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0);
   }
 
+
+
+
+
+
+
+
+
+
+
+
+Widget _buildBlogSection() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: GestureDetector(
+      onTap: () async {
+        final url = 'https://sistemacerceta.com/blog_residentes_app/${widget.userId}';
+        if (await canLaunchUrlString(url)) {
+          await launchUrlString(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 15,
+              offset: Offset(0, 8),
+            ),
+          ],
+          image: const DecorationImage(
+            image: AssetImage('assets/images/blog.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            gradient: LinearGradient(
+              colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text(
+                  'Explora las últimas noticias',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: const [
+                    Text(
+                      'Ir al Blog',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward, color: Colors.white70)
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ).animate().fade(duration: 600.ms).slideY(begin: 0.3, curve: Curves.easeOut),
+    ),
+  );
+}
+
+
+
+
+
+
+
   Widget _buildFeaturesSection(bool isDarkMode) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,9 +747,9 @@ Widget _buildFloatingBlogAccess() {
                           ? PedidosScreen(userId: widget.userId)
                           : feature['name'] == 'Pagos'
                               ? NuevoPagoScreen(userId: widget.userId)
-                              : feature['name'] == 'Autorizaciones'
-                                  ? InformesScreen(userId: widget.userId)
-                                  : PqrsScreen(userId: widget.userId),
+                               : feature['name'] == 'Autorizaciones'
+                ? AutorizacionesScreen(userId: widget.userId)
+                                  : AutorizacionesScreen(userId: widget.userId),
                     ),
                   );
                 }

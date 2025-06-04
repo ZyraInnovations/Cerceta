@@ -5011,6 +5011,36 @@ app.get("/domicilios/:userId", async (req, res) => {
 
 
 
+app.get("/user_infoo/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const [userResult] = await pool.query(
+      `SELECT 
+         a.numero AS apartamento,
+         u.nombre, 
+         e.nombre AS edificio_nombre,
+         a.responsable, 
+         a.piso, 
+         a.correo 
+       FROM usuarios u
+       LEFT JOIN apartamentos a ON u.apartamento = a.id
+       LEFT JOIN edificios e ON a.edificio_id = e.id
+       WHERE u.id = ?`,
+      [userId]
+    );
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    const data = userResult[0];
+    res.json(data);
+  } catch (error) {
+    console.error("Error en la consulta:", error);
+    res.status(500).json({ error: "Error al obtener datos del usuario" });
+  }
+});
 
 
   
@@ -7344,6 +7374,105 @@ app.get('/autorizaciones', async (req, res) => {
     } else {
         res.redirect('/login');
     }
+});
+
+
+
+
+
+app.post('/autorizar_ingreso', async (req, res) => {
+  try {
+    const {
+      userId,
+      residente,
+      edificio,
+      apartamento,
+      nombre_visitante,
+      tipo_documento,
+      documento,
+      fecha_desde,
+      fecha_hasta,
+      hora,
+      relacion,
+      observaciones
+    } = req.body;
+
+    // Validación básica de campos
+    if (!userId || !residente || !edificio || !apartamento || !nombre_visitante || !tipo_documento || !documento || !fecha_desde || !fecha_hasta || !hora) {
+      return res.status(400).json({
+        success: false,
+        message: 'Todos los campos obligatorios deben estar completos'
+      });
+    }
+
+    // Consultar correo del representante
+    const [rows] = await pool.query(
+      'SELECT correorepresentante FROM edificios WHERE nombre = ?', 
+      [edificio]
+    );
+
+    if (!rows.length || !rows[0].correorepresentante) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No se encontró el correo del representante del edificio' 
+      });
+    }
+
+    const correoRepresentante = rows[0].correorepresentante;
+
+    // Guardar en la base de datos
+    await pool.query(
+      `INSERT INTO autorizaciones 
+      (user_id, residente, edificio, apartamento, nombre_visitante, tipo_documento, 
+       documento, fecha_desde, fecha_hasta, hora, relacion, observaciones, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')`,
+      [
+        userId, residente, edificio, apartamento, nombre_visitante, tipo_documento,
+        documento, fecha_desde, fecha_hasta, hora, relacion, observaciones
+      ]
+    );
+
+    // Enviar correo
+    const mailOptions = {
+      from: '"Sistema de Autorizaciones" <cercetasolucionempresarial@gmail.com>',
+      to: correoRepresentante,
+      subject: `Nueva autorización de ingreso - ${nombre_visitante}`,
+      html: `
+        <h2>Nueva autorización de ingreso registrada</h2>
+        <p><strong>Residente:</strong> ${residente}</p>
+        <p><strong>Edificio:</strong> ${edificio}</p>
+        <p><strong>Apartamento:</strong> ${apartamento}</p>
+        <hr>
+        <h3>Datos del visitante:</h3>
+        <p><strong>Nombre:</strong> ${nombre_visitante}</p>
+        <p><strong>Tipo de documento:</strong> ${tipo_documento}</p>
+        <p><strong>Documento:</strong> ${documento}</p>
+        <p><strong>Relación con residente:</strong> ${relacion}</p>
+        <hr>
+        <h3>Detalles de la visita:</h3>
+        <p><strong>Fecha desde:</strong> ${fecha_desde}</p>
+        <p><strong>Fecha hasta:</strong> ${fecha_hasta}</p>
+        <p><strong>Hora:</strong> ${hora}</p>
+        <p><strong>Observaciones:</strong> ${observaciones || 'Ninguna'}</p>
+        <hr>
+        <p>Por favor verifique esta información y apruebe la solicitud en el sistema.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ 
+      success: true, 
+      message: 'Autorización enviada y correo notificado al representante' 
+    });
+
+  } catch (error) {
+    console.error('Error en autorizar_ingreso:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al procesar la autorización' 
+    });
+  }
 });
 
 
