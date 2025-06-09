@@ -4820,7 +4820,7 @@ app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
 
 
 
-const serviceAccount = require('../src/public/serviceAccountKey.json');
+const serviceAccount = require('../src/firebase/serviceAccountKey.json');
 
 
 admin.initializeApp({
