@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "247085450328",
-    "project_id": "cercetaresidencial",
-    "storage_bucket": "cercetaresidencial.firebasestorage.app"
+    "project_number": "837635390811",
+    "project_id": "cercetaaplicacion",
+    "storage_bucket": "cercetaaplicacion.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:247085450328:android:f33369e0ec3761233d762d",
+        "mobilesdk_app_id": "1:837635390811:android:116e7d6207e8574c48ae7e",
         "android_client_info": {
-          "package_name": "app.cercetaresidencial"
+          "package_name": "com.cerceta.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCVmtPbIA_NAoryz1oeJSLRH9GU3Rammzs"
+          "current_key": "AIzaSyCVCLTgJL77BI7jifhrMXsa5G5rRqaIcck"
         }
       ],
       "services": {

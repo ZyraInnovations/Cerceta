@@ -19,7 +19,6 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
-
 // Configurar el motor de plantillas
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));  // Asegúrate de que apunte correctamente a tu carpeta de vistas

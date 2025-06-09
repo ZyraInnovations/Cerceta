@@ -25,12 +25,13 @@ android {
     compileSdkVersion 35
 
     defaultConfig {
-        applicationId "app.cercetaresidencial"
+    applicationId "com.cerceta.app" // ✅ CORRECTO
         minSdkVersion 23
         targetSdkVersion 35
-   versionCode 5
-    versionName "1.0.5"
+   versionCode 6
+    versionName "1.0.6"
     }
+
     // 👇 CONFIGURACIÓN DE FIRMA
     signingConfigs {
         release {

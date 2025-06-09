@@ -1,4 +1,4 @@
-package com.cercetaresidencial.app
+package com.cerceta.app // ✅
 
 import io.flutter.embedding.android.FlutterActivity
 
