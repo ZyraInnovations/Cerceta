@@ -13,6 +13,7 @@ const fileUpload = require('express-fileupload');
 const jwt = require('jsonwebtoken'); // Importa jsonwebtoken
 const SECRET_KEY = 'MiClaveSuperSegura!$%&/()=12345';
 const admin = require('firebase-admin');
+require('dotenv').config();
 
 app.use(session({
     secret: 'mysecret',  // Cambia este secreto
@@ -4818,14 +4819,32 @@ app.get('/obtener_apartamentos/:edificio_id', async (req, res) => {
 
 
 
+let serviceAccount;
 
+try {
+  if (process.env.USE_SERVICE_ACCOUNT_JSON === 'true') {
+    serviceAccount = require('./config/serviceAccountKey.json');
+  } else {
+    const base64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
+    if (!base64) throw new Error('❌ Variable GOOGLE_APPLICATION_CREDENTIALS_BASE64 no definida');
+    const decoded = Buffer.from(base64, 'base64').toString('utf8');
+    serviceAccount = JSON.parse(decoded);
+  }
 
-const serviceAccount = require('../src/firebase/serviceAccountKey.json');
+  // ✅ Verifica si Firebase ya fue inicializado
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('✅ Firebase inicializado correctamente');
+  } else {
+    console.log('⚠️ Firebase ya estaba inicializado');
+  }
 
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+} catch (error) {
+  console.error('🔥 Error al inicializar Firebase:', error.message);
+  process.exit(1);
+}
 
 
 

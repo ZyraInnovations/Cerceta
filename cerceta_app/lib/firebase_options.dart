@@ -41,48 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDziU2t5kSnu7YqT5LBh8Fwr94Xj8Sdig4',
-    appId: '1:837635390811:web:edd25bfb7d42755f48ae7e',
-    messagingSenderId: '837635390811',
-    projectId: 'cercetaaplicacion',
-    authDomain: 'cercetaaplicacion.firebaseapp.com',
-    storageBucket: 'cercetaaplicacion.firebasestorage.app',
-    measurementId: 'G-ZCBMGGMWFF',
+    apiKey: 'AIzaSyBgd-BJyZsX5iijO-v7HRUPXy-ZOCkA3LM',
+    appId: '1:682756534988:web:e39a9bc9705667e2c70869',
+    messagingSenderId: '682756534988',
+    projectId: 'cercetaapk',
+    authDomain: 'cercetaapk.firebaseapp.com',
+    storageBucket: 'cercetaapk.firebasestorage.app',
+    measurementId: 'G-17ZZEC57LJ',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCVCLTgJL77BI7jifhrMXsa5G5rRqaIcck',
-    appId: '1:837635390811:android:116e7d6207e8574c48ae7e',
-    messagingSenderId: '837635390811',
-    projectId: 'cercetaaplicacion',
-    storageBucket: 'cercetaaplicacion.firebasestorage.app',
+    apiKey: 'AIzaSyBLyp_VaCw2ND4PUqp2rXJiCS3Ocj-jIqI',
+    appId: '1:682756534988:android:e942fb032f42f030c70869',
+    messagingSenderId: '682756534988',
+    projectId: 'cercetaapk',
+    storageBucket: 'cercetaapk.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAPJghb2QCRy_EQtjC9wEhXjCmJI_leqDg',
-    appId: '1:837635390811:ios:f645cd94df48a4e148ae7e',
-    messagingSenderId: '837635390811',
-    projectId: 'cercetaaplicacion',
-    storageBucket: 'cercetaaplicacion.firebasestorage.app',
+    apiKey: 'AIzaSyDCent3pzumK4eyXXel5q92lpO1kyNHrxY',
+    appId: '1:682756534988:ios:3cbf97fddd93f85cc70869',
+    messagingSenderId: '682756534988',
+    projectId: 'cercetaapk',
+    storageBucket: 'cercetaapk.firebasestorage.app',
     iosBundleId: 'app.cercetaresidencial',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAPJghb2QCRy_EQtjC9wEhXjCmJI_leqDg',
-    appId: '1:837635390811:ios:e941c41f5fadb2a348ae7e',
-    messagingSenderId: '837635390811',
-    projectId: 'cercetaaplicacion',
-    storageBucket: 'cercetaaplicacion.firebasestorage.app',
+    apiKey: 'AIzaSyDCent3pzumK4eyXXel5q92lpO1kyNHrxY',
+    appId: '1:682756534988:ios:d9d0ebfd5441a426c70869',
+    messagingSenderId: '682756534988',
+    projectId: 'cercetaapk',
+    storageBucket: 'cercetaapk.firebasestorage.app',
     iosBundleId: 'com.example.viancoApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDziU2t5kSnu7YqT5LBh8Fwr94Xj8Sdig4',
-    appId: '1:837635390811:web:d493fc79c65c677248ae7e',
-    messagingSenderId: '837635390811',
-    projectId: 'cercetaaplicacion',
-    authDomain: 'cercetaaplicacion.firebaseapp.com',
-    storageBucket: 'cercetaaplicacion.firebasestorage.app',
-    measurementId: 'G-4EDLWQKHVX',
+    apiKey: 'AIzaSyBgd-BJyZsX5iijO-v7HRUPXy-ZOCkA3LM',
+    appId: '1:682756534988:web:b4adae6f9e1c5850c70869',
+    messagingSenderId: '682756534988',
+    projectId: 'cercetaapk',
+    authDomain: 'cercetaapk.firebaseapp.com',
+    storageBucket: 'cercetaapk.firebasestorage.app',
+    measurementId: 'G-20ZN6SWJD7',
   );
 }

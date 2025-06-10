@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "837635390811",
-    "project_id": "cercetaaplicacion",
-    "storage_bucket": "cercetaaplicacion.firebasestorage.app"
+    "project_number": "682756534988",
+    "project_id": "cercetaapk",
+    "storage_bucket": "cercetaapk.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:837635390811:android:116e7d6207e8574c48ae7e",
+        "mobilesdk_app_id": "1:682756534988:android:e942fb032f42f030c70869",
         "android_client_info": {
           "package_name": "com.cerceta.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCVCLTgJL77BI7jifhrMXsa5G5rRqaIcck"
+          "current_key": "AIzaSyBLyp_VaCw2ND4PUqp2rXJiCS3Ocj-jIqI"
         }
       ],
       "services": {
