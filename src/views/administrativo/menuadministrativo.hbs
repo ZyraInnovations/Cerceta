@@ -41,6 +41,14 @@
 
 
   </style>
+  <style>
+  .day {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background 0.3s;
+  }
+</style>
+
  </head>
  <body class="bg-gray-100 p-6">
   <div class="max-w-7xl mx-auto">
@@ -103,37 +111,27 @@
 
     </div>
 
+<div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+  <div>
+    <h2 class="text-lg font-semibold text-gray-800">Bitácora de Aseo</h2>
+    <p class="text-sm text-gray-500">Informes realizados este mes</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <i class="fas fa-broom text-green-500 text-3xl"></i>
+    <span class="text-3xl font-bold text-gray-800">{{totalAseo}}</span>
+  </div>
+</div>
 
-
-
-    <div class="bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       Informes del dia
-      </h2>
-      <p class="text-gray-400">
-       INFORMES REALIZADOS
-      </p>
-     </div>
-
-
-
-
-     <div class="flex items-center justify-center">
-      <div class="relative">
-       <div class="w-24 h-24 rounded-full border-8 border-gray-200">
-       </div>
-       <div class="absolute inset-0 flex items-center justify-center">
-        <div class="w-24 h-24 rounded-full border-8 border-blue-500" style="clip: rect(0, 48px, 48px, 24px);">
-        </div>
-       </div>
-       <div class="absolute inset-0 flex items-center justify-center">
-        <span id="percentage" class="text-2xl font-semibold">
-         65%
-        </span>
-       </div>
-      </div>
-     </div>
+<div class="bg-white p-6 rounded-lg shadow flex items-center justify-between mt-4">
+  <div>
+    <h2 class="text-lg font-semibold text-gray-800">Bitácora del Conserje</h2>
+    <p class="text-sm text-gray-500">Informes realizados este mes</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <i class="fas fa-user-shield text-blue-500 text-3xl"></i>
+    <span class="text-3xl font-bold text-gray-800">{{totalConserje}}</span>
+  </div>
+</div>
 
      
      <div class="flex justify-between mt-4">
@@ -910,4 +908,17 @@ function verificarYEnviarUbicacion() {
 // Llama a la función al cargar la página
 verificarYEnviarUbicacion();
 
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const alertas = {{{json alertas}}}; // Inyectamos como JSON desde backend
+
+    alertas.forEach(alerta => {
+      const dayElement = document.querySelector(`.day[data-day='${alerta.dia}']`);
+      if (dayElement) {
+        dayElement.classList.add('bg-red-100', 'rounded-full', 'cursor-pointer', 'hover:bg-red-200');
+        dayElement.setAttribute('title', alerta.nombre);
+      }
+    });
+  });
 </script>

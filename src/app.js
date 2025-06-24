@@ -566,33 +566,71 @@ hbs.registerHelper('json', function(context) {
 
 
 
-app.get("/menuAdministrativo", (req, res) => {
-    if (req.session.loggedin === true) {
-        try {
-            const userId = req.session.userId;
-            const nombreUsuario = req.session.name || req.session.user.name;
-            req.session.nombreGuardado = nombreUsuario;
+app.get("/menuAdministrativo", async (req, res) => {
+  if (req.session.loggedin === true) {
+    try {
+      const userId = req.session.userId;
+      const nombreUsuario = req.session.name || req.session.user.name;
+      req.session.nombreGuardado = nombreUsuario;
 
-            const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
+      const cargos = req.session.cargo?.split(',').map(c => c.trim()) || [];
 
-            console.log(`🔐 Usuario autenticado: ${nombreUsuario} (ID: ${userId})`);
-            console.log(`🎯 Roles asignados: [${cargos.join(', ')}]`);
+      const inicioMes = moment().startOf('month').format('YYYY-MM-DD');
+      const finMes = moment().endOf('month').format('YYYY-MM-DD');
 
-            res.render("administrativo/menuadministrativo.hbs", {
-                layout: 'layouts/nav_admin.hbs',
-                name: nombreUsuario,
-                userId,
-                roles: cargos // pasamos el array directamente
-            });
-        } catch (error) {
-            console.error('Error al cargar el menú administrativo:', error);
-            res.status(500).send('Error interno');
-        }
-    } else {
-        res.redirect("/login");
-    }
+      // Consultar bitácoras
+      const [aseoResult] = await pool.query(`
+        SELECT COUNT(*) AS total FROM bitacora_aseo 
+        WHERE fecha BETWEEN ? AND ?
+      `, [inicioMes, finMes]);
+
+      const [conserjeResult] = await pool.query(`
+        SELECT COUNT(*) AS total FROM bitacora_conserje 
+        WHERE fecha BETWEEN ? AND ?
+      `, [inicioMes, finMes]);
+// Consulta de alertas del mes actual
+const [alertasMes] = await pool.query(`
+  SELECT fecha_ejecucion, nombre_actividad FROM alertas 
+  WHERE fecha_ejecucion BETWEEN ? AND ?
+`, [inicioMes, finMes]);
+
+// Convertimos a formato útil para el frontend
+const alertasFormateadas = alertasMes.map(row => ({
+  dia: moment(row.fecha_ejecucion).date(), // Solo día numérico
+  nombre: row.nombre_actividad
+}));
+
+      const totalAseo = aseoResult[0].total;
+      const totalConserje = conserjeResult[0].total;
+
+      const diasTranscurridos = moment().diff(moment().startOf('month'), 'days') + 1;
+      const estimado = diasTranscurridos; // 1 por día
+
+      const porcentajeAseo = Math.min(100, Math.round((totalAseo / estimado) * 100));
+      const porcentajeConserje = Math.min(100, Math.round((totalConserje / estimado) * 100));
+
+      console.log(`📊 Bitácoras este mes — Aseo: ${totalAseo}, Conserje: ${totalConserje}`);
+
+res.render("administrativo/menuadministrativo.hbs", {
+  layout: 'layouts/nav_admin.hbs',
+  name: nombreUsuario,
+  userId,
+  roles: cargos,
+  porcentajeAseo,
+  porcentajeConserje,
+  totalAseo,
+  totalConserje,
+  alertas: alertasFormateadas
 });
 
+    } catch (error) {
+      console.error('❌ Error al cargar el menú administrativo:', error);
+      res.status(500).send('Error interno del servidor');
+    }
+  } else {
+    res.redirect("/login");
+  }
+});
 
 
 
