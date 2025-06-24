@@ -20,6 +20,7 @@ def CERCETA_KEY_PASSWORD = keystoreProperties['keyPassword']
 
 
 
+
 android {
     namespace 'app.cercetaresidencial'
     compileSdkVersion 35

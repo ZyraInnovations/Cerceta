@@ -5085,39 +5085,39 @@ app.get("/user_infoo/:userId", async (req, res) => {
   
 
 
+app.get('/bitacora_aseo', async (req, res) => {
+  if (req.session.loggedin === true) {
+    const name = req.session.name;
+    const userId = req.session.userId;
 
+    try {
+      const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+      const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
 
+      // Obtener el último ID de bitácora
+      const [result] = await pool.query('SELECT MAX(id) AS lastId FROM bitacora_aseo');
+      const lastId = result[0].lastId || 0;
+      const revisionId = lastId + 1;
 
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
 
-  app.get('/bitacora_aseo', async (req, res) => {
-    if (req.session.loggedin === true) {
-      const name = req.session.name;
-      const userId = req.session.userId;
-  
-      try {
-        const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-        const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
-  
-        // Agregamos los roles desde sesión
-        const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
-  
-        res.render('administrativo/Bitacora/Aseo/crear.hbs', {
-          name,
-          userId,
-          edificios,
-          admins,
-          roles,
-          layout: 'layouts/nav_admin.hbs'
-        });
-      } catch (err) {
-        console.error("Error al obtener edificios:", err);
-        res.status(500).send("Error en el servidor");
-      }
-    } else {
-      res.redirect('/login');
+      res.render('administrativo/Bitacora/Aseo/crear.hbs', {
+        name,
+        userId,
+        edificios,
+        admins,
+        roles,
+        revisionId,  // 👈 lo enviamos a la vista
+        layout: 'layouts/nav_admin.hbs'
+      });
+    } catch (err) {
+      console.error("Error al obtener datos:", err);
+      res.status(500).send("Error en el servidor");
     }
-  });
-  
+  } else {
+    res.redirect('/login');
+  }
+});
 
 
 
@@ -5280,34 +5280,37 @@ app.post('/bitacora_aseo/guardar', async (req, res) => {
 
 
 
-
-
 app.get('/bitacora_conserje', async (req, res) => {
-    if (req.session.loggedin === true) {
-        const name = req.session.name;
-        const userId = req.session.userId;
+  if (req.session.loggedin === true) {
+    const name = req.session.name;
+    const userId = req.session.userId;
 
-        try {
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
+    try {
+      const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+      const [admins] = await pool.query('SELECT id, nombre FROM usuarios WHERE role = "admin"');
 
-            const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+      const [result] = await pool.query('SELECT MAX(id) AS lastId FROM bitacora_conserje');
+      const lastId = result[0].lastId || 0;
+      const revisionId = lastId + 1;
 
-            res.render('administrativo/Bitacora/conserje/crear.hbs', { 
-                name,
-                userId,
-                edificios,
-                admins,
-                roles,
-                layout: 'layouts/nav_admin.hbs'
-            });
-        } catch (err) {
-            console.error("Error al obtener datos:", err);
-            res.status(500).send("Error en el servidor");
-        }
-    } else {
-        res.redirect('/login');
+      const roles = req.session.cargo?.split(',').map(r => r.trim()) || [];
+
+      res.render('administrativo/Bitacora/conserje/crear.hbs', { 
+        name,
+        userId,
+        edificios,
+        admins,
+        roles,
+        revisionId, // 👈 enviado a la vista
+        layout: 'layouts/nav_admin.hbs'
+      });
+    } catch (err) {
+      console.error("Error al obtener datos:", err);
+      res.status(500).send("Error en el servidor");
     }
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
