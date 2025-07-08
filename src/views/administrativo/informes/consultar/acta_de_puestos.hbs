@@ -18,6 +18,31 @@
       }
     }
   </style>
+  <style>
+  /* Estilo para forzar vista tipo PC mientras se genera el PDF */
+  body.modo-pc {
+    width: 1024px;
+    margin: 0 auto;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  body.modo-pc img {
+    max-height: 100px !important;
+    object-fit: contain !important;
+  }
+
+  body.modo-pc .grid.md\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  body.modo-pc .grid.md\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+</style>
+
 </head>
 <body class="bg-gray-100 p-6">
   <h1 class="text-2xl font-bold text-gray-800 mb-6">📋 Consulta de Actas de Puestos</h1>
@@ -147,7 +172,9 @@
               </table>
             </div>
             {{/if}}
-
+<br>
+<br>
+<br>
             <!-- Firmas -->
             <div class="grid md:grid-cols-3 gap-4 text-center mt-6">
               <div>
@@ -180,38 +207,36 @@
       detalle.classList.toggle('hidden');
     }
 
-    function descargarPDF(id) {
-      const contenido = document.getElementById('acta-' + id);
-      // Aseguramos que el contenido esté visible
-      contenido.classList.remove('hidden');
+function descargarPDF(id) {
+  const contenido = document.getElementById('acta-' + id);
+  contenido.classList.remove('hidden');
 
-      const opciones = {
-        margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `acta_puesto_${id}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true, scrollY: -window.scrollY },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
+  const opciones = {
+    margin: [0.5, 0.5, 0.5, 0.5],
+    filename: `acta_puesto_${id}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 3,
+      useCORS: true,
+      scrollY: 0
+    },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
 
-      // Si el dispositivo tiene ancho menor a 1024px, se clona el contenido en un contenedor de ancho fijo
-      if (window.innerWidth < 1024) {
-        const clonContenido = contenido.cloneNode(true);
-        clonContenido.classList.remove('hidden');
-        
-        const contenedorTemp = document.createElement('div');
-        contenedorTemp.style.width = '1024px';  // ancho fijo para simular vista de PC
-        contenedorTemp.style.margin = '0 auto';
-        contenedorTemp.appendChild(clonContenido);
-        
-        document.body.appendChild(contenedorTemp);
-        html2pdf().set(opciones).from(contenedorTemp).save().then(() => {
-          document.body.removeChild(contenedorTemp);
-        });
-      } else {
-        // Si está en PC (o ancho mayor), se usa el contenido original
-        html2pdf().set(opciones).from(contenido).save();
-      }
-    }
+  // Aplicar clase para simular vista de PC
+  document.body.classList.add('modo-pc');
+
+  // Esperar un frame para asegurar que los estilos ya se aplicaron
+  setTimeout(() => {
+    html2pdf()
+      .set(opciones)
+      .from(contenido)
+      .save()
+      .then(() => {
+        document.body.classList.remove('modo-pc');
+      });
+  }, 100); // tiempo breve para que los estilos se apliquen correctamente
+}
   </script>
 </body>
 </html>
