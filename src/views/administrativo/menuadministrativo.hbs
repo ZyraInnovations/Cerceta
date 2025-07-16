@@ -50,389 +50,172 @@
 </style>
 
  </head>
- <body class="bg-gray-100 p-6">
-  <div class="max-w-7xl mx-auto">
-   <div class="flex justify-between items-center mb-6">
-    <div>
-     <h1 class="text-3xl font-bold">
-      Hola, {{name}}!
-     </h1>
-     <p class="text-gray-500">
-      ¡Que tenga un buen día!
-     </p>
-    </div>
-    <div class="flex items-center space-x-4">
-     <div class="relative">
-<input 
-  class="pl-10 pr-4 py-2 rounded-full bg-white shadow-sm focus:outline-none hidden lg:block" 
-  placeholder="Search" 
-  type="text"
-/>     
-<i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hidden lg:block"></i>
-      </i>
 
 
 
-     </div>
 
-     <div class="flex items-center space-x-2">
-      <img alt="User avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/RTXoMRHgNOKfMS0ePrgymeRMo1soePfqLeurQ5U9epgkKDm7JA.jpg" width="40"/>
+
+
+
+<body class="bg-gradient-to-tr from-[#1e99d3] via-[#7cb646]/30 to-[#efa325]/30 min-h-screen font-inter">
+  <!-- Header -->
+  <header class="flex items-center justify-between py-4 px-8 bg-white/90 rounded-2xl shadow-lg mt-4 mb-8 border-t-8 border-[#c92458] backdrop-blur-xl">
+    <div class="flex items-center gap-4">
+      <img src="imagenes/logo-cerceta.png" alt="Logo Cerceta" class="w-14 h-14 rounded-full shadow border-4 border-[#efa325]" />
       <div>
-       <p class="font-semibold">
-     {{name}}
-       </p>
-       <p class="text-sm text-gray-500">
-        Kyiv
-       </p>
+        <h1 class="text-2xl font-extrabold text-[#1e99d3]">¡Hola, {{name}}!</h1>
+        <p class="text-sm text-[#7cb646] font-semibold">Bienvenido a tu panel Cerceta</p>
       </div>
-     </div>
-     <i class="fas fa-bell text-gray-400">
-     </i>
     </div>
-   </div>
-   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div class="col-span-1 md:col-span-2 lg:col-span-1 bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       Visita nuestra pagina web
-      </h2>
-      <p class="text-gray-400">
-       Cerceta
-      </p>
-     </div>
-     <img alt="Online lesson illustration" class="w-full h-40 object-cover rounded-lg mb-4" height="200" src="imagenes/pagina.png" width="600"/>
-    
-
-
-    <button class="bg-purple-500 text-white px-4 py-2 rounded-full" onclick="window.location.href='https://cercetasolucionesempresariales.com/';">
-      Visitar
-    </button>
-
-
+    <div class="flex items-center gap-4">
+      <button class="relative" onclick="toggleNotificationPopup()">
+        <i class="fas fa-bell text-2xl text-[#c92458]"></i>
+        <span id="notificationCount" class="absolute -top-1 -right-1 bg-[#efa325] text-white text-xs rounded-full px-1 hidden"></span>
+      </button>
     </div>
+  </header>
 
-<div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
-  <div>
-    <h2 class="text-lg font-semibold text-gray-800">Bitácora de Aseo</h2>
-    <p class="text-sm text-gray-500">Informes realizados este mes</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <i class="fas fa-broom text-green-500 text-3xl"></i>
-    <span class="text-3xl font-bold text-gray-800">{{totalAseo}}</span>
-  </div>
-</div>
-
-<div class="bg-white p-6 rounded-lg shadow flex items-center justify-between mt-4">
-  <div>
-    <h2 class="text-lg font-semibold text-gray-800">Bitácora del Conserje</h2>
-    <p class="text-sm text-gray-500">Informes realizados este mes</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <i class="fas fa-user-shield text-blue-500 text-3xl"></i>
-    <span class="text-3xl font-bold text-gray-800">{{totalConserje}}</span>
-  </div>
-</div>
-
-     
-     <div class="flex justify-between mt-4">
-      <span class="text-gray-400">
-       DoneHomework
-      </span>
-      <span class="text-gray-400">
-       Progress
-      </span>
-     </div>
+  <!-- Modal Acciones Rápidas -->
+  <div id="accionesRapidasModal" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-80 p-7 relative border-t-8 border-[#1e99d3] animate-fade-in-up">
+      <button onclick="toggleAccionesRapidas()" class="absolute top-3 right-3 text-[#c92458] hover:text-[#efa325] text-2xl font-bold">&times;</button>
+      <h3 class="text-xl font-extrabold mb-6 flex items-center gap-2 text-[#1e99d3]">
+        <i class="fas fa-bolt text-[#efa325]"></i>
+        Acciones Rápidas
+      </h3>
+      <div class="flex flex-col gap-4">
+        <a href="/subir_publicacion"
+          class="flex items-center gap-3 px-4 py-3 bg-[#1e99d3] hover:bg-[#1781b3] text-white rounded-xl font-semibold shadow transition-all group">
+          <i class="fas fa-pencil-alt text-[#efa325] group-hover:text-white"></i>
+          <span>Subir Blog</span>
+        </a>
+        <a href="/crear_domicilios"
+          class="flex items-center gap-3 px-4 py-3 bg-[#7cb646] hover:bg-[#63932e] text-white rounded-xl font-semibold shadow transition-all group">
+          <i class="fas fa-motorcycle text-[#c92458] group-hover:text-white"></i>
+          <span>Reportar Domicilios</span>
+        </a>
+      </div>
     </div>
-
-
-
-
-<div class="bg-white p-6 rounded-lg shadow">
-     
-  
-  <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold" >
-      ALERTAS DEL MES:
-    </h2> <br>
-    <h2 id="month-title" class="text-lg font-semibold">
-      <!-- El mes será actualizado dinámicamente -->
-    </h2>
-    <i class="fas fa-chevron-right text-gray-400"></i>
-  </div>
-  <div class="grid grid-cols-7 gap-2 text-center text-gray-500">
-    <div>M</div>
-    <div>T</div>
-    <div>W</div>
-    <div>T</div>
-    <div>F</div>
-    <div>S</div>
-    <div>S</div>
-
-    <div class="col-span-7 h-1"></div>
-
-    <!-- Días del mes -->
-    <div class="day" data-day="1">1</div>
-    <div class="day" data-day="2">2</div>
-    <div class="day" data-day="3">3</div>
-    <div class="day" data-day="4">4</div>
-    <div class="day" data-day="5">5</div>
-    <div class="day" data-day="6">6</div>
-    <div class="day" data-day="7">7</div>
-
-    <div class="day" data-day="8">8</div>
-    <div class="day" data-day="9">9</div>
-    <div class="day" data-day="10">10</div>
-    <div class="day" data-day="11">11</div>
-    <div class="day" data-day="12">12</div>
-    <div class="day" data-day="13">13</div>
-    <div class="day" data-day="14">14</div>
-
-    <div class="day" data-day="15">15</div>
-    <div class="day" data-day="16">16</div>
-    <div class="day" data-day="17">17</div>
-    <div class="day" data-day="18">18</div>
-    <div class="day" data-day="19">19</div>
-    <div class="day" data-day="20">20</div>
-    <div class="day" data-day="21">21</div>
-
-    <div class="day" data-day="22">22</div>
-    <div class="day" data-day="23">23</div>
-    <div class="day" data-day="24">24</div>
-    <div class="day" data-day="25">25</div>
-    <div class="day" data-day="26">26</div>
-    <div class="day" data-day="27">27</div>
-    <div class="day" data-day="28">28</div>
-
-    <div class="day" data-day="29">29</div>
-    <div class="day" data-day="30">30</div>
   </div>
 
-
-
-
-
-
-<div class="mt-4" id="actividades-container">
-  <!-- Las actividades se agregarán aquí dinámicamente -->
-</div>
-<button id="ver-mas-btn" class="mt-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-  Ver más
-</button>
-
-  </div>
-
-
-
-
-
-    
-
-    <div class="col-span-1 md:col-span-2 lg:col-span-1 bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       $ Pagos
-      </h2>
-      <a class="text-blue-500" href="#">
-       Consultar
-      </a>
-     </div>
-
-
-
-
-     <img alt="Progress chart" class="w-full h-40 object-cover rounded-lg" height="200" src="https://storage.googleapis.com/a1aa/image/XthG2pAH4NaJNJDib2LL0iarIOXgj4MkVCtsBldk9rAmBz9E.jpg" width="600"/>
+  <!-- Tarjetas resumen -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 px-2">
+    <div class="rounded-2xl shadow-lg p-6 flex flex-col items-start hover:scale-[1.03] transition bg-gradient-to-tr from-[#1e99d3]/90 via-[#1e99d3]/50 to-[#7cb646]/50">
+      <div class="flex items-center justify-between w-full mb-3">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-broom bg-[#efa325] text-white p-2 rounded-lg text-2xl shadow"></i>
+          <span class="font-extrabold text-lg text-white drop-shadow">Bitácora de Aseo</span>
+        </div>
+        <span class="text-3xl font-bold text-white drop-shadow">{{totalAseo}}</span>
+      </div>
+      <p class="text-white/80">Informes de este mes</p>
+      <a href="#" class="mt-3 text-[#efa325] font-bold hover:underline">Ver detalles</a>
     </div>
-    <div class="bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       Usuarios
-      </h2>
-      <a class="text-blue-500" href="#">
-       see all
-      </a>
-     </div>
-     <div class="space-y-4">
-      <div class="flex items-center space-x-4">
-       <img alt="Teacher avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/YpFKqreYYEwOcyES6HfXBNnxrwz34LQILfuNdLgHXnczMYunA.jpg" width="40"/>
-       <div>
-        <p class="font-semibold">
-         Olga Potapova
-        </p>
-        <p class="text-sm text-gray-500">
-         C++
-        </p>
-       </div>
+    <div class="rounded-2xl shadow-lg p-6 flex flex-col items-start hover:scale-[1.03] transition bg-gradient-to-tr from-[#c92458]/90 via-[#c92458]/60 to-[#efa325]/30">
+      <div class="flex items-center justify-between w-full mb-3">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-user-shield bg-[#7cb646] text-white p-2 rounded-lg text-2xl shadow"></i>
+          <span class="font-extrabold text-lg text-white drop-shadow">Bitácora Conserje</span>
+        </div>
+        <span class="text-3xl font-bold text-white drop-shadow">{{totalConserje}}</span>
       </div>
-      <div class="flex items-center space-x-4">
-       <img alt="Teacher avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/YpFKqreYYEwOcyES6HfXBNnxrwz34LQILfuNdLgHXnczMYunA.jpg" width="40"/>
-       <div>
-        <p class="font-semibold">
-         Roman Kim
-        </p>
-        <p class="text-sm text-gray-500">
-         Robotech
-        </p>
-       </div>
-      </div>
-      <div class="flex items-center space-x-4">
-       <img alt="Teacher avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/YpFKqreYYEwOcyES6HfXBNnxrwz34LQILfuNdLgHXnczMYunA.jpg" width="40"/>
-       <div>
-        <p class="font-semibold">
-         John Dorosh
-        </p>
-        <p class="text-sm text-gray-500">
-         Physics
-        </p>
-       </div>
-      </div>
-      <div class="flex items-center space-x-4">
-       <img alt="Teacher avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/YpFKqreYYEwOcyES6HfXBNnxrwz34LQILfuNdLgHXnczMYunA.jpg" width="40"/>
-       <div>
-        <p class="font-semibold">
-         Irina Voloka
-        </p>
-        <p class="text-sm text-gray-500">
-         C++
-        </p>
-       </div>
-      </div>
-      <div class="flex items-center space-x-4">
-       <img alt="Teacher avatar" class="w-10 h-10 rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/YpFKqreYYEwOcyES6HfXBNnxrwz34LQILfuNdLgHXnczMYunA.jpg" width="40"/>
-       <div>
-        <p class="font-semibold">
-         Alex Malash
-        </p>
-        <p class="text-sm text-gray-500">
-         IT
-        </p>
-       </div>
-      </div>
-     </div>
+      <p class="text-white/80">Informes de este mes</p>
+      <a href="#" class="mt-3 text-[#7cb646] font-bold hover:underline">Ver detalles</a>
     </div>
-
-
-
-
-
-
-
-
-
-
-    <div class="bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       Bitacoras
-      </h2>
-      <p class="text-gray-400">
-       Consultar
-      </p>
-     </div>
-     <img alt="Learning hours chart" class="w-full h-40 object-cover rounded-lg" height="200" src="https://storage.googleapis.com/a1aa/image/0UhWeSBVz7U8f09VUzSfrdN70twPQF5JblHQlJhVW5pnMYunA.jpg" width="600"/>
+    <div class="rounded-2xl shadow-lg p-6 flex flex-col items-start hover:scale-[1.03] transition bg-gradient-to-tr from-[#efa325]/90 via-[#efa325]/50 to-[#c92458]/30">
+      <div class="flex items-center justify-between w-full mb-3">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-money-check-alt bg-[#1e99d3] text-white p-2 rounded-lg text-2xl shadow"></i>
+          <span class="font-extrabold text-lg text-white drop-shadow">Pagos</span>
+        </div>
+        <span class="text-3xl font-bold text-white drop-shadow">$ {{totalPagos}}</span>
+      </div>
+      <p class="text-white/80">Tus pagos del mes</p>
+      <a href="#" class="mt-3 text-[#c92458] font-bold hover:underline">Ver recibos</a>
     </div>
-
-
-  <div class="bg-white p-6 rounded-lg shadow">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-semibold">
-      MAPA UBICACIONES
-    </h2>
-    <a class="text-blue-500" href="#">
-      VER
-    </a>
   </div>
-  <img src="imagenes/mapa-mundo-digital_1017-8011.png" alt="Map" class="w-full h-auto rounded-lg shadow-lg">
-</div>
 
-
-
-  <div class="bg-white p-6 rounded-lg shadow">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-semibold">
-      MAPA UBICACIONES
-    </h2>
-    <a class="text-blue-500" href="#">
-      VER
-    </a>
+  <!-- Calendario y actividades -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 px-2">
+    <!-- Calendario visual -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-8 border-[#1e99d3]/40">
+      <div class="flex items-center mb-4">
+        <i class="fas fa-calendar-alt text-[#1e99d3] text-2xl mr-2"></i>
+        <h2 class="text-xl font-extrabold text-[#c92458]">Calendario de Alertas</h2>
+      </div>
+      <div id="calendario-alertas">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-[#7cb646]">
+            ALERTAS DEL MES:
+          </h2>
+          <h2 id="month-title" class="text-lg font-semibold"></h2>
+          <i class="fas fa-chevron-right text-[#efa325]"></i>
+        </div>
+        <div class="grid grid-cols-7 gap-2 text-center text-[#1e99d3] font-bold">
+          <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+          <div class="col-span-7 h-1"></div>
+          <!-- Días del mes -->
+          <div class="day" data-day="1">1</div>
+          <div class="day" data-day="2">2</div>
+          <div class="day" data-day="3">3</div>
+          <div class="day" data-day="4">4</div>
+          <div class="day" data-day="5">5</div>
+          <div class="day" data-day="6">6</div>
+          <div class="day" data-day="7">7</div>
+          <div class="day" data-day="8">8</div>
+          <div class="day" data-day="9">9</div>
+          <div class="day" data-day="10">10</div>
+          <div class="day" data-day="11">11</div>
+          <div class="day" data-day="12">12</div>
+          <div class="day" data-day="13">13</div>
+          <div class="day" data-day="14">14</div>
+          <div class="day" data-day="15">15</div>
+          <div class="day" data-day="16">16</div>
+          <div class="day" data-day="17">17</div>
+          <div class="day" data-day="18">18</div>
+          <div class="day" data-day="19">19</div>
+          <div class="day" data-day="20">20</div>
+          <div class="day" data-day="21">21</div>
+          <div class="day" data-day="22">22</div>
+          <div class="day" data-day="23">23</div>
+          <div class="day" data-day="24">24</div>
+          <div class="day" data-day="25">25</div>
+          <div class="day" data-day="26">26</div>
+          <div class="day" data-day="27">27</div>
+          <div class="day" data-day="28">28</div>
+          <div class="day" data-day="29">29</div>
+          <div class="day" data-day="30">30</div>
+        </div>
+      </div>
+    </div>
+    <!-- Últimas actividades -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-8 border-[#c92458]/40">
+      <div class="flex items-center mb-4">
+        <i class="fas fa-bolt text-[#efa325] text-2xl mr-2"></i>
+        <h2 class="text-xl font-extrabold text-[#1e99d3]">Últimas actividades</h2>
+      </div>
+      <div id="actividades-container"></div>
+      <button id="ver-mas-btn" class="mt-6 px-6 py-2 bg-[#c92458] text-white rounded-full font-bold hover:bg-[#efa325] transition">Ver más</button>
+    </div>
   </div>
 
 
-     
 
-<br>
-
-
-
-
-
-
-
+  <!-- Botón flotante -->
+  <button class="fixed bottom-7 right-7 bg-[#1e99d3] hover:bg-[#1781b3] text-white p-4 rounded-full shadow-xl hover:scale-110 transition-all flex items-center gap-2 z-50"
+    onclick="toggleAccionesRapidas()">
+    <i class="fas fa-plus text-2xl"></i>
+    <span class="font-bold hidden md:inline">Acción rápida</span>
+  </button>
+</body>
 
 
-    <div class="bg-white p-6 rounded-lg shadow">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">
-       Events
-      </h2>
-      <a class="text-blue-500" href="#">
-       see all
-      </a>
-     </div>
-     <div class="space-y-4">
-      <div class="flex justify-between items-center">
-       <div>
-        <p class="font-semibold">
-         Robot Fest
-        </p>
-        <p class="text-sm text-gray-500">
-         Friday, 27th January 12:00 PM
-        </p>
-       </div>
-       <i class="fas fa-bell text-gray-400">
-       </i>
-      </div>
-      <div class="flex justify-between items-center">
-       <div>
-        <p class="font-semibold">
-         IT news webinar
-        </p>
-        <p class="text-sm text-gray-500">
-         Monday, 30th January 10:00 PM
-        </p>
-       </div>
-       <i class="fas fa-bell text-gray-400">
-       </i>
-      </div>
-      <div class="flex justify-between items-center">
-       <div>
-        <p class="font-semibold">
-         English club
-        </p>
-        <p class="text-sm text-gray-500">
-         Monday, 30th January 12:00 PM
-        </p>
-       </div>
-       <i class="fas fa-bell text-gray-400">
-       </i>
-      </div>
-      <div class="flex justify-between items-center">
-       <div>
-        <p class="font-semibold">
-         New best tools
-        </p>
-        <p class="text-sm text-gray-500">
-         Tuesday, 31th January 12:00 PM
-        </p>
-       </div>
-       <i class="fas fa-bell text-gray-400">
-       </i>
-      </div>
-     </div>
-    </div>
-   </div>
-  </div>
- </body>
-</html>
+
+
+
+
+
+
 
 
 
@@ -920,5 +703,20 @@ verificarYEnviarUbicacion();
         dayElement.setAttribute('title', alerta.nombre);
       }
     });
+  });
+</script>
+<script>
+  function toggleAccionesRapidas() {
+    const modal = document.getElementById('accionesRapidasModal');
+    modal.classList.toggle('hidden');
+  }
+
+  // Cerrar si hace clic fuera de la caja
+  document.addEventListener('click', function(event) {
+    const modal = document.getElementById('accionesRapidasModal');
+    const modalBox = modal.querySelector('div');
+    if (!modal.classList.contains('hidden') && !modalBox.contains(event.target) && event.target.closest('button[onclick*="toggleAccionesRapidas"]') === null) {
+      modal.classList.add('hidden');
+    }
   });
 </script>
