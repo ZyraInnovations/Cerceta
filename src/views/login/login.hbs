@@ -262,40 +262,7 @@
   });
 
 </script>
-<script>
-  // Alerta inicial
-  window.addEventListener("DOMContentLoaded", function () {
-    setTimeout(() => {
-      alert("El servicio no está disponible. Por favor, póngase en contacto con el administrador.");
-    }, 300);
 
-    // Crear un overlay que bloquee TODA la pantalla
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.background = 'rgba(255,255,255,0.7)';
-    overlay.style.zIndex = 9999;
-    overlay.style.cursor = 'not-allowed';
-    document.body.appendChild(overlay);
-
-    // Al hacer click en cualquier parte, muestra el mensaje y evita todo
-    overlay.addEventListener('click', function (e) {
-      alert("El servicio no está disponible. Por favor, póngase en contacto con el administrador.");
-      e.stopPropagation();
-      e.preventDefault();
-    });
-
-    // Si intenta usar teclado/tab, también lo bloquea
-    overlay.tabIndex = 0;
-    overlay.addEventListener('keydown', function (e) {
-      alert("El servicio no está disponible. Por favor, póngase en contacto con el administrador.");
-      e.preventDefault();
-    });
-  });
-</script>
 
 </body>
 </html>
